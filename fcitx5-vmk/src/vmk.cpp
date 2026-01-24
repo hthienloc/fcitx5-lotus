@@ -1137,7 +1137,7 @@ void vmkEngine::keyEvent(const InputMethodEntry &entry, KeyEvent &keyEvent) {
     if (!keyEvent.isRelease() && keyEvent.rawKey().check(FcitxKey_grave)) {
         currentConfigureApp_ = ic->program();
         if (currentConfigureApp_.empty()) currentConfigureApp_ = "unknown-app";
-
+        g_mouse_clicked.store(false, std::memory_order_relaxed);
         showAppModeMenu(ic);
         keyEvent.filterAndAccept();
         return;
