@@ -66,23 +66,27 @@ paru -S fcitx5-vmk-git
 
 ### Các Distro khác (Ubuntu/Fedora/Debian/openSUSE)
 
-Hiện tại chưa có các file package để quản lý dễ dàng bằng package manager trên các distro này. Chúng tôi đang lên kế hoạch phát hành các package chính thức trong tương lai.
+Bạn có thể cài đặt fcitx5-vmk thông qua Open Build Service (OBS), nơi cung cấp các package đã được biên dịch sẵn cho nhiều distro khác nhau.
 
-Bạn có thể cài đặt bằng 2 cách sau:
+#### Cách 1: Cài đặt qua Open Build Service (Khuyên dùng)
 
-#### Cách 1: Biên dịch từ mã nguồn (Build from source)
+Truy cập trang [Open Build Service](https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-vmk) để xem hướng dẫn cài đặt chi tiết cho distro của bạn.
+
+#### Cách 2: Biên dịch từ mã nguồn (Build from source)
+
+Nếu bạn muốn biên dịch từ mã nguồn, hãy làm theo các bước sau:
 
 ##### Yêu cầu hệ thống
 
 ```bash
 # Ubuntu/Debian
-sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme
+sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme pkg-config libx11-dev
 
 # Fedora/RHEL
-sudo dnf install cmake extra-cmake-modules fcitx5-devel libinput-devel libudev-devel gcc-c++ golang hicolor-icon-theme
+sudo dnf install cmake extra-cmake-modules fcitx5-devel libinput-devel libudev-devel gcc-c++ golang hicolor-icon-theme systemd-devel libX11-devel
 
 # openSUSE
-sudo zypper install cmake extra-cmake-modules fcitx5-devel libinput-devel systemd-devel gcc-c++ go hicolor-icon-theme
+sudo zypper install cmake extra-cmake-modules fcitx5-devel libinput-devel systemd-devel gcc-c++ go hicolor-icon-theme systemd-devel libX11-devel udev
 ```
 
 ##### Biên dịch và cài đặt
@@ -111,45 +115,6 @@ sudo make uninstall
 # Hoặc nếu đã cài đặt với PREFIX tùy chỉnh
 sudo make uninstall PREFIX=/usr/local
 ```
-
-#### Cách 2: Sử dụng bản Prebuilt (Không cần build)
-
-Để tiết kiệm thời gian biên dịch, bạn có thể tải và giải nén bản prebuilt trực tiếp:
-
-```bash
-# 1. Cài đặt các dependencies
-# Ubuntu/Debian
-sudo apt-get install fcitx5 libinput libudev hicolor-icon-theme
-
-# Fedora/RHEL
-sudo dnf install fcitx5 libinput systemd-libs hicolor-icon-theme
-
-# openSUSE
-sudo zypper install fcitx5 libinput systemd hicolor-icon-theme
-
-# 2. Tải bản prebuilt (từ Releases trên GitHub)
-wget https://github.com/nhktmdzhg/VMK/releases/download/v0.9.3-alpha/fcitx5-vmk-v0.9.3-alpha.tar.gz
-
-# 3. Giải nén vào thư mục gốc / (cần quyền root)
-sudo tar -xzf fcitx5-vmk-v0.9.3-alpha.tar.gz -C /
-
-# 4. Khởi động lại fcitx5 hoặc đăng xuất và đăng nhập lại
-fcitx5-remote -r
-# hoặc
-pkill fcitx5 && fcitx5 -d
-```
-
-### 🎯 Các Package trong tương lai
-
-Chúng tôi đang lên kế hoạch phát hành các package chính thức cho các distro sau:
-
-| Distro        | Trạng thái      | Gói    |
-| ------------- | --------------- | ------ |
-| Ubuntu/Debian | Đang phát triển | `.deb` |
-| Fedora/RHEL   | Đang phát triển | `.rpm` |
-| openSUSE      | Đang phát triển | `.rpm` |
-
-Nếu bạn muốn đóng góp vào việc đóng gói cho distro của mình, vui lòng mở một Pull Request hoặc Issue.
 
 ---
 
@@ -197,7 +162,4 @@ Chân thành cảm ơn tác giả đã đặt nền móng cho một bộ gõ ti�
 
 - **GitHub Repository:** https://github.com/nhktmdzhg/VMK
 - **Báo lỗi:** https://github.com/nhktmdzhg/VMK/issues
-- **AUR Packages:**
-  - [`fcitx5-vmk`](https://aur.archlinux.org/packages/fcitx5-vmk)
-  - [`fcitx5-vmk-bin`](https://aur.archlinux.org/packages/fcitx5-vmk-bin)
-  - [`fcitx5-vmk-git`](https://aur.archlinux.org/packages/fcitx5-vmk-git)
+- **Open Build Service:** https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-vmk
