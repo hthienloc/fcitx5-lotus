@@ -37,10 +37,6 @@ jobs:
           hicolor-icon-theme \
           pkg-config
       
-    - name: Build VMK
-      run: |
-        make build
-      
     - name: Create tarball structure
       run: |
         mkdir -p dist
@@ -51,3 +47,25 @@ jobs:
     - name: Compress Artifact
       run: |
         tar -czf fcitx5-vmk.tar.gz -C dist .
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: fcitx5-vmk-package
+        path: fcitx5-vmk.tar.gz
+        retention-days: 7
+
+    # - name: Create Release
+    #   uses: softprops/action-gh-release@v2
+    #   if: github.event_name == 'push' && github.ref == 'refs/heads/deploy'
+    #   with:
+    #     files: fcitx5-vmk.tar.gz
+    #     tag_name: v${{ github.run_number }}
+    #     name: Release Build ${{ github.run_number }}
+    #     body: |
+    #       Bản build tự động từ branch deploy.
+    #       Lý do: ${{ github.event.inputs.reason || 'Auto build on push' }}
+    #     draft: false
+    #     prerelease: false
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
