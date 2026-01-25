@@ -1,6 +1,9 @@
 name: Build VMK
 
 on:
+  push:
+    branches:
+      - deploy
   workflow_dispatch:
     inputs:
       reason:
