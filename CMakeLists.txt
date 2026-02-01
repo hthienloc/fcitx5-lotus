@@ -10,7 +10,6 @@ include(GNUInstallDirs)
 include(ECMUninstallTarget)
 
 find_package(Fcitx5Core ${REQUIRED_FCITX_VERSION} REQUIRED)
-find_package(Fcitx5Module REQUIRED COMPONENTS TestFrontend)
 find_package(Fcitx5Utils REQUIRED)
 find_package(Pthread REQUIRED)
 find_package(Gettext REQUIRED)
