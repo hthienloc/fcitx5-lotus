@@ -1,5 +1,3 @@
-find_package(simdjson REQUIRED)
-
 set(fcitx_vmk_sources
   vmk.cpp
 )
@@ -12,10 +10,12 @@ target_link_libraries(vmk
 	Bamboo::Core
 	Pthread::Pthread
 	X11::X11
-	simdjson::simdjson
 )
 
-target_include_directories(vmk PRIVATE ${PROJECT_BINARY_DIR})
+target_include_directories(vmk PRIVATE
+    ${PROJECT_BINARY_DIR}
+    ${PROJECT_SOURCE_DIR}/data/emoji
+)
 install(TARGETS vmk DESTINATION "${CMAKE_INSTALL_LIBDIR}/fcitx5")
 
 fcitx5_translate_desktop_file(vmk.conf.in vmk.conf)

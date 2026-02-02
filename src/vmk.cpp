@@ -964,10 +964,6 @@ namespace fcitx {
     }
 
     vmkEngine::vmkEngine(Instance* instance) : instance_(instance), factory_([this](InputContext& ic) { return new VMKState(this, &ic); }) {
-        std::string emojiPath = StandardPath::global().locate(StandardPath::Type::PkgData, "vmk/emojione.json");
-        if (!emojiLoader_.load(emojiPath)) {
-            std::cerr << "[VMK Emoji] Failed to load emojis from: " << emojiPath << std::endl;
-        }
         startMonitoringOnce();
         Init();
         {
