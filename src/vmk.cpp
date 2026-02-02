@@ -78,7 +78,6 @@ std::atomic<bool>        stop_flag_monitor{false};
 std::atomic<bool>        monitor_running{false};
 int                      uinput_fd_        = -1;
 int                      uinput_client_fd_ = -1;
-int                      extraBackspace    = 0;
 
 std::string              buildSocketPath(const char* base_path_suffix) {
     const char* username_c = std::getenv("USER");
@@ -376,8 +375,7 @@ namespace fcitx {
 
         // Helper function for emoji mode
         void handleEmojiMode(KeyEvent& keyEvent) {
-            uint32_t modifierMask = static_cast<uint32_t>(KeyState::Ctrl) | static_cast<uint32_t>(KeyState::Alt) | static_cast<uint32_t>(KeyState::Super);
-            if (static_cast<uint32_t>(keyEvent.key().states()) & modifierMask) {
+            if (keyEvent.key().hasModifier()) {
                 keyEvent.forward();
                 return;
             }
@@ -386,8 +384,8 @@ namespace fcitx {
 
             auto                baseList   = ic_->inputPanel().candidateList();
             auto                commonList = std::dynamic_pointer_cast<CommonCandidateList>(baseList);
-            if (commonList && currentSym >= FcitxKey_1 && currentSym <= FcitxKey_9) {
-                int offset      = currentSym - FcitxKey_1;
+            if (commonList && keyEvent.key().digit() >= 1 && keyEvent.key().digit() <= 9) {
+                int offset      = keyEvent.key().digit() - 1;
                 int globalIndex = commonList->currentPage() * commonList->pageSize() + offset;
 
                 if (globalIndex < (int)commonList->totalSize()) {
@@ -406,43 +404,58 @@ namespace fcitx {
 
                 bool handled = false;
 
-                if (currentSym == FcitxKey_Tab || currentSym == FcitxKey_Down) {
-                    if (globalCursorIndex == totalSize - 1) {
-                        commonList->setGlobalCursorIndex(globalCursorIndex);
-                    } else if (localCursorIndex < pageSize - 1) {
-                        commonList->setGlobalCursorIndex(globalCursorIndex + 1);
-                    } else {
-                        commonList->next();
-                        int newPage = commonList->currentPage();
-                        commonList->setGlobalCursorIndex(newPage * pageSize);
-                    }
-                    handled = true;
-                } else if (currentSym == FcitxKey_ISO_Left_Tab || currentSym == FcitxKey_Up) {
-                    if (globalCursorIndex == 0) {
-                        commonList->setGlobalCursorIndex(globalCursorIndex);
-                    } else if (localCursorIndex > 0) {
-                        commonList->setGlobalCursorIndex(globalCursorIndex - 1);
-                    } else {
-                        commonList->prev();
-                        int newPage  = commonList->currentPage();
-                        int newIndex = newPage * pageSize + pageSize - 1;
-                        commonList->setGlobalCursorIndex(newIndex);
-                    }
-                    handled = true;
-                } else if (currentSym == FcitxKey_Page_Down || currentSym == FcitxKey_Right) {
-                    if (commonList->hasNext()) {
-                        commonList->next();
-                        int newPage = commonList->currentPage();
-                        commonList->setGlobalCursorIndex(newPage * pageSize);
+                switch (currentSym) {
+                    case FcitxKey_Tab:
+                    case FcitxKey_Down: {
+                        if (globalCursorIndex == totalSize - 1) {
+                            commonList->setGlobalCursorIndex(globalCursorIndex);
+                        } else if (localCursorIndex < pageSize - 1) {
+                            commonList->setGlobalCursorIndex(globalCursorIndex + 1);
+                        } else {
+                            commonList->next();
+                            int newPage = commonList->currentPage();
+                            commonList->setGlobalCursorIndex(newPage * pageSize);
+                        }
                         handled = true;
+                        break;
                     }
-                } else if (currentSym == FcitxKey_Page_Up || currentSym == FcitxKey_Left) {
-                    if (commonList->hasPrev()) {
-                        commonList->prev();
-                        int newPage = commonList->currentPage();
-                        commonList->setGlobalCursorIndex(newPage * pageSize);
+
+                    case FcitxKey_ISO_Left_Tab:
+                    case FcitxKey_Up: {
+                        if (globalCursorIndex == 0) {
+                            commonList->setGlobalCursorIndex(globalCursorIndex);
+                        } else if (localCursorIndex > 0) {
+                            commonList->setGlobalCursorIndex(globalCursorIndex - 1);
+                        } else {
+                            commonList->prev();
+                            int newPage  = commonList->currentPage();
+                            int newIndex = newPage * pageSize + pageSize - 1;
+                            commonList->setGlobalCursorIndex(newIndex);
+                        }
                         handled = true;
+                        break;
                     }
+                    case FcitxKey_Page_Down:
+                    case FcitxKey_Right: {
+                        if (commonList->hasNext()) {
+                            commonList->next();
+                            int newPage = commonList->currentPage();
+                            commonList->setGlobalCursorIndex(newPage * pageSize);
+                            handled = true;
+                        }
+                        break;
+                    }
+                    case FcitxKey_Page_Up:
+                    case FcitxKey_Left: {
+                        if (commonList->hasPrev()) {
+                            commonList->prev();
+                            int newPage = commonList->currentPage();
+                            commonList->setGlobalCursorIndex(newPage * pageSize);
+                            handled = true;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
 
                 if (handled) {
@@ -466,36 +479,39 @@ namespace fcitx {
                 return;
             }
 
-            if (currentSym == FcitxKey_space || currentSym == FcitxKey_Return) {
-                if (commonList && !commonList->empty()) {
-                    int globalIdx = commonList->globalCursorIndex();
+            switch (currentSym) {
+                case FcitxKey_space:
+                case FcitxKey_Return: {
+                    if (commonList && !commonList->empty()) {
+                        int globalIdx = commonList->globalCursorIndex();
+                        commonList->candidateFromAll(globalIdx).select(ic_);
+                        keyEvent.filterAndAccept();
+                    } else if (currentSym == FcitxKey_Return && !emojiBuffer_.empty()) {
+                        ic_->commitString(emojiBuffer_);
+                        emojiBuffer_.clear();
+                        ic_->inputPanel().reset();
+                        ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+                        keyEvent.filterAndAccept();
+                    } else {
+                        keyEvent.forward();
+                    }
+                    return;
+                }
 
-                    commonList->candidateFromAll(globalIdx).select(ic_);
-
-                    keyEvent.filterAndAccept();
-                } else if (currentSym == FcitxKey_Return && !emojiBuffer_.empty()) {
-                    ic_->commitString(emojiBuffer_);
+                case FcitxKey_Escape: {
                     emojiBuffer_.clear();
+                    emojiCandidates_.clear();
                     ic_->inputPanel().reset();
                     ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
                     keyEvent.filterAndAccept();
-                } else {
-                    keyEvent.forward();
+                    return;
                 }
-                return;
+
+                default: break;
             }
 
-            if (currentSym == FcitxKey_Escape) {
-                emojiBuffer_.clear();
-                emojiCandidates_.clear();
-                ic_->inputPanel().reset();
-                ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
-                keyEvent.filterAndAccept();
-                return;
-            }
-
-            if (currentSym >= 32 && currentSym <= 126) {
-                emojiBuffer_ += static_cast<char>(currentSym);
+            if (!Key::keySymToUTF8(currentSym).empty()) {
+                emojiBuffer_ += Key::keySymToUTF8(currentSym);
                 keyEvent.filterAndAccept();
                 updateEmojiPreedit();
             } else {
@@ -539,7 +555,7 @@ namespace fcitx {
                 candidateList->setLayoutHint(CandidateLayoutHint::Vertical);
                 candidateList->setPageSize(9);
 
-                for (int i = 0; i < emojiCandidates_.size(); ++i) {
+                for (size_t i = 0; i < emojiCandidates_.size(); ++i) {
                     int  localIndex = i % 9 + 1;
                     Text displayLabel(std::to_string(localIndex) + ": " + emojiCandidates_[i].trigger + " " + emojiCandidates_[i].output);
                     candidateList->append(std::make_unique<EmojiCandidateWord>(displayLabel, this, emojiCandidates_[i].output));
@@ -559,6 +575,8 @@ namespace fcitx {
             current_backspace_count_ = 0;
             pending_commit_string_   = addedPart;
 
+            int extraBackspace = 0;
+
             if (isAutofillCertain(ic_->surroundingText()))
                 extraBackspace = 1;
             else
@@ -567,30 +585,37 @@ namespace fcitx {
             expected_backspaces_ = fcitx::utf8::length(deletedPart) + 1 + extraBackspace;
 
             if (expected_backspaces_ > 0) {
-                is_deleting_.store(true);
+                is_deleting_.store(true, std::memory_order_release);
                 send_backspace_uinput(expected_backspaces_);
 
                 int my_id = ++current_thread_id_;
                 std::thread([this, my_id]() {
                     auto start = std::chrono::steady_clock::now();
-                    while (is_deleting_.load()) {
-                        if (current_thread_id_.load() != my_id)
+
+                    while (true) {
+                        if (current_thread_id_.load(std::memory_order_acquire) != my_id) {
                             return;
-                        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                        }
+
+                        if (!is_deleting_.load(std::memory_order_acquire)) {
+                            return;
+                        }
+
                         auto now = std::chrono::steady_clock::now();
-                        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() > 200)
+                        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() > 200) {
                             break;
+                        }
+
+                        std::this_thread::sleep_for(std::chrono::milliseconds(5));
                     }
-                    if (current_thread_id_.load() == my_id) {
+                    if (current_thread_id_.load(std::memory_order_acquire) == my_id) {
+                        is_deleting_.store(false, std::memory_order_release);
                         if (!pending_commit_string_.empty()) {
                             ic_->commitString(pending_commit_string_);
                             pending_commit_string_ = "";
                         }
-                        is_deleting_.store(false);
                     }
                 }).detach();
-
-                extraBackspace = 0;
             } else {
                 if (!addedPart.empty()) {
                     ic_->commitString(addedPart);
@@ -600,119 +625,119 @@ namespace fcitx {
 
         // Helper function for vmk1/vmk1hc mode
         void handleUinputMode(KeyEvent& keyEvent, fcitx::KeySym currentSym, bool checkEmptyPreedit) {
-            if (!is_deleting_.load()) {
-                if (isBackspace(currentSym) || currentSym == FcitxKey_Return) {
-                    if (isBackspace(currentSym)) {
-                        history_ += "\\b\\";
-                        replayBufferToEngine(history_);
-                        UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
-                        oldPreBuffer_ = (preeditC && preeditC.get()[0]) ? preeditC.get() : "";
-                    } else {
-                        history_.clear();
-                        ResetEngine(vmkEngine_.handle());
-                        oldPreBuffer_.clear();
-                    }
-                    keyEvent.forward();
-                    return;
-                }
-            } else {
-                if (isBackspace(currentSym) && is_deleting_) {
-                    if (handleUInputKeyPress(keyEvent, currentSym))
+            if (is_deleting_.load(std::memory_order_acquire)) {
+                if (isBackspace(currentSym)) {
+                    if (handleUInputKeyPress(keyEvent, currentSym)) {
                         return;
-                    return;
+                    }
+                } else {
+                    keyEvent.filterAndAccept();
                 }
+                return;
+            }
+
+            if (uinput_fd_ < 0) {
+                setup_uinput();
+            }
+
+            if (keyEvent.key().isCursorMove() || keyEvent.key().hasModifier() || currentSym == FcitxKey_Tab || currentSym == FcitxKey_ISO_Left_Tab ||
+                currentSym == FcitxKey_Delete) {
+                keyEvent.forward();
+                return;
+            }
+
+            if (isBackspace(currentSym) || currentSym == FcitxKey_Return) {
+                if (isBackspace(currentSym)) {
+                    history_ += "\\b\\";
+                    replayBufferToEngine(history_);
+                    UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
+                    oldPreBuffer_ = (preeditC && preeditC.get()[0]) ? preeditC.get() : "";
+                } else {
+                    history_.clear();
+                    ResetEngine(vmkEngine_.handle());
+                    oldPreBuffer_.clear();
+                }
+                keyEvent.forward();
+                return;
+            }
+
+            std::string keyUtf8 = Key::keySymToUTF8(currentSym);
+            if (keyUtf8.empty()) {
+                keyEvent.forward();
+                return;
+            }
+
+            bool processed = EngineProcessKeyEvent(vmkEngine_.handle(), currentSym, keyEvent.rawKey().states());
+
+            auto commitF = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle()));
+            if (commitF && commitF.get()[0]) {
+                std::string commitStr = commitF.get();
+                std::string commonPrefix, deletedPart, addedPart;
+                compareAndSplitStrings(oldPreBuffer_, commitStr, commonPrefix, deletedPart, addedPart);
+
+                if (!deletedPart.empty()) {
+                    performReplacement(deletedPart, addedPart);
+                } else if (!addedPart.empty()) {
+                    ic_->commitString(addedPart);
+                }
+
+                history_.clear();
+                ResetEngine(vmkEngine_.handle());
+                oldPreBuffer_.clear();
+
                 keyEvent.filterAndAccept();
                 return;
             }
-            if (!is_deleting_.load()) {
-                if (uinput_fd_ < 0)
-                    setup_uinput();
 
-                bool isNavigation = (currentSym >= FcitxKey_Home && currentSym <= FcitxKey_Begin) || (currentSym >= FcitxKey_Left && currentSym <= FcitxKey_Down) ||
-                    currentSym == FcitxKey_Tab || currentSym == FcitxKey_ISO_Left_Tab;
-
-                uint32_t shortcutMask =
-                    static_cast<uint32_t>(KeyState::Ctrl) | static_cast<uint32_t>(KeyState::Alt) | static_cast<uint32_t>(KeyState::Super) | static_cast<uint32_t>(KeyState::Hyper);
-
-                if (isNavigation || keyEvent.key().states() & shortcutMask) {
-                    keyEvent.forward();
-                    return;
-                }
-                bool processed = EngineProcessKeyEvent(vmkEngine_.handle(), currentSym, keyEvent.rawKey().states());
-
-                if (auto commitF = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle())); commitF && commitF.get()[0]) {
-                    std::string commitStr = commitF.get();
-                    std::string commonPrefix, deletedPart, addedPart;
-                    compareAndSplitStrings(oldPreBuffer_, commitStr, commonPrefix, deletedPart, addedPart);
-
-                    if (!deletedPart.empty()) {
-                        performReplacement(deletedPart, addedPart);
-                    } else {
-                        if (!addedPart.empty()) {
-                            ic_->commitString(addedPart);
-                        }
-                    }
-
-                    history_.clear();
-                    ResetEngine(vmkEngine_.handle());
-                    oldPreBuffer_.clear();
-
-                    keyEvent.filterAndAccept();
-                    return;
-                }
-
-                if (!processed) {
-                    if (checkEmptyPreedit) {
-                        UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
-                        std::string      preeditStr = (preeditC && preeditC.get()[0]) ? preeditC.get() : "";
-                        if (preeditStr.empty()) {
-                            history_.clear();
-                            oldPreBuffer_.clear();
-                            keyEvent.forward();
-                        }
-                    }
-                    return;
-                }
-                if (currentSym >= 32 && currentSym <= 126) {
-                    history_ += static_cast<char>(currentSym);
-                } else {
-                    keyEvent.forward();
-                    return;
-                }
-                replayBufferToEngine(history_);
-                if (auto commitF = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle())); commitF && commitF.get()[0]) {
-                    history_.clear();
-                    ResetEngine(vmkEngine_.handle());
-                    oldPreBuffer_.clear();
-                    return;
-                }
-                keyEvent.filterAndAccept();
-                UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
-                std::string      preeditStr = (preeditC && preeditC.get()[0]) ? preeditC.get() : "";
-                std::string      commonPrefix, deletedPart, addedPart;
-                if (compareAndSplitStrings(oldPreBuffer_, preeditStr, commonPrefix, deletedPart, addedPart)) {
-                    if (deletedPart.empty()) {
-                        if (!addedPart.empty()) {
-                            ic_->commitString(addedPart);
-                            oldPreBuffer_ = preeditStr;
-                        }
-                    } else {
-                        if (uinput_client_fd_ < 0) {
-                            std::string rawKey = keyEvent.key().toString();
-                            if (!rawKey.empty()) {
-                                ic_->commitString(rawKey);
-                            }
-                            return;
-                        }
-
-                        if (is_deleting_.load()) {
-                            is_deleting_.store(false);
-                        }
-                        performReplacement(deletedPart, addedPart);
-                        oldPreBuffer_ = preeditStr;
+            if (!processed) {
+                if (checkEmptyPreedit) {
+                    UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
+                    if (!preeditC || !preeditC.get()[0]) {
+                        history_.clear();
+                        oldPreBuffer_.clear();
+                        keyEvent.forward();
                     }
                 }
                 return;
+            }
+
+            history_ += keyUtf8;
+            replayBufferToEngine(history_);
+
+            auto commitAfterReplay = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle()));
+            if (commitAfterReplay && commitAfterReplay.get()[0]) {
+                history_.clear();
+                ResetEngine(vmkEngine_.handle());
+                oldPreBuffer_.clear();
+                return;
+            }
+            keyEvent.filterAndAccept();
+            UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
+            std::string      preeditStr = (preeditC && preeditC.get()[0]) ? preeditC.get() : "";
+
+            std::string      commonPrefix, deletedPart, addedPart;
+            if (compareAndSplitStrings(oldPreBuffer_, preeditStr, commonPrefix, deletedPart, addedPart)) {
+                if (deletedPart.empty()) {
+                    if (!addedPart.empty()) {
+                        ic_->commitString(addedPart);
+                        oldPreBuffer_ = preeditStr;
+                    }
+                } else {
+                    if (uinput_client_fd_ < 0) {
+                        std::string rawKey = keyEvent.key().toString();
+                        if (!rawKey.empty()) {
+                            ic_->commitString(rawKey);
+                        }
+                        return;
+                    }
+
+                    if (is_deleting_.load()) {
+                        is_deleting_.store(false);
+                    }
+
+                    performReplacement(deletedPart, addedPart);
+                    oldPreBuffer_ = preeditStr;
+                }
             }
         }
 
@@ -722,7 +747,7 @@ namespace fcitx {
             if (uinput_client_fd_ < 0) {
                 connect_uinput_server();
             }
-            if (current_backspace_count_ >= (int)expected_backspaces_ && is_deleting_.load()) {
+            if (current_backspace_count_ >= expected_backspaces_ && is_deleting_.load()) {
                 is_deleting_.store(false);
                 current_backspace_count_ = -1;
                 expected_backspaces_     = 0;
