@@ -128,7 +128,8 @@ Hoặc có thể xem cách cài của từng distro [tại đây](INSTALL.md).
 
 #### Cách 2: Biên dịch từ mã nguồn (Build from source)
 
-(Không khuyến khích các bạn cài bằng cách này nếu không hiểu rõ cấu trúc thư mục của distro của bạn, vì ta cần set đúng LIBDIR thì vmk mới có thể chạy được)
+> LƯU Ý, TUYỆT ĐỐI KHÔNG CÀI BẰNG CÁCH NÀY NẾU BẠN KHÔNG HIỂU GÌ VỀ CẤU TRÚC THƯ MỤC CỦA DISTRO CỦA BẠN, NẾU DISTRO CỦA BẠN ĐƯỢC HỖ TRỢ THÔNG QUA OBS Ở TRÊN, HÃY DÙNG NÓ, KHÔNG NÊN DÙNG CÁCH NÀY ĐỂ RỒI LẠI ĐI HỎI TẠI SAO MÌNH CÀI THEO README NHƯNG LẠI BỊ LỖI NOT AVAILABLE. Chỉ nên hỏi nếu distro của bạn không có trong danh sách hỗ trợ của OBS, lúc đấy bạn phải build từ mã nguồn.  
+(Xin lỗi vì in hoa, vì in thường vẫn có 2 ông không nhìn được)
 
 Nếu bạn muốn biên dịch từ mã nguồn, hãy làm theo các bước sau:
 

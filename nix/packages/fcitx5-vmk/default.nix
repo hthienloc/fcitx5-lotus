@@ -16,7 +16,7 @@
 }:
 stdenv.mkDerivation rec {
   pname = "fcitx5-vmk";
-  version = "0.11.0";
+  version = "0.12.0";
 
   src = fetchFromGitHub {
     owner = "nhktmdzhg";
