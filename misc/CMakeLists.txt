@@ -1,13 +1,13 @@
-install(FILES fcitx5-vmk-server@.service
+install(FILES fcitx5-lotus-server@.service
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/systemd/system)
 
-install(FILES 99-vmk.rules
+install(FILES 99-lotus.rules
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/udev/rules.d)
 
-install(FILES module-fcitx5-vmk.conf
+install(FILES module-fcitx5-lotus.conf
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/modules-load.d
-    RENAME fcitx5-vmk.conf)
+    RENAME fcitx5-lotus.conf)
 
-install(FILES user-vmk.conf
+install(FILES user-lotus.conf
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/sysusers.d
-    RENAME vmk.conf)
+    RENAME lotus.conf)

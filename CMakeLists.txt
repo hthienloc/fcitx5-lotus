@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(fcitx5-vmk VERSION 0.12.1) 
+project(fcitx5-lotus VERSION 0.12.1) 
 
 set(REQUIRED_FCITX_VERSION 5.0.5)
 find_package(ECM 1.0.0 REQUIRED)
@@ -15,11 +15,11 @@ find_package(Gettext REQUIRED)
 find_package(X11 REQUIRED)
 
 include("${FCITX_INSTALL_CMAKECONFIG_DIR}/Fcitx5Utils/Fcitx5CompilerSettings.cmake")
-add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-vmk\") 
+add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-lotus\") 
 
 find_package(Fcitx5Utils REQUIRED)
 if (Fcitx5Utils_VERSION VERSION_GREATER_EQUAL "5.1.13")
-    add_definitions(-DVMK_USE_MODERN_FCITX_API)
+    add_definitions(-DLOTUS_USE_MODERN_FCITX_API)
     message(STATUS "Fcitx5 version ${Fcitx5Utils_VERSION} detected: Using modern API")
 else()
     message(STATUS "Fcitx5 version ${Fcitx5Utils_VERSION} detected: Using legacy API")
@@ -33,10 +33,10 @@ add_subdirectory(data)
 add_subdirectory(server)
 add_subdirectory(misc)
 
-fcitx5_translate_desktop_file(org.fcitx.Fcitx5.Addon.Vmk.metainfo.xml.in
-    org.fcitx.Fcitx5.Addon.Vmk.metainfo.xml XML)
+fcitx5_translate_desktop_file(org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml.in
+    org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml XML)
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/org.fcitx.Fcitx5.Addon.Vmk.metainfo.xml" DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml" DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
 
 install(FILES 
         LICENSES/GPL-3.0-or-later.txt

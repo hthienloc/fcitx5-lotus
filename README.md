@@ -1,30 +1,30 @@
 <a id="readme-top"></a>
 
 <div align="center">
-  <a href="https://github.com/nhktmdzhg/VMK">
-    <img src="data/icons/scalable/apps/fcitx-vmk-logo.svg" alt="Logo" width="80" height="80">
+  <a href="https://github.com/nhktmdzhg/fcitx5-lotus">
+    <img src="data/icons/scalable/apps/fcitx-lotus-logo.svg" alt="Logo" width="80" height="80">
   </a>
 
-  <h2 align="center">Fcitx5 VMK</h2>
+  <h2 align="center">Fcitx5 Lotus</h2>
 
   <p align="center">
     <b>Bộ gõ tiếng Việt đơn giản, hiệu năng cao cho Linux</b>
     <br />
     <br />
-    <a href="https://github.com/nhktmdzhg/VMK/releases">
-      <img src="https://img.shields.io/github/v/release/nhktmdzhg/VMK?style=flat&color=success" alt="Release">
+    <a href="https://github.com/nhktmdzhg/fcitx5-lotus/releases">
+      <img src="https://img.shields.io/github/v/release/nhktmdzhg/fcitx5-lotus?style=flat&color=success" alt="Release">
     </a>
-    <a href="https://github.com/nhktmdzhg/VMK/blob/main/LICENSE">
-      <img src="https://img.shields.io/github/license/nhktmdzhg/VMK?style=flat&color=blue" alt="License">
+    <a href="https://github.com/nhktmdzhg/fcitx5-lotus/blob/main/LICENSE">
+      <img src="https://img.shields.io/github/license/nhktmdzhg/fcitx5-lotus?style=flat&color=blue" alt="License">
     </a>
-    <a href="https://github.com/nhktmdzhg/VMK/stargazers">
-      <img src="https://img.shields.io/github/stars/nhktmdzhg/VMK?style=flat&color=yellow" alt="Stars">
+    <a href="https://github.com/nhktmdzhg/fcitx5-lotus/stargazers">
+      <img src="https://img.shields.io/github/stars/nhktmdzhg/fcitx5-lotus?style=flat&color=yellow" alt="Stars">
     </a>
-    <a href="https://github.com/nhktmdzhg/VMK/network/members">
-      <img src="https://img.shields.io/github/forks/nhktmdzhg/VMK?style=flat&color=orange" alt="Forks">
+    <a href="https://github.com/nhktmdzhg/fcitx5-lotus/network/members">
+      <img src="https://img.shields.io/github/forks/nhktmdzhg/fcitx5-lotus?style=flat&color=orange" alt="Forks">
     </a>
-    <a href="https://github.com/nhktmdzhg/VMK/issues">
-      <img src="https://img.shields.io/github/issues/nhktmdzhg/VMK?style=flat&color=red" alt="Issues">
+    <a href="https://github.com/nhktmdzhg/fcitx5-lotus/issues">
+      <img src="https://img.shields.io/github/issues/nhktmdzhg/fcitx5-lotus?style=flat&color=red" alt="Issues">
     </a>
   </p>
 
@@ -32,9 +32,9 @@
     <a href="#cài-đặt"><strong>Cài đặt »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/nhktmdzhg/VMK/issues/new?template=bug_report.yml">Báo lỗi</a>
+    <a href="https://github.com/nhktmdzhg/fcitx5-lotus/issues/new?template=bug_report.yml">Báo lỗi</a>
     &middot;
-    <a href="https://github.com/nhktmdzhg/VMK/issues/new?template=feature_request.yml">Yêu cầu tính năng</a>
+    <a href="https://github.com/nhktmdzhg/fcitx5-lotus/issues/new?template=feature_request.yml">Yêu cầu tính năng</a>
   </p>
 </div>
 
@@ -68,24 +68,24 @@ Dự án này là một bản fork được tối ưu hóa từ [bộ gõ VMK g�
 
 Hiện tại AUR có 3 gói cài đặt để bạn lựa chọn:
 
-| Gói              | Mô tả                                          |
-| ---------------- | ---------------------------------------------- |
-| `fcitx5-vmk`     | Build từ mã nguồn release ổn định              |
-| `fcitx5-vmk-bin` | Dùng binary đã build sẵn (không cần biên dịch) |
-| `fcitx5-vmk-git` | Build từ danh sách commit mới nhất             |
+| Gói                | Mô tả                                          |
+| ------------------ | ---------------------------------------------- |
+| `fcitx5-lotus`     | Build từ mã nguồn release ổn định              |
+| `fcitx5-lotus-bin` | Dùng binary đã build sẵn (không cần biên dịch) |
+| `fcitx5-lotus-git` | Build từ danh sách commit mới nhất             |
 
 Cài đặt bằng `yay`:
 
 ```bash
 # Cú pháp: yay -S <tên-gói>
-yay -S fcitx5-vmk
+yay -S fcitx5-lotus
 ```
 
 Hoặc `paru`:
 
 ```bash
 # Cú pháp: paru -S <tên-gói>
-paru -S fcitx5-vmk
+paru -S fcitx5-lotus
 ```
 
 </details>
@@ -94,10 +94,10 @@ paru -S fcitx5-vmk
 <summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
 <br>
 
-Truy cập trang [Open Build Service](https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-vmk) để xem hướng dẫn cài đặt chi tiết cho distro của bạn.
+Truy cập trang [Open Build Service](https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-lotus) để xem hướng dẫn cài đặt chi tiết cho distro của bạn.
 
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-vmk/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-vmk)
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-vmk/badge.svg?type=default)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-vmk)
+[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
+[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=default)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
 
 Hoặc có thể xem cách cài của từng distro [tại đây](INSTALL.md).
 
@@ -109,15 +109,15 @@ Hoặc có thể xem cách cài của từng distro [tại đây](INSTALL.md).
 <summary><b>NixOS</b></summary>
 <br>
 
-Thêm input của fcitx5-vmk vào `flake.nix`:
+Thêm input của fcitx5-lotus vào `flake.nix`:
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    fcitx5-vmk = {
-      url = "github:nhktmdzhg/VMK";
+    fcitx5-lotus = {
+      url = "github:nhktmdzhg/fcitx5-lotus";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -128,7 +128,7 @@ Thêm input của fcitx5-vmk vào `flake.nix`:
 }
 ```
 
-Bật fcitx5-vmk service trong `configuration.nix`:
+Bật fcitx5-lotus service trong `configuration.nix`:
 
 ```nix
 {
@@ -136,10 +136,10 @@ Bật fcitx5-vmk service trong `configuration.nix`:
   ...
 }: {
   imports = [
-    inputs.fcitx5-vmk.nixosModules.fcitx5-vmk
+    inputs.fcitx5-lotus.nixosModules.fcitx5-lotus
   ];
 
-  services.fcitx5-vmk = {
+  services.fcitx5-lotus = {
     enable = true;
     user = "your_username"; # Sửa thành tên user của bạn
   };
@@ -184,8 +184,8 @@ sudo zypper install cmake extra-cmake-modules fcitx5-devel libinput-devel system
 
 ```bash
 # Clone repository
-git clone https://github.com/nhktmdzhg/VMK.git
-cd VMK
+git clone https://github.com/nhktmdzhg/fcitx5-lotus.git
+cd fcitx5-lotus
 
 # Biên dịch
 cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib . # Tùy vào distro mà LIBDIR sẽ khác nhau
@@ -206,21 +206,21 @@ sudo make install PREFIX=/usr/local
 
 ## ⚙️ Bật bộ gõ
 
-Sau khi cài đặt xong, bạn cần thực hiện các bước sau để bật bộ gõ VMK:
+Sau khi cài đặt xong, bạn cần thực hiện các bước sau để bật bộ gõ fcitx5-lotus:
 
-### 1. Bật VMK Server
+### 1. Bật Lotus Server
 
 Server giúp bộ gõ tương tác với hệ thống tốt hơn (đặc biệt là gửi phím xóa và sửa lỗi).
 
 ```bash
 # Bật và khởi động service (tự động fix lỗi thiếu user systemd nếu có)
-sudo systemctl enable --now fcitx5-vmk-server@$(whoami).service || \
-(sudo systemd-sysusers && sudo systemctl enable --now fcitx5-vmk-server@$(whoami).service)
+sudo systemctl enable --now fcitx5-lotus-server@$(whoami).service || \
+(sudo systemd-sysusers && sudo systemctl enable --now fcitx5-lotus-server@$(whoami).service)
 ```
 
 ```bash
 # Kiểm tra status (nếu thấy active (running) màu xanh là OK)
-systemctl status fcitx5-vmk-server@$(whoami).service
+systemctl status fcitx5-lotus-server@$(whoami).service
 ```
 
 ### 2. Thiết lập biến môi trường
@@ -297,7 +297,7 @@ Thêm `fcitx5` vào danh sách ứng dụng khởi động cùng hệ thống (A
 Sau khi đã log out và log in lại:
 
 1. Mở **Fcitx5 Configuration** (tìm trong menu ứng dụng hoặc chạy `fcitx5-configtool`).
-2. Tìm **VMK** ở cột bên phải.
+2. Tìm **Lotus** ở cột bên phải.
 3. Nhấn mũi tên **<** để thêm nó sang cột bên trái.
 4. Apply.
 <details>
@@ -308,7 +308,7 @@ Nếu bạn sử dụng Wayland, Fcitx5 cần được cấu hình thêm để h
 - **KDE Plasma:** Vào _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Chọn **Fcitx 5**.
 - **Hyprland:** Thêm dòng sau vào `~/.config/hypr/hyprland.conf`:
   ```ini
-  permission = fcitx5-vmk-server, keyboard, allow
+  permission = fcitx5-lotus-server, keyboard, allow
   ```
   </details>
 
@@ -353,15 +353,15 @@ Tự động reset trạng thái bộ gõ khi người dùng click chuột hoặ
 Bạn có thể dùng `pacman` (khuyên dùng), `yay` hoặc `paru` để gỡ cài đặt:
 
 ```bash
-sudo pacman -Rns fcitx5-vmk
+sudo pacman -Rns fcitx5-lotus
 ```
 
 ```bash
-yay -Rns fcitx5-vmk
+yay -Rns fcitx5-lotus
 ```
 
 ```bash
-paru -Rns fcitx5-vmk
+paru -Rns fcitx5-lotus
 ```
 
 > **Lưu ý:** Các file config ở `$HOME` sẽ được giữ lại.
@@ -377,19 +377,19 @@ Gỡ package thông thường qua trình quản lý gói:
 - Debian/Ubuntu
 
 ```bash
-sudo apt remove fcitx5-vmk
+sudo apt remove fcitx5-lotus
 ```
 
 - Fedora
 
 ```bash
-sudo dnf remove fcitx5-vmk
+sudo dnf remove fcitx5-lotus
 ```
 
 - openSUSE
 
 ```bash
-sudo zypper remove fcitx5-vmk
+sudo zypper remove fcitx5-lotus
 ```
 
 </details>
@@ -398,7 +398,7 @@ sudo zypper remove fcitx5-vmk
 <summary><b>NixOS</b></summary>
 <br>
 
-Xóa (hoặc comment) dòng `services.fcitx5-vmk` và `inputs` trong file config, sau đó rebuild lại system. NixOS sẽ tự dọn dẹp.
+Xóa (hoặc comment) dòng `services.fcitx5-lotus` và `inputs` trong file config, sau đó rebuild lại system. NixOS sẽ tự dọn dẹp.
 
 </details>
 
@@ -428,8 +428,8 @@ Vui lòng xem hướng dẫn chi tiết [tại đây](CONTRIBUTING.md) để bi�
 
 ### Những người đóng góp:
 
-<a href="https://github.com/nhktmdzhg/VMK/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=nhktmdzhg/VMK" alt="contrib.rocks image" />
+<a href="https://github.com/nhktmdzhg/fcitx5-lotus/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=nhktmdzhg/fcitx5-lotus" alt="contrib.rocks image" />
 </a>
 
 ---
@@ -444,8 +444,8 @@ Dự án được phân phối dưới giấy phép GNU General Public License v
 
 ## ✨ Lịch sử sao
 
-<a href="https://star-history.com/#nhktmdzhg/VMK&Date">
- <img src="https://api.star-history.com/svg?repos=nhktmdzhg/VMK&type=Date" alt="Star History Chart">
+<a href="https://star-history.com/#nhktmdzhg/fcitx5-lotus&Date">
+ <img src="https://api.star-history.com/svg?repos=nhktmdzhg/fcitx5-lotus&type=Date" alt="Star History Chart">
 </a>
 
 ---

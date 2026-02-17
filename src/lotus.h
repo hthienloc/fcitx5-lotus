@@ -6,12 +6,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
  */
-#ifndef _FCITX5_vmk_vmk_H_
-#define _FCITX5_vmk_vmk_H_
+#ifndef _FCITX5_LOTUS_H_
+#define _FCITX5_LOTUS_H_
 
 #include "bamboo-core.h"
-#include "vmk-config.h"
 #include "emoji.h"
+#include "lotus-config.h"
 #include <fcitx-config/iniparser.h>
 #include <fcitx-utils/i18n.h>
 #include <fcitx/action.h>
@@ -80,16 +80,16 @@ namespace fcitx {
         std::optional<uintptr_t> handle_;
     };
 
-    class VMKState;
+    class LotusState;
 
-    class vmkEngine final : public InputMethodEngine {
+    class LotusEngine final : public InputMethodEngine {
       public:
         Instance* instance() const {
             return instance_;
         }
 
-        vmkEngine(Instance* instance);
-        ~vmkEngine();
+        LotusEngine(Instance* instance);
+        ~LotusEngine();
 
         void                 activate(const InputMethodEntry& entry, InputContextEvent& event) override;
         void                 deactivate(const fcitx::InputMethodEntry& entry, fcitx::InputContextEvent& event) override;
@@ -139,7 +139,7 @@ namespace fcitx {
         void refreshOption();
 
         void saveConfig() {
-            safeSaveAsIni(config_, "conf/vmk.conf");
+            safeSaveAsIni(config_, "conf/lotus.conf");
         }
         void updateModeAction(InputContext* ic);
         void updateSpellAction(InputContext* ic);
@@ -148,7 +148,7 @@ namespace fcitx {
         void updateAutoNonVnRestoreAction(InputContext* ic);
         void updateModernStyleAction(InputContext* ic);
         void updateFreeMarkingAction(InputContext* ic);
-        void updateFixVmk1WithAckAction(InputContext* ic);
+        void updateFixUinputWithAckAction(InputContext* ic);
         void updateInputMethodAction(InputContext* ic);
         void updateCharsetAction(InputContext* ic);
         void populateConfig();
@@ -160,17 +160,17 @@ namespace fcitx {
         EmojiLoader& emojiLoader() {
             return emojiLoader_;
         }
-        void setMode(VMKMode mode, InputContext* ic);
+        void setMode(LotusMode mode, InputContext* ic);
 
       private:
         Instance*                                         instance_;
-        vmkConfig                                         config_;
-        vmkCustomKeymap                                   customKeymap_;
+        lotusConfig                                       config_;
+        lotusCustomKeymap                                 customKeymap_;
 
-        std::unordered_map<std::string, vmkMacroTable>    macroTables_;
+        std::unordered_map<std::string, lotusMacroTable>  macroTables_;
         std::unordered_map<std::string, CGoObject>        macroTableObject_;
 
-        FactoryFor<VMKState>                              factory_;
+        FactoryFor<LotusState>                            factory_;
         std::vector<std::string>                          imNames_;
 
         std::unique_ptr<SimpleAction>                     inputMethodAction_;
@@ -189,26 +189,26 @@ namespace fcitx {
         std::unique_ptr<SimpleAction>                     autoNonVnRestoreAction_;
         std::unique_ptr<SimpleAction>                     modernStyleAction_;
         std::unique_ptr<SimpleAction>                     freeMarkingAction_;
-        std::unique_ptr<SimpleAction>                     fixVmk1WithAckAction_;
+        std::unique_ptr<SimpleAction>                     fixUinputWithAckAction_;
         std::vector<ScopedConnection>                     connections_;
         CGoObject                                         dictionary_;
         // ibus-bamboo mode save/load
-        std::unordered_map<std::string, fcitx::VMKMode> appRules_;
-        std::string                                     appRulesPath_;
-        bool                                            isSelectingAppMode_ = false;
-        std::string                                     currentConfigureApp_;
-        VMKMode                                         globalMode_;
-        EmojiLoader                                     emojiLoader_;
+        std::unordered_map<std::string, fcitx::LotusMode> appRules_;
+        std::string                                       appRulesPath_;
+        bool                                              isSelectingAppMode_ = false;
+        std::string                                       currentConfigureApp_;
+        LotusMode                                         globalMode_;
+        EmojiLoader                                       emojiLoader_;
     };
 
-    class vmkFactory : public AddonFactory {
+    class LotusFactory : public AddonFactory {
       public:
         AddonInstance* create(AddonManager* manager) override {
-            registerDomain("fcitx5-vmk", FCITX_INSTALL_LOCALEDIR);
-            return new vmkEngine(manager->instance());
+            registerDomain("fcitx5-lotus", FCITX_INSTALL_LOCALEDIR);
+            return new LotusEngine(manager->instance());
         }
     };
 
 } // namespace fcitx
 
-#endif // _FCITX5_vmk_vmk_H_
+#endif // _FCITX5_LOTUS_H_

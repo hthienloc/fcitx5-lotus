@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
  */
-#include "vmk.h"
+#include "lotus.h"
 #include "ack-apps.h"
 
 #include <cstdint>
@@ -63,7 +63,7 @@
 #include <mutex>
 #endif
 
-fcitx::VMKMode    realMode = fcitx::VMKMode::VMKSmooth;
+fcitx::LotusMode  realMode = fcitx::LotusMode::Smooth;
 std::atomic<bool> needEngineReset{false};
 std::string       BASE_SOCKET_PATH;
 // Global flag to signal mouse click for closing app mode menu
@@ -92,7 +92,7 @@ std::string buildSocketPath(const char* base_path_suffix) {
     const char* username_c = std::getenv("USER");
     std::string path;
     path.reserve(32);
-    path += "vmksocket-";
+    path += "lotussocket-";
     path += (username_c ? username_c : "default");
     path += '-';
     path += base_path_suffix;
@@ -167,16 +167,16 @@ bool isBackspace(uint32_t sym) {
 namespace fcitx {
     namespace {
         constexpr std::string_view MacroPrefix             = "macro/";
-        constexpr std::string_view InputMethodActionPrefix = "vmk-input-method-";
-        constexpr std::string_view CharsetActionPrefix     = "vmk-charset-";
-        const std::string          CustomKeymapFile        = "conf/vmk-custom-keymap.conf";
+        constexpr std::string_view InputMethodActionPrefix = "lotus-input-method-";
+        constexpr std::string_view CharsetActionPrefix     = "lotus-charset-";
+        const std::string          CustomKeymapFile        = "conf/lotus-custom-keymap.conf";
         constexpr int              MAX_SCAN_LENGTH         = 15;
 
         std::string                macroFile(std::string_view imName) {
-            return stringutils::concat("conf/vmk-macro-", imName, ".conf");
+            return stringutils::concat("conf/lotus-macro-", imName, ".conf");
         }
 
-        uintptr_t newMacroTable(const vmkMacroTable& macroTable) {
+        uintptr_t newMacroTable(const lotusMacroTable& macroTable) {
             const auto&        macros = *macroTable.macros;
             std::vector<char*> charArray;
             charArray.reserve(macros.size() * 2 + 1);
@@ -209,18 +209,18 @@ namespace fcitx {
 
     } // namespace
 
-    FCITX_DEFINE_LOG_CATEGORY(vmk, "vmk");
+    FCITX_DEFINE_LOG_CATEGORY(lotus, "lotus");
 
-    class VMKState final : public InputContextProperty {
+    class LotusState final : public InputContextProperty {
       public:
-        VMKState(vmkEngine* engine, InputContext* ic) : engine_(engine), ic_(ic) {
+        LotusState(LotusEngine* engine, InputContext* ic) : engine_(engine), ic_(ic) {
             setEngine();
         }
 
-        ~VMKState() {}
+        ~LotusState() {}
 
         void setEngine() {
-            vmkEngine_.reset();
+            lotusEngine_.reset();
             realMode = modeStringToEnum(engine_->config().mode.value());
 
             if (engine_->config().inputMethod.value() == "Custom") {
@@ -232,15 +232,15 @@ namespace fcitx {
                     charArray.push_back(const_cast<char*>(keymap.value->data()));
                 }
                 charArray.push_back(nullptr);
-                vmkEngine_.reset(NewCustomEngine(charArray.data(), engine_->dictionary(), engine_->macroTable()));
+                lotusEngine_.reset(NewCustomEngine(charArray.data(), engine_->dictionary(), engine_->macroTable()));
             } else {
-                vmkEngine_.reset(NewEngine(engine_->config().inputMethod->data(), engine_->dictionary(), engine_->macroTable()));
+                lotusEngine_.reset(NewEngine(engine_->config().inputMethod->data(), engine_->dictionary(), engine_->macroTable()));
             }
             setOption();
         }
 
         void setOption() {
-            if (!vmkEngine_)
+            if (!lotusEngine_)
                 return;
             FcitxBambooEngineOption option = {
                 .autoNonVnRestore    = *engine_->config().autoNonVnRestore,
@@ -252,7 +252,7 @@ namespace fcitx {
                 .modernStyle         = *engine_->config().modernStyle,
                 .freeMarking         = *engine_->config().freeMarking,
             };
-            EngineSetOption(vmkEngine_.handle(), &option);
+            EngineSetOption(lotusEngine_.handle(), &option);
         }
 
         bool connect_uinput_server() {
@@ -313,15 +313,15 @@ namespace fcitx {
         }
 
         void replayBufferToEngine(const std::string& buffer) {
-            if (!vmkEngine_.handle())
+            if (!lotusEngine_.handle())
                 return;
 
-            ResetEngine(vmkEngine_.handle());
+            ResetEngine(lotusEngine_.handle());
             for (uint32_t c : fcitx::utf8::MakeUTF8CharRange(buffer)) {
                 if (c == static_cast<uint32_t>('\b')) {
-                    EngineProcessKeyEvent(vmkEngine_.handle(), FcitxKey_BackSpace, 0);
+                    EngineProcessKeyEvent(lotusEngine_.handle(), FcitxKey_BackSpace, 0);
                 } else {
-                    EngineProcessKeyEvent(vmkEngine_.handle(), c, 0);
+                    EngineProcessKeyEvent(lotusEngine_.handle(), c, 0);
                 }
             }
         }
@@ -377,15 +377,15 @@ namespace fcitx {
 
         // Helper function for preedit mode
         void handlePreeditMode(KeyEvent& keyEvent) {
-            if (EngineProcessKeyEvent(vmkEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states()))
+            if (EngineProcessKeyEvent(lotusEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states()))
                 keyEvent.filterAndAccept();
-            if (char* commit = EnginePullCommit(vmkEngine_.handle())) {
+            if (char* commit = EnginePullCommit(lotusEngine_.handle())) {
                 if (commit[0])
                     ic_->commitString(commit);
                 free(commit);
             }
             ic_->inputPanel().reset();
-            UniqueCPtr<char> preedit(EnginePullPreedit(vmkEngine_.handle()));
+            UniqueCPtr<char> preedit(EnginePullPreedit(lotusEngine_.handle()));
             if (preedit && preedit.get()[0]) {
                 std::string_view view = preedit.get();
                 Text             text;
@@ -666,7 +666,7 @@ namespace fcitx {
             if (keyEvent.key().isCursorMove() || currentSym == FcitxKey_Tab || currentSym == FcitxKey_KP_Tab || currentSym == FcitxKey_ISO_Left_Tab ||
                 currentSym == FcitxKey_Escape || keyEvent.key().hasModifier()) {
                 history_.clear();
-                ResetEngine(vmkEngine_.handle());
+                ResetEngine(lotusEngine_.handle());
                 oldPreBuffer_.clear();
                 keyEvent.forward();
                 return;
@@ -718,7 +718,7 @@ namespace fcitx {
             }
         }
 
-        // Helper function for vmk1/vmk1hc/vmksmooth mode
+        // Helper function for uinput mode
         void handleUinputMode(KeyEvent& keyEvent, KeySym currentSym, bool checkEmptyPreedit, int sleepTime) {
             checkForwardSpecialKey(keyEvent, currentSym);
             if (is_deleting_.load(std::memory_order_acquire)) {
@@ -742,11 +742,11 @@ namespace fcitx {
                 if (isBackspace(currentSym)) {
                     history_.push_back('\b');
                     replayBufferToEngine(history_);
-                    UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
+                    UniqueCPtr<char> preeditC(EnginePullPreedit(lotusEngine_.handle()));
                     oldPreBuffer_ = (preeditC && preeditC.get()[0]) ? preeditC.get() : "";
                 } else {
                     history_.clear();
-                    ResetEngine(vmkEngine_.handle());
+                    ResetEngine(lotusEngine_.handle());
                     oldPreBuffer_.clear();
                 }
                 keyEvent.forward();
@@ -759,9 +759,9 @@ namespace fcitx {
                 return;
             }
 
-            bool processed = EngineProcessKeyEvent(vmkEngine_.handle(), currentSym, keyEvent.rawKey().states());
+            bool processed = EngineProcessKeyEvent(lotusEngine_.handle(), currentSym, keyEvent.rawKey().states());
 
-            auto commitF = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle()));
+            auto commitF = UniqueCPtr<char>(EnginePullCommit(lotusEngine_.handle()));
             if (commitF && commitF.get()[0]) {
                 std::string commitStr = commitF.get();
                 std::string commonPrefix, deletedPart, addedPart;
@@ -774,7 +774,7 @@ namespace fcitx {
                 }
 
                 history_.clear();
-                ResetEngine(vmkEngine_.handle());
+                ResetEngine(lotusEngine_.handle());
                 oldPreBuffer_.clear();
 
                 keyEvent.filterAndAccept();
@@ -783,7 +783,7 @@ namespace fcitx {
 
             if (!processed) {
                 if (checkEmptyPreedit) {
-                    UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
+                    UniqueCPtr<char> preeditC(EnginePullPreedit(lotusEngine_.handle()));
                     if (!preeditC || !preeditC.get()[0]) {
                         history_.clear();
                         oldPreBuffer_.clear();
@@ -798,15 +798,15 @@ namespace fcitx {
 
             replayBufferToEngine(history_);
 
-            auto commitAfterReplay = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle()));
+            auto commitAfterReplay = UniqueCPtr<char>(EnginePullCommit(lotusEngine_.handle()));
             if (commitAfterReplay && commitAfterReplay.get()[0]) {
                 history_.clear();
-                ResetEngine(vmkEngine_.handle());
+                ResetEngine(lotusEngine_.handle());
                 oldPreBuffer_.clear();
                 return;
             }
             keyEvent.filterAndAccept();
-            UniqueCPtr<char> preeditC(EnginePullPreedit(vmkEngine_.handle()));
+            UniqueCPtr<char> preeditC(EnginePullPreedit(lotusEngine_.handle()));
             std::string      preeditStr = (preeditC && preeditC.get()[0]) ? preeditC.get() : "";
 
             std::string      commonPrefix, deletedPart, addedPart;
@@ -850,7 +850,7 @@ namespace fcitx {
             }
 
             if (isBackspace(keyEvent.rawKey().sym())) {
-                ResetEngine(vmkEngine_.handle());
+                ResetEngine(lotusEngine_.handle());
                 keyEvent.forward();
                 return;
             }
@@ -896,18 +896,18 @@ namespace fcitx {
                     goto process_normal;
                 }
 
-                EngineRebuildFromText(vmkEngine_.handle(), oldWord.c_str());
+                EngineRebuildFromText(lotusEngine_.handle(), oldWord.c_str());
 
-                bool processed = EngineProcessKeyEvent(vmkEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states());
+                bool processed = EngineProcessKeyEvent(lotusEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states());
 
                 if (!processed) {
                     keyEvent.forward();
-                    ResetEngine(vmkEngine_.handle());
+                    ResetEngine(lotusEngine_.handle());
                     return;
                 }
 
-                auto        commitPtr  = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle()));
-                auto        preeditPtr = UniqueCPtr<char>(EnginePullPreedit(vmkEngine_.handle()));
+                auto        commitPtr  = UniqueCPtr<char>(EnginePullCommit(lotusEngine_.handle()));
+                auto        preeditPtr = UniqueCPtr<char>(EnginePullPreedit(lotusEngine_.handle()));
 
                 std::string newWord = "";
                 if (commitPtr && commitPtr.get()[0])
@@ -918,7 +918,7 @@ namespace fcitx {
                 std::string commonPrefix, deletedPart, addedPart;
                 compareAndSplitStrings(oldWord, newWord, commonPrefix, deletedPart, addedPart);
                 if (deletedPart.empty() && addedPart == keyEvent.key().toString()) {
-                    ResetEngine(vmkEngine_.handle());
+                    ResetEngine(lotusEngine_.handle());
                     keyEvent.forward();
                     return;
                 }
@@ -934,22 +934,22 @@ namespace fcitx {
                         ic->commitString(addedPart);
                     }
 
-                    ResetEngine(vmkEngine_.handle());
+                    ResetEngine(lotusEngine_.handle());
                     keyEvent.filterAndAccept();
                     return;
                 }
 
-                ResetEngine(vmkEngine_.handle());
+                ResetEngine(lotusEngine_.handle());
                 keyEvent.filterAndAccept();
                 return;
             }
 
         process_normal:
-            ResetEngine(vmkEngine_.handle());
-            bool processed = EngineProcessKeyEvent(vmkEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states());
+            ResetEngine(lotusEngine_.handle());
+            bool processed = EngineProcessKeyEvent(lotusEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states());
             if (processed) {
-                auto        commitPtr  = UniqueCPtr<char>(EnginePullCommit(vmkEngine_.handle()));
-                auto        preeditPtr = UniqueCPtr<char>(EnginePullPreedit(vmkEngine_.handle()));
+                auto        commitPtr  = UniqueCPtr<char>(EnginePullCommit(lotusEngine_.handle()));
+                auto        preeditPtr = UniqueCPtr<char>(EnginePullPreedit(lotusEngine_.handle()));
                 std::string out        = "";
                 if (commitPtr && commitPtr.get()[0])
                     out += commitPtr.get();
@@ -959,7 +959,7 @@ namespace fcitx {
                 if (!out.empty())
                     ic->commitString(out);
 
-                ResetEngine(vmkEngine_.handle());
+                ResetEngine(lotusEngine_.handle());
                 keyEvent.filterAndAccept();
             } else {
                 keyEvent.forward();
@@ -967,7 +967,7 @@ namespace fcitx {
         }
 
         void keyEvent(KeyEvent& keyEvent) {
-            if (!vmkEngine_ || keyEvent.isRelease())
+            if (!lotusEngine_ || keyEvent.isRelease())
                 return;
             if (uinput_client_fd_ < 0) {
                 connect_uinput_server();
@@ -977,10 +977,11 @@ namespace fcitx {
                 current_backspace_count_ = -1;
                 expected_backspaces_     = 0;
             }
-            if (needEngineReset.load() && (realMode == VMKMode::VMK1 || realMode == VMKMode::VMK2 || realMode == VMKMode::VMK1HC || realMode == VMKMode::VMKSmooth)) {
+            if (needEngineReset.load() &&
+                (realMode == LotusMode::Uinput || realMode == LotusMode::SurroundingText || realMode == LotusMode::UinputHC || realMode == LotusMode::Smooth)) {
                 oldPreBuffer_.clear();
                 history_.clear();
-                ResetEngine(vmkEngine_.handle());
+                ResetEngine(lotusEngine_.handle());
                 is_deleting_.store(false);
                 current_backspace_count_ = -1;
                 needEngineReset.store(false);
@@ -1002,27 +1003,27 @@ namespace fcitx {
             const KeySym currentSym = keyEvent.rawKey().sym();
 
             switch (realMode) {
-                case VMKMode::VMK1: {
+                case LotusMode::Uinput: {
                     handleUinputMode(keyEvent, currentSym, true, 20);
                     break;
                 }
-                case VMKMode::VMK1HC: {
+                case LotusMode::UinputHC: {
                     handleUinputMode(keyEvent, currentSym, false, 20);
                     break;
                 }
-                case VMKMode::VMK2: {
+                case LotusMode::SurroundingText: {
                     handleSurroundingText(keyEvent, currentSym);
                     break;
                 }
-                case VMKMode::Preedit: {
+                case LotusMode::Preedit: {
                     handlePreeditMode(keyEvent);
                     break;
                 }
-                case VMKMode::Emoji: {
+                case LotusMode::Emoji: {
                     handleEmojiMode(keyEvent);
                     break;
                 }
-                case VMKMode::VMKSmooth: {
+                case LotusMode::Smooth: {
                     handleUinputMode(keyEvent, currentSym, true, 5);
                     break;
                 }
@@ -1041,44 +1042,40 @@ namespace fcitx {
             // place cursor pos is 0 and realtextLen = textLen too.
             // So we need get value of SurroundingText::selectedText()
             // but maybe can use that cus cursor alway = anchor in this
-            // code base in vmk1 mode
+            // code base in uinput mode
             //
             // https://github.com/fcitx/fcitx5/blob/master/src/lib/fcitx/surroundingtext.cpp
             /*
-              std::string SurroundingText::selectedText() const {
-                FCITX_D();
-                auto start = std::min(anchor(), cursor());
-                auto end = std::max(anchor(), cursor());
-                auto len = end - start;
-                if (len == 0)
-                    return {};
-                auto startIter = utf8::nextNChar(d->text_.begin(), start);
-                auto endIter = utf8::nextNChar(startIter, len);
-                return std::string(startIter, endIter);
-              }
-              void SurroundingText::setText(const std::string &text, unsigned int cursor, unsigned int anchor) {
-                FCITX_D();
-                auto length = utf8::lengthValidated(text);
-                if (length == utf8::INVALID_LENGTH || length < cursor || length < anchor) {
-                    invalidate();
-                    return;
-                }
-                d->valid_ = true;
-                d->text_ = text;
-                d->cursor_ = cursor;
-                d->anchor_ = anchor;
-                d->utf8Length_ = length;
+          std::string SurroundingText::selectedText() const {
+            FCITX_D();
+            auto start = std::min(anchor(), cursor());
+            auto end = std::max(anchor(), cursor());
+            auto len = end - start;
+            if (len == 0)
+                return {};
+            auto startIter = utf8::nextNChar(d->text_.begin(), start);
+            auto endIter = utf8::nextNChar(startIter, len);
+            return std::string(startIter, endIter);
+          }
+          void SurroundingText::setText(const std::string &text, unsigned int
+        cursor, unsigned int anchor) { FCITX_D(); auto length =
+        utf8::lengthValidated(text); if (length == utf8::INVALID_LENGTH ||
+        length < cursor || length < anchor) { invalidate(); return;
             }
-            void SurroundingText::setCursor(unsigned int cursor, unsigned int anchor) {
-                FCITX_D();
-                if (d->utf8Length_ < cursor || d->utf8Length_ < anchor) {
-                    invalidate();
-                    return;
-                }
-                d->cursor_ = cursor;
-                d->anchor_ = anchor;
+            d->valid_ = true;
+            d->text_ = text;
+            d->cursor_ = cursor;
+            d->anchor_ = anchor;
+            d->utf8Length_ = length;
+        }
+        void SurroundingText::setCursor(unsigned int cursor, unsigned int
+        anchor) { FCITX_D(); if (d->utf8Length_ < cursor || d->utf8Length_ <
+        anchor) { invalidate(); return;
             }
-            */
+            d->cursor_ = cursor;
+            d->anchor_ = anchor;
+        }
+        */
 
             const auto& surrounding = ic_->surroundingText();
             const auto& text        = surrounding.text();
@@ -1089,15 +1086,16 @@ namespace fcitx {
             }
             is_deleting_.store(false);
 
-            // Commit pending preedit text before clearing buffers to prevent data loss.
-            // Strategy: Call EngineCommitPreedit() first (for Preedit mode finalization),
-            // then pull any remaining preedit text (for other modes like VMK1/VMKSmooth).
-            // This ensures text is saved regardless of which mode we're switching from.
-            if (vmkEngine_) {
+            // Commit pending preedit text before clearing buffers to prevent data
+            // loss. Strategy: Call EngineCommitPreedit() first (for Preedit mode
+            // finalization), then pull any remaining preedit text (for other modes
+            // like Uinput/Smooth). This ensures text is saved regardless of which
+            // mode we're switching from.
+            if (lotusEngine_) {
                 // Finalize preedit properly (required for Preedit mode)
-                if (realMode == VMKMode::Preedit) {
-                    EngineCommitPreedit(vmkEngine_.handle());
-                    UniqueCPtr<char> commit(EnginePullCommit(vmkEngine_.handle()));
+                if (realMode == LotusMode::Preedit) {
+                    EngineCommitPreedit(lotusEngine_.handle());
+                    UniqueCPtr<char> commit(EnginePullCommit(lotusEngine_.handle()));
                     if (commit && commit.get()[0]) {
                         ic_->commitString(commit.get());
                     }
@@ -1107,20 +1105,20 @@ namespace fcitx {
             clearAllBuffers();
 
             switch (realMode) {
-                case VMKMode::Preedit: {
+                case LotusMode::Preedit: {
                     ic_->inputPanel().reset();
                     ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
                     ic_->updatePreedit();
                     break;
                 }
-                case VMKMode::VMK2:
-                case VMKMode::VMK1:
-                case VMKMode::VMK1HC:
-                case VMKMode::VMKSmooth: {
+                case LotusMode::SurroundingText:
+                case LotusMode::Uinput:
+                case LotusMode::UinputHC:
+                case LotusMode::Smooth: {
                     ic_->inputPanel().reset();
                     break;
                 }
-                case VMKMode::Emoji: {
+                case LotusMode::Emoji: {
                     ic_->inputPanel().reset();
                     ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
                     ic_->updatePreedit();
@@ -1134,11 +1132,11 @@ namespace fcitx {
 
         void commitBuffer() {
             switch (realMode) {
-                case VMKMode::Preedit: {
+                case LotusMode::Preedit: {
                     ic_->inputPanel().reset();
-                    if (vmkEngine_) {
-                        EngineCommitPreedit(vmkEngine_.handle());
-                        UniqueCPtr<char> commit(EnginePullCommit(vmkEngine_.handle()));
+                    if (lotusEngine_) {
+                        EngineCommitPreedit(lotusEngine_.handle());
+                        UniqueCPtr<char> commit(EnginePullCommit(lotusEngine_.handle()));
                         if (commit && commit.get()[0])
                             ic_->commitString(commit.get());
                     }
@@ -1146,22 +1144,22 @@ namespace fcitx {
                     ic_->updatePreedit();
                     break;
                 }
-                case VMKMode::VMK1:
-                case VMKMode::VMK1HC:
-                case VMKMode::VMKSmooth: {
+                case LotusMode::Uinput:
+                case LotusMode::UinputHC:
+                case LotusMode::Smooth: {
                     // For uinput modes: commit pending preedit when focus changes
                     // (e.g., when user tabs to another field while typing)
-                    if (vmkEngine_) {
-                        UniqueCPtr<char> preedit(EnginePullPreedit(vmkEngine_.handle()));
+                    if (lotusEngine_) {
+                        UniqueCPtr<char> preedit(EnginePullPreedit(lotusEngine_.handle()));
                         if (preedit && preedit.get()[0]) {
                             ic_->commitString(preedit.get());
                         }
                     }
                     break;
                 }
-                case VMKMode::VMK2: {
-                    if (vmkEngine_)
-                        ResetEngine(vmkEngine_.handle());
+                case LotusMode::SurroundingText: {
+                    if (lotusEngine_)
+                        ResetEngine(lotusEngine_.handle());
                     break;
                 }
                 default: {
@@ -1183,8 +1181,8 @@ namespace fcitx {
             }
             emojiBuffer_.clear();
             emojiCandidates_.clear();
-            if (vmkEngine_)
-                ResetEngine(vmkEngine_.handle());
+            if (lotusEngine_)
+                ResetEngine(lotusEngine_.handle());
         }
 
         bool isEmptyHistory() {
@@ -1193,9 +1191,9 @@ namespace fcitx {
 
       private:
         struct EmojiCandidateWord : public CandidateWord {
-            VMKState*   state_;
+            LotusState* state_;
             std::string emojiOutput_;
-            EmojiCandidateWord(Text text, VMKState* state, const std::string& emojiOutput) : CandidateWord(std::move(text)), state_(state), emojiOutput_(emojiOutput) {}
+            EmojiCandidateWord(Text text, LotusState* state, const std::string& emojiOutput) : CandidateWord(std::move(text)), state_(state), emojiOutput_(emojiOutput) {}
 
             void select(InputContext* inputContext) const override {
                 FCITX_UNUSED(inputContext);
@@ -1209,9 +1207,9 @@ namespace fcitx {
                 state_->ic_->updatePreedit();
             }
         };
-        vmkEngine*       engine_;
+        LotusEngine*     engine_;
         InputContext*    ic_;
-        CGoObject        vmkEngine_;
+        CGoObject        lotusEngine_;
         std::string      oldPreBuffer_;
         std::string      history_;
         size_t           expected_backspaces_     = 0;
@@ -1275,7 +1273,7 @@ namespace fcitx {
                         }
                     }
 
-                    if (n > 0 && strcmp(exe_path, "/usr/bin/fcitx5-vmk-server") == 0) {
+                    if (n > 0 && strcmp(exe_path, "/usr/bin/fcitx5-lotus-server") == 0) {
                         needEngineReset.store(true, std::memory_order_relaxed);
                         // Also signal that mouse was clicked to close app mode menu
                         g_mouse_clicked.store(true, std::memory_order_relaxed);
@@ -1293,7 +1291,7 @@ namespace fcitx {
         std::thread(mousePressResetThread).detach();
     }
 
-    vmkEngine::vmkEngine(Instance* instance) : instance_(instance), factory_([this](InputContext& ic) { return new VMKState(this, &ic); }) {
+    LotusEngine::LotusEngine(Instance* instance) : instance_(instance), factory_([this](InputContext& ic) { return new LotusState(this, &ic); }) {
         startMonitoringOnce();
         Init();
         {
@@ -1302,10 +1300,10 @@ namespace fcitx {
             imNames_ = std::move(imNames);
         }
         config_.inputMethod.annotation().setList(imNames_);
-#if VMK_USE_MODERN_FCITX_API
-        auto fd = StandardPaths::global().open(StandardPathsType::PkgData, "vmk/vietnamese.cm.dict");
+#if LOTUS_USE_MODERN_FCITX_API
+        auto fd = StandardPaths::global().open(StandardPathsType::PkgData, "lotus/vietnamese.cm.dict");
 #else
-        auto fd = StandardPath::global().open(StandardPath::Type::PkgData, "vmk/vietnamese.cm.dict", O_RDONLY);
+        auto fd = StandardPath::global().open(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict", O_RDONLY);
 #endif
         if (!fd.isValid())
             throw std::runtime_error("Failed to load dictionary");
@@ -1315,16 +1313,16 @@ namespace fcitx {
         modeAction_     = std::make_unique<SimpleAction>();
         modeAction_->setIcon("preferences-system");
         modeAction_->setShortText(_("Typing Mode"));
-        uiManager.registerAction("vmk-mode", modeAction_.get());
+        uiManager.registerAction("lotus-mode", modeAction_.get());
         modeMenu_ = std::make_unique<Menu>();
         modeAction_->setMenu(modeMenu_.get());
 
-        std::vector<VMKMode> modes = {VMKMode::VMKSmooth, VMKMode::VMK1, VMKMode::VMK2, VMKMode::Preedit, VMKMode::VMK1HC};
+        std::vector<LotusMode> modes = {LotusMode::Smooth, LotusMode::Uinput, LotusMode::SurroundingText, LotusMode::Preedit, LotusMode::UinputHC};
         for (const auto& mode : modes) {
             auto action = std::make_unique<SimpleAction>();
             action->setShortText(modeEnumToString(mode));
             action->setCheckable(true);
-            uiManager.registerAction("vmk-mode-" + modeEnumToString(mode), action.get());
+            uiManager.registerAction("lotus-mode-" + modeEnumToString(mode), action.get());
             connections_.emplace_back(action->connect<SimpleAction::Activated>([this, mode](InputContext* ic) {
                 if (globalMode_ == mode) {
                     return;
@@ -1344,7 +1342,7 @@ namespace fcitx {
         inputMethodAction_ = std::make_unique<SimpleAction>();
         inputMethodAction_->setIcon("document-edit");
         inputMethodAction_->setShortText("Input Method");
-        uiManager.registerAction("vmk-input-method", inputMethodAction_.get());
+        uiManager.registerAction("lotus-input-method", inputMethodAction_.get());
         inputMethodMenu_ = std::make_unique<Menu>();
         inputMethodAction_->setMenu(inputMethodMenu_.get());
 
@@ -1370,7 +1368,7 @@ namespace fcitx {
         charsetAction_ = std::make_unique<SimpleAction>();
         charsetAction_->setShortText(_("Charset"));
         charsetAction_->setIcon("character-set");
-        uiManager.registerAction("vmk-charset", charsetAction_.get());
+        uiManager.registerAction("lotus-charset", charsetAction_.get());
         charsetMenu_ = std::make_unique<Menu>();
         charsetAction_->setMenu(charsetMenu_.get());
 
@@ -1405,7 +1403,7 @@ namespace fcitx {
             refreshOption();
             updateSpellAction(ic);
         }));
-        uiManager.registerAction("vmk-spellcheck", spellCheckAction_.get());
+        uiManager.registerAction("lotus-spellcheck", spellCheckAction_.get());
 
         macroAction_ = std::make_unique<SimpleAction>();
         macroAction_->setLongText(_("Enable Macro"));
@@ -1417,7 +1415,7 @@ namespace fcitx {
             refreshOption();
             updateMacroAction(ic);
         }));
-        uiManager.registerAction("vmk-macro", macroAction_.get());
+        uiManager.registerAction("lotus-macro", macroAction_.get());
 
         capitalizeMacroAction_ = std::make_unique<SimpleAction>();
         capitalizeMacroAction_->setLongText(_("Capitalize Macro"));
@@ -1429,7 +1427,7 @@ namespace fcitx {
             refreshOption();
             updateCapitalizeMacroAction(ic);
         }));
-        uiManager.registerAction("vmk-capitalizemacro", capitalizeMacroAction_.get());
+        uiManager.registerAction("lotus-capitalizemacro", capitalizeMacroAction_.get());
 
         autoNonVnRestoreAction_ = std::make_unique<SimpleAction>();
         autoNonVnRestoreAction_->setLongText(_("Auto restore keys with invalid words"));
@@ -1441,7 +1439,7 @@ namespace fcitx {
             refreshOption();
             updateAutoNonVnRestoreAction(ic);
         }));
-        uiManager.registerAction("vmk-autonvnrestore", autoNonVnRestoreAction_.get());
+        uiManager.registerAction("lotus-autonvnrestore", autoNonVnRestoreAction_.get());
 
         modernStyleAction_ = std::make_unique<SimpleAction>();
         modernStyleAction_->setLongText(_("Use oà, _uý (instead of òa, úy)"));
@@ -1453,7 +1451,7 @@ namespace fcitx {
             refreshOption();
             updateModernStyleAction(ic);
         }));
-        uiManager.registerAction("vmk-modernstyle", modernStyleAction_.get());
+        uiManager.registerAction("lotus-modernstyle", modernStyleAction_.get());
 
         freeMarkingAction_ = std::make_unique<SimpleAction>();
         freeMarkingAction_->setLongText(_("Allow type with more freedom"));
@@ -1465,26 +1463,26 @@ namespace fcitx {
             refreshOption();
             updateFreeMarkingAction(ic);
         }));
-        uiManager.registerAction("vmk-freemarking", freeMarkingAction_.get());
+        uiManager.registerAction("lotus-freemarking", freeMarkingAction_.get());
 
-        fixVmk1WithAckAction_ = std::make_unique<SimpleAction>();
-        fixVmk1WithAckAction_->setLongText(_("Fix uinput mode with ack"));
-        fixVmk1WithAckAction_->setIcon("network-transmit-receive");
-        fixVmk1WithAckAction_->setCheckable(true);
-        connections_.emplace_back(fixVmk1WithAckAction_->connect<SimpleAction::Activated>([this](InputContext* ic) {
-            config_.fixVmk1WithAck.setValue(!*config_.fixVmk1WithAck);
+        fixUinputWithAckAction_ = std::make_unique<SimpleAction>();
+        fixUinputWithAckAction_->setLongText(_("Fix uinput mode with ack"));
+        fixUinputWithAckAction_->setIcon("network-transmit-receive");
+        fixUinputWithAckAction_->setCheckable(true);
+        connections_.emplace_back(fixUinputWithAckAction_->connect<SimpleAction::Activated>([this](InputContext* ic) {
+            config_.fixUinputWithAck.setValue(!*config_.fixUinputWithAck);
             saveConfig();
             refreshOption();
-            updateFixVmk1WithAckAction(ic);
+            updateFixUinputWithAckAction(ic);
         }));
-        uiManager.registerAction("vmk-fixvmk1withack", fixVmk1WithAckAction_.get());
+        uiManager.registerAction("lotus-fixuinputwithack", fixUinputWithAckAction_.get());
 
         reloadConfig();
         globalMode_ = modeStringToEnum(config_.mode.value());
         updateModeAction(nullptr);
-        instance_->inputContextManager().registerProperty("VMKState", &factory_);
+        instance_->inputContextManager().registerProperty("LotusState", &factory_);
 
-#if VMK_USE_MODERN_FCITX_API
+#if LOTUS_USE_MODERN_FCITX_API
         std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
 #else
         std::string configDir = StandardPath::global().userDirectory(StandardPath::Type::Config) + "/fcitx5/conf";
@@ -1493,11 +1491,11 @@ namespace fcitx {
         if (!std::filesystem::exists(configDir)) {
             std::filesystem::create_directories(configDir);
         }
-        appRulesPath_ = configDir + "/vmk-app-rules.conf";
+        appRulesPath_ = configDir + "/lotus-app-rules.conf";
         loadAppRules();
     }
 
-    vmkEngine::~vmkEngine() {
+    LotusEngine::~LotusEngine() {
         stop_flag_monitor.store(true, std::memory_order_release);
         monitor_cv.notify_all();
         int fd = mouse_socket_fd.load(std::memory_order_acquire);
@@ -1506,8 +1504,8 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::reloadConfig() {
-        readAsIni(config_, "conf/vmk.conf");
+    void LotusEngine::reloadConfig() {
+        readAsIni(config_, "conf/lotus.conf");
         readAsIni(customKeymap_, CustomKeymapFile);
         for (const auto& imName : imNames_) {
             auto& table = macroTables_[imName];
@@ -1517,7 +1515,7 @@ namespace fcitx {
         populateConfig();
     }
 
-    const Configuration* vmkEngine::getSubConfig(const std::string& path) const {
+    const Configuration* LotusEngine::getSubConfig(const std::string& path) const {
         if (path == "custom_keymap")
             return &customKeymap_;
         if (stringutils::startsWith(path, MacroPrefix)) {
@@ -1528,13 +1526,13 @@ namespace fcitx {
         return nullptr;
     }
 
-    void vmkEngine::setConfig(const RawConfig& config) {
+    void LotusEngine::setConfig(const RawConfig& config) {
         config_.load(config, true);
         saveConfig();
         populateConfig();
     }
 
-    void vmkEngine::populateConfig() {
+    void LotusEngine::populateConfig() {
         refreshEngine();
         refreshOption();
         updateModeAction(nullptr);
@@ -1546,10 +1544,10 @@ namespace fcitx {
         updateAutoNonVnRestoreAction(nullptr);
         updateModernStyleAction(nullptr);
         updateFreeMarkingAction(nullptr);
-        updateFixVmk1WithAckAction(nullptr);
+        updateFixUinputWithAckAction(nullptr);
     }
 
-    void vmkEngine::setSubConfig(const std::string& path, const RawConfig& config) {
+    void LotusEngine::setSubConfig(const std::string& path, const RawConfig& config) {
         if (path == "custom_keymap") {
             customKeymap_.load(config, true);
             safeSaveAsIni(customKeymap_, CustomKeymapFile);
@@ -1565,11 +1563,11 @@ namespace fcitx {
         }
     }
 
-    std::string vmkEngine::subMode(const InputMethodEntry&, InputContext&) {
+    std::string LotusEngine::subMode(const InputMethodEntry&, InputContext&) {
         return *config_.inputMethod;
     }
 
-    void vmkEngine::activate(const InputMethodEntry& entry, InputContextEvent& event) {
+    void LotusEngine::activate(const InputMethodEntry& entry, InputContextEvent& event) {
         FCITX_UNUSED(entry);
         auto                     ic = event.inputContext();
         static std::atomic<bool> mouseThreadStarted{false};
@@ -1582,7 +1580,7 @@ namespace fcitx {
 
         // ibus-bamboo mode save/load
         std::string appName = ic->program();
-        VMKMode     targetMode;
+        LotusMode   targetMode;
 
         if (!appRules_.empty() && appRules_.count(appName)) {
             targetMode = appRules_[appName];
@@ -1594,8 +1592,8 @@ namespace fcitx {
         updateInputMethodAction(event.inputContext());
         updateCharsetAction(event.inputContext());
 
-        if (*config_.fixVmk1WithAck) {
-            if (targetMode == VMKMode::VMK1 || targetMode == VMKMode::VMK1HC || targetMode == VMKMode::VMKSmooth) {
+        if (*config_.fixUinputWithAck) {
+            if (targetMode == LotusMode::Uinput || targetMode == LotusMode::UinputHC || targetMode == LotusMode::Smooth) {
                 bool needWaitAck = false;
                 for (const auto& ackApp : ack_apps) {
                     if (appName.find(ackApp) != std::string::npos) {
@@ -1627,14 +1625,14 @@ namespace fcitx {
         statusArea.addAction(StatusGroup::InputMethod, autoNonVnRestoreAction_.get());
         statusArea.addAction(StatusGroup::InputMethod, modernStyleAction_.get());
         statusArea.addAction(StatusGroup::InputMethod, freeMarkingAction_.get());
-        statusArea.addAction(StatusGroup::InputMethod, fixVmk1WithAckAction_.get());
+        statusArea.addAction(StatusGroup::InputMethod, fixUinputWithAckAction_.get());
     }
 
-    void vmkEngine::keyEvent(const InputMethodEntry& entry, KeyEvent& keyEvent) {
+    void LotusEngine::keyEvent(const InputMethodEntry& entry, KeyEvent& keyEvent) {
         FCITX_UNUSED(entry);
         auto ic = keyEvent.inputContext();
 
-        // Handle mouse click event from fcitx5-vmk-server to close app mode menu
+        // Handle mouse click event from fcitx5-lotus-server to close app mode menu
         // The server sends signal via Unix socket when user clicks outside the menu
         if (isSelectingAppMode_ && g_mouse_clicked.load(std::memory_order_relaxed)) {
             closeAppModeMenu();
@@ -1654,7 +1652,8 @@ namespace fcitx {
             KeySym keySym   = keyEvent.key().sym();
 
             // Lambda to move cursor in candidate list with wrap-around
-            // Note: Index 0 is reserved for header ("App: ..."), so valid range is [1, totalSize-1]
+            // Note: Index 0 is reserved for header ("App: ..."), so valid range is
+            // [1, totalSize-1]
             auto moveCursor = [&](int delta) {
                 if (!menuList || menuList->empty()) {
                     return false;
@@ -1685,8 +1684,8 @@ namespace fcitx {
 
             keyEvent.filterAndAccept();
 
-            VMKMode selectedMode  = VMKMode::NoMode;
-            bool    selectionMade = false;
+            LotusMode selectedMode  = LotusMode::NoMode;
+            bool      selectionMade = false;
 
             switch (keySym) {
                 case FcitxKey_Tab:
@@ -1716,33 +1715,34 @@ namespace fcitx {
                     break;
                 }
                     // Map keyboard shortcuts to modes
-                    // Numbers [1-4]: VMK input modes, Letters [q/w/e/r]: Special modes/actions
+                    // Numbers [1-4]: Lotus input modes, Letters [q/w/e/r]: Special
+                    // modes/actions
                 case FcitxKey_1: {
-                    selectedMode = VMKMode::VMKSmooth;
+                    selectedMode = LotusMode::Smooth;
                     break;
                 }
                 case FcitxKey_2: {
-                    selectedMode = VMKMode::VMK1;
+                    selectedMode = LotusMode::Uinput;
                     break;
                 }
                 case FcitxKey_3: {
-                    selectedMode = VMKMode::VMK1HC;
+                    selectedMode = LotusMode::UinputHC;
                     break;
                 }
                 case FcitxKey_4: {
-                    selectedMode = VMKMode::VMK2;
+                    selectedMode = LotusMode::SurroundingText;
                     break;
                 }
                 case FcitxKey_q: {
-                    selectedMode = VMKMode::Preedit;
+                    selectedMode = LotusMode::Preedit;
                     break;
                 }
                 case FcitxKey_w: {
-                    selectedMode = VMKMode::Emoji;
+                    selectedMode = LotusMode::Emoji;
                     break;
                 }
                 case FcitxKey_e: {
-                    selectedMode = VMKMode::Off;
+                    selectedMode = LotusMode::Off;
                     break;
                 }
                 case FcitxKey_r: {
@@ -1769,8 +1769,8 @@ namespace fcitx {
                 default: break;
             }
 
-            if (selectedMode != VMKMode::NoMode) {
-                if (selectedMode != VMKMode::Emoji) {
+            if (selectedMode != LotusMode::NoMode) {
+                if (selectedMode != LotusMode::Emoji) {
                     appRules_[currentConfigureApp_] = selectedMode;
                     saveAppRules();
                 }
@@ -1790,7 +1790,8 @@ namespace fcitx {
         }
 
         // Open app mode selection menu when user presses backtick/grave key (`)
-        // Triggered by Shift+` key combination, allows user to change input mode per-app
+        // Triggered by Shift+` key combination, allows user to change input mode
+        // per-app
         if (!keyEvent.isRelease() && keyEvent.rawKey().check(FcitxKey_grave)) {
             currentConfigureApp_ = ic->program();
             if (currentConfigureApp_.empty())
@@ -1810,7 +1811,7 @@ namespace fcitx {
             realtextLen = static_cast<int>(textLen);
     }
 
-    void vmkEngine::reset(const InputMethodEntry& entry, InputContextEvent& event) {
+    void LotusEngine::reset(const InputMethodEntry& entry, InputContextEvent& event) {
         FCITX_UNUSED(entry);
         auto state = event.inputContext()->propertyFor(&factory_);
         if (!state->isEmptyHistory() && event.type() != EventType::InputContextFocusOut) {
@@ -1822,10 +1823,10 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::deactivate(const InputMethodEntry& entry, InputContextEvent& event) {
+    void LotusEngine::deactivate(const InputMethodEntry& entry, InputContextEvent& event) {
         FCITX_UNUSED(entry);
         auto state = event.inputContext()->propertyFor(&factory_);
-        if (realMode == VMKMode::Preedit) {
+        if (realMode == LotusMode::Preedit) {
             if (event.type() != EventType::InputContextFocusOut)
                 state->commitBuffer();
             else
@@ -1840,7 +1841,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::refreshEngine() {
+    void LotusEngine::refreshEngine() {
         if (!factory_.registered())
             return;
         instance_->inputContextManager().foreach ([this](InputContext* ic) {
@@ -1852,7 +1853,7 @@ namespace fcitx {
         });
     }
 
-    void vmkEngine::refreshOption() {
+    void LotusEngine::refreshOption() {
         if (!factory_.registered())
             return;
         instance_->inputContextManager().foreach ([this](InputContext* ic) {
@@ -1864,14 +1865,14 @@ namespace fcitx {
         });
     }
 
-    void vmkEngine::updateModeAction(InputContext* ic) {
+    void LotusEngine::updateModeAction(InputContext* ic) {
         std::string currentModeStr = config_.mode.value();
-        VMKMode     newMode        = modeStringToEnum(currentModeStr);
+        LotusMode   newMode        = modeStringToEnum(currentModeStr);
         globalMode_                = newMode;
         setMode(newMode, ic);
 
         for (const auto& action : modeSubAction_) {
-            action->setChecked(action->name() == "vmk-mode-" + currentModeStr);
+            action->setChecked(action->name() == "lotus-mode-" + currentModeStr);
             if (ic)
                 action->update(ic);
         }
@@ -1882,7 +1883,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateInputMethodAction(InputContext* ic) {
+    void LotusEngine::updateInputMethodAction(InputContext* ic) {
         auto name = stringutils::concat(InputMethodActionPrefix, *config_.inputMethod);
         for (const auto& action : inputMethodSubAction_) {
             action->setChecked(action->name() == name);
@@ -1895,7 +1896,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateCharsetAction(InputContext* ic) {
+    void LotusEngine::updateCharsetAction(InputContext* ic) {
         auto name = stringutils::concat(CharsetActionPrefix, *config_.outputCharset);
         for (const auto& action : charsetSubAction_) {
             action->setChecked(action->name() == name);
@@ -1904,7 +1905,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateSpellAction(InputContext* ic) {
+    void LotusEngine::updateSpellAction(InputContext* ic) {
         spellCheckAction_->setChecked(*config_.spellCheck);
         spellCheckAction_->setShortText(*config_.spellCheck ? _("Spell Check: On") : _("Spell Check: Off"));
         if (ic) {
@@ -1912,7 +1913,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateMacroAction(InputContext* ic) {
+    void LotusEngine::updateMacroAction(InputContext* ic) {
         macroAction_->setChecked(*config_.macro);
         macroAction_->setShortText(*config_.macro ? _("Macro: On") : _("Macro: Off"));
         if (ic) {
@@ -1920,7 +1921,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateCapitalizeMacroAction(InputContext* ic) {
+    void LotusEngine::updateCapitalizeMacroAction(InputContext* ic) {
         capitalizeMacroAction_->setChecked(*config_.capitalizeMacro);
         capitalizeMacroAction_->setShortText(*config_.capitalizeMacro ? _("Capitalize Macro: On") : _("Capitalize Macro: Off"));
         if (ic) {
@@ -1928,7 +1929,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateAutoNonVnRestoreAction(InputContext* ic) {
+    void LotusEngine::updateAutoNonVnRestoreAction(InputContext* ic) {
         autoNonVnRestoreAction_->setChecked(*config_.autoNonVnRestore);
         autoNonVnRestoreAction_->setShortText(*config_.autoNonVnRestore ? _("Auto Non-VN Restore: On") : _("Auto Non-VN Restore: Off"));
         if (ic) {
@@ -1936,7 +1937,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateModernStyleAction(InputContext* ic) {
+    void LotusEngine::updateModernStyleAction(InputContext* ic) {
         modernStyleAction_->setChecked(*config_.modernStyle);
         modernStyleAction_->setShortText(*config_.modernStyle ? _("Modern Style: On") : _("Modern Style: Off"));
         if (ic) {
@@ -1944,7 +1945,7 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateFreeMarkingAction(InputContext* ic) {
+    void LotusEngine::updateFreeMarkingAction(InputContext* ic) {
         freeMarkingAction_->setChecked(*config_.freeMarking);
         freeMarkingAction_->setShortText(*config_.freeMarking ? _("Free Marking: On") : _("Free Marking: Off"));
         if (ic) {
@@ -1952,15 +1953,15 @@ namespace fcitx {
         }
     }
 
-    void vmkEngine::updateFixVmk1WithAckAction(InputContext* ic) {
-        fixVmk1WithAckAction_->setChecked(*config_.fixVmk1WithAck);
-        fixVmk1WithAckAction_->setShortText(*config_.fixVmk1WithAck ? _("Fix Vmk1 With Ack: On") : _("Fix Vmk1 With Ack: Off"));
+    void LotusEngine::updateFixUinputWithAckAction(InputContext* ic) {
+        fixUinputWithAckAction_->setChecked(*config_.fixUinputWithAck);
+        fixUinputWithAckAction_->setShortText(*config_.fixUinputWithAck ? _("Fix Uinput With Ack: On") : _("Fix Uinput With Ack: Off"));
         if (ic) {
-            fixVmk1WithAckAction_->update(ic);
+            fixUinputWithAckAction_->update(ic);
         }
     }
 
-    void vmkEngine::loadAppRules() {
+    void LotusEngine::loadAppRules() {
         appRules_.clear();
         std::ifstream file(appRulesPath_);
         if (!file.is_open())
@@ -1980,12 +1981,12 @@ namespace fcitx {
         file.close();
     }
 
-    void vmkEngine::saveAppRules() {
+    void LotusEngine::saveAppRules() {
         std::ofstream file(appRulesPath_, std::ios::trunc);
         if (!file.is_open())
             return;
 
-        file << "# VMK Per-App Configuration\n";
+        file << "# Lotus Per-App Configuration\n";
         for (const auto& pair : appRules_) {
             std::string modeStr = modeEnumToString(pair.second);
             file << pair.first << "=" << modeStr << "\n";
@@ -1993,15 +1994,15 @@ namespace fcitx {
         file.close();
     }
 
-    void vmkEngine::closeAppModeMenu() {
+    void LotusEngine::closeAppModeMenu() {
         isSelectingAppMode_ = false;
         g_mouse_clicked.store(false, std::memory_order_relaxed);
     }
 
     namespace {
-        // Custom candidate word class that supports both mouse click and keyboard selection
-        // Unlike DisplayOnlyCandidateWord, this executes a callback when selected,
-        // enabling interactive menu items in the app mode selection UI
+        // Custom candidate word class that supports both mouse click and keyboard
+        // selection Unlike DisplayOnlyCandidateWord, this executes a callback when
+        // selected, enabling interactive menu items in the app mode selection UI
         class AppModeCandidateWord : public CandidateWord {
           public:
             AppModeCandidateWord(Text text, std::function<void(InputContext*)> callback) : CandidateWord(std::move(text)), callback_(std::move(callback)) {}
@@ -2017,7 +2018,7 @@ namespace fcitx {
         };
     } // namespace
 
-    void vmkEngine::showAppModeMenu(InputContext* ic) {
+    void LotusEngine::showAppModeMenu(InputContext* ic) {
         isSelectingAppMode_ = true;
 
         auto candidateList = std::make_unique<CommonCandidateList>();
@@ -2026,7 +2027,7 @@ namespace fcitx {
         candidateList->setPageSize(10);
 
         // Helper lambda: Add ">>" marker to highlight current active mode
-        auto getLabel = [&](const VMKMode& modeName, const std::string& modeLabel) {
+        auto getLabel = [&](const LotusMode& modeName, const std::string& modeLabel) {
             if (modeName == realMode) {
                 return Text(">> " + modeLabel);
             } else {
@@ -2034,7 +2035,8 @@ namespace fcitx {
             }
         };
 
-        // Helper lambda: Cleanup after mode selection (reset UI and commit pending text)
+        // Helper lambda: Cleanup after mode selection (reset UI and commit pending
+        // text)
         auto cleanup = [this](InputContext* ic) {
             isSelectingAppMode_ = false;
             ic->inputPanel().reset();
@@ -2043,12 +2045,12 @@ namespace fcitx {
             state->reset(); // This will commit any pending preedit text
         };
 
-        // Helper lambda: Create callback to apply selected mode and save app-specific settings
-        // Note: Emoji mode is transient (not saved to appRules), user must explicitly
-        // select it each time they open the menu
-        auto applyMode = [this, cleanup](VMKMode mode) {
+        // Helper lambda: Create callback to apply selected mode and save
+        // app-specific settings Note: Emoji mode is transient (not saved to
+        // appRules), user must explicitly select it each time they open the menu
+        auto applyMode = [this, cleanup](LotusMode mode) {
             return [this, mode, cleanup](InputContext* ic) {
-                if (mode != VMKMode::Emoji) {
+                if (mode != LotusMode::Emoji) {
                     appRules_[currentConfigureApp_] = mode;
                     saveAppRules();
                 }
@@ -2059,15 +2061,16 @@ namespace fcitx {
         };
 
         // Build candidate list for app mode menu
-        // Structure: Header + 8 selectable items (4 VMK modes + 4 special options)
+        // Structure: Header + 8 selectable items (4 Lotus modes + 4 special
+        // options)
         candidateList->append(std::make_unique<DisplayOnlyCandidateWord>(Text(_("App: ") + currentConfigureApp_)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(VMKMode::VMKSmooth, _("[1] Uinput (smooth)")), applyMode(VMKMode::VMKSmooth)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(VMKMode::VMK1, _("[2] Uinput (Slow)")), applyMode(VMKMode::VMK1)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(VMKMode::VMK1HC, _("[3] Uinput (Hardcore)")), applyMode(VMKMode::VMK1HC)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(VMKMode::VMK2, _("[4] Surrounding Text")), applyMode(VMKMode::VMK2)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(VMKMode::Preedit, _("[q] Preedit")), applyMode(VMKMode::Preedit)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(VMKMode::Emoji, _("[w] Emoji Picker")), applyMode(VMKMode::Emoji)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(VMKMode::Off, _("[e] OFF")), applyMode(VMKMode::Off)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Smooth, _("[1] Uinput (smooth)")), applyMode(LotusMode::Smooth)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Uinput, _("[2] Uinput (Slow)")), applyMode(LotusMode::Uinput)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::UinputHC, _("[3] Uinput (Hardcore)")), applyMode(LotusMode::UinputHC)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::SurroundingText, _("[4] Surrounding Text")), applyMode(LotusMode::SurroundingText)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Preedit, _("[q] Preedit")), applyMode(LotusMode::Preedit)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Emoji, _("[w] Emoji Picker")), applyMode(LotusMode::Emoji)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[e] OFF")), applyMode(LotusMode::Off)));
 
         candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[r] Remove App Settings")), [this, cleanup](InputContext* ic) {
             if (appRules_.count(currentConfigureApp_)) {
@@ -2083,16 +2086,17 @@ namespace fcitx {
         }));
 
         // Set initial cursor position to highlight current active mode
-        // Index mapping: 1=VMKSmooth, 2=VMK1, 3=VMK1HC, 4=VMK2, 5=Preedit, 6=Emoji, 7=Off
+        // Index mapping: 1=Smooth, 2=Uinput, 3=UinputHC, 4=SurroundingText,
+        // 5=Preedit, 6=Emoji, 7=Off
         int selectedIndex = 1;
         switch (realMode) {
-            case VMKMode::VMKSmooth: selectedIndex = 1; break;
-            case VMKMode::VMK1: selectedIndex = 2; break;
-            case VMKMode::VMK1HC: selectedIndex = 3; break;
-            case VMKMode::VMK2: selectedIndex = 4; break;
-            case VMKMode::Preedit: selectedIndex = 5; break;
-            case VMKMode::Emoji: selectedIndex = 6; break;
-            case VMKMode::Off: selectedIndex = 7; break;
+            case LotusMode::Smooth: selectedIndex = 1; break;
+            case LotusMode::Uinput: selectedIndex = 2; break;
+            case LotusMode::UinputHC: selectedIndex = 3; break;
+            case LotusMode::SurroundingText: selectedIndex = 4; break;
+            case LotusMode::Preedit: selectedIndex = 5; break;
+            case LotusMode::Emoji: selectedIndex = 6; break;
+            case LotusMode::Off: selectedIndex = 7; break;
             default: selectedIndex = 1; break;
         }
         candidateList->setGlobalCursorIndex(selectedIndex);
@@ -2102,23 +2106,23 @@ namespace fcitx {
         ic->updateUserInterface(UserInterfaceComponent::InputPanel);
     }
 
-    void vmkEngine::setMode(VMKMode mode, InputContext* ic) {
+    void LotusEngine::setMode(LotusMode mode, InputContext* ic) {
         realMode = mode;
         if (ic) {
             ic->updateUserInterface(UserInterfaceComponent::StatusArea);
         }
     }
 
-    std::string vmkEngine::overrideIcon(const fcitx::InputMethodEntry& /*entry*/) {
+    std::string LotusEngine::overrideIcon(const fcitx::InputMethodEntry& /*entry*/) {
         switch (realMode) {
-            case VMKMode::Off: return "fcitx-vmk-off";
-            case VMKMode::Emoji: return "fcitx-vmk-emoji";
+            case LotusMode::Off: return "fcitx-lotus-off";
+            case LotusMode::Emoji: return "fcitx-lotus-emoji";
             default: return {};
         }
     }
 } // namespace fcitx
 
-FCITX_ADDON_FACTORY(fcitx::vmkFactory)
+FCITX_ADDON_FACTORY(fcitx::LotusFactory)
 
 std::string SubstrChar(const std::string& s, size_t start, size_t len) {
     if (s.empty())

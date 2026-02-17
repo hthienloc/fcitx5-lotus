@@ -1,6 +1,6 @@
-# Đóng góp cho fcitx5-vmk
+# Đóng góp cho fcitx5-lotus
 
-Cảm ơn bạn quan tâm đến việc đóng góp cho dự án fcitx5-vmk! Tài liệu này hướng dẫn bạn cách tham gia phát triển dự án.
+Cảm ơn bạn quan tâm đến việc đóng góp cho dự án fcitx5-lotus! Tài liệu này hướng dẫn bạn cách tham gia phát triển dự án.
 
 ## 📋 Mục lục
 
@@ -26,8 +26,8 @@ Cảm ơn bạn quan tâm đến việc đóng góp cho dự án fcitx5-vmk! Tà
 
 ```bash
 # Clone repository
-git clone https://github.com/nhktmdzhg/VMK.git
-cd VMK
+git clone https://github.com/nhktmdzhg/fcitx5-lotus.git
+cd fcitx5-lotus
 
 # Khởi tạo submodules
 git submodule update --init --recursive
@@ -45,9 +45,9 @@ make -j$(nproc)
 Fork repository này trên GitHub và clone fork của bạn về máy.
 
 ```bash
-git clone https://github.com/yourusername/VMK.git
-cd VMK
-git remote add upstream https://github.com/nhktmdzhg/VMK.git
+git clone https://github.com/yourusername/fcitx5-lotus.git
+cd fcitx5-lotus
+git remote add upstream https://github.com/nhktmdzhg/fcitx5-lotus.git
 ```
 
 ### 2. Tạo nhánh mới
@@ -151,7 +151,7 @@ feature/*, fix/*, hotfix/*  ← Nhánh cá nhân cho mỗi PR
 
 Khi báo cáo lỗi, vui lòng cung cấp:
 
-- Phiên bản fcitx5-vmk
+- Phiên bản fcitx5-lotus
 - Hệ điều hành và phiên bản
 - Các bước để tái hiện lỗi
 - Log hoặc screenshot (nếu có) (Log bằng lệnh fcitx5-diagnose)

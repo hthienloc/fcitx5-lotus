@@ -1,9 +1,9 @@
 [Addon]
-Name=vmk Wrapper For Fcitx
+Name=Lotus Wrapper For Fcitx
 Category=InputMethod
 Version=@PROJECT_VERSION@
 Enabled=True
-Library=libvmk
+Library=liblotus
 Type=SharedLibrary
 OnDemand=True
 Configurable=True

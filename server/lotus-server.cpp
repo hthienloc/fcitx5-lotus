@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
  */
+#include <atomic>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -18,6 +19,7 @@
 #include <poll.h>
 #include <pwd.h>
 #include <sched.h>
+#include <signal.h>
 #include <string>
 #include <sys/ioctl.h>
 #include <sys/resource.h>
@@ -27,8 +29,6 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <vector>
-#include <signal.h>
-#include <atomic>
 // --- VARIABLES ---
 static int               uinput_fd_ = -1;
 static std::atomic<bool> g_running{true};
@@ -108,13 +108,13 @@ int main(int argc, char* argv[]) {
 
     std::string backspace_socket;
     backspace_socket.reserve(40);
-    backspace_socket += "vmksocket-";
+    backspace_socket += "lotussocket-";
     backspace_socket += target_user;
     backspace_socket += "-kb_socket";
 
     std::string mouse_flag_socket;
     mouse_flag_socket.reserve(48);
-    mouse_flag_socket += "vmksocket-";
+    mouse_flag_socket += "lotussocket-";
     mouse_flag_socket += target_user;
     mouse_flag_socket += "-mouse_socket";
 
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
         usetup.id.bustype = BUS_USB;
         usetup.id.vendor  = 0x1234;
         usetup.id.product = 0x5678;
-        strncpy(usetup.name, "VMK-Uinput-Server", UINPUT_MAX_NAME_SIZE - 1);
+        strncpy(usetup.name, "Lotus-Uinput-Server", UINPUT_MAX_NAME_SIZE - 1);
         ioctl(uinput_fd_, UI_DEV_SETUP, &usetup);
         ioctl(uinput_fd_, UI_DEV_CREATE);
         sleep(1);
