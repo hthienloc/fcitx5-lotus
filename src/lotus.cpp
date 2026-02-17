@@ -253,7 +253,7 @@ namespace fcitx {
                 .freeMarking         = *engine_->config().freeMarking,
             };
             EngineSetOption(lotusEngine_.handle(), &option);
-        }
+        }`
 
         bool connect_uinput_server() {
             if (uinput_client_fd_ >= 0)
@@ -2064,17 +2064,17 @@ namespace fcitx {
         // Structure: Header + 8 selectable items (4 Lotus modes + 4 special
         // options)
         candidateList->append(std::make_unique<DisplayOnlyCandidateWord>(Text(_("App: ") + currentConfigureApp_)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Smooth, _("[1] Uinput (smooth)")), applyMode(LotusMode::Smooth)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Smooth, _("[1] Uinput (Smooth)")), applyMode(LotusMode::Smooth)));
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Uinput, _("[2] Uinput (Slow)")), applyMode(LotusMode::Uinput)));
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::UinputHC, _("[3] Uinput (Hardcore)")), applyMode(LotusMode::UinputHC)));
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::SurroundingText, _("[4] Surrounding Text")), applyMode(LotusMode::SurroundingText)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Preedit, _("[q] Preedit")), applyMode(LotusMode::Preedit)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Emoji, _("[w] Emoji Picker")), applyMode(LotusMode::Emoji)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[e] OFF")), applyMode(LotusMode::Off)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Preedit, _("[Q] Preedit")), applyMode(LotusMode::Preedit)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Emoji, _("[W] Emoji Picker")), applyMode(LotusMode::Emoji)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[E] OFF")), applyMode(LotusMode::Off)));
 
-        candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[r] Remove App Settings")), [this, cleanup](InputContext* ic) {
+        candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[R] Default Typing")), [this, cleanup](InputContext* ic) {
             if (appRules_.count(currentConfigureApp_)) {
-                appRules_.erase(currentConfigureApp_);
+                appRules_.erase(currentConfigureApp_);TypingTyping
                 saveAppRules();
             }
             cleanup(ic);
