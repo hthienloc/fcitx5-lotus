@@ -1,5 +1,5 @@
 {
-  description = "Fcitx5 VMK";
+  description = "Fcitx5 Lotus";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";

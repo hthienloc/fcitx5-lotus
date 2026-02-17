@@ -1,5 +1,5 @@
 [Unit]
-Description=Fcitx5 VMK Server for %i
+Description=Fcitx5 Lotus Server for %i
 After=multi-user.target udev.target
 
 [Service]
@@ -13,7 +13,7 @@ ProcSubset=all
 
 Type=simple
 
-ExecStart=/usr/bin/fcitx5-vmk-server -u %i
+ExecStart=/usr/bin/fcitx5-lotus-server -u %i
 
 Restart=on-failure
 RestartSec=0

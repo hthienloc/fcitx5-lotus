@@ -1,4 +1,4 @@
-# Bảng tra cứu Emoji cho bộ gõ VMK
+# Bảng tra cứu Emoji cho bộ gõ fcitx5-lotus
 
 | Emoji | Các từ khóa kích hoạt (Triggers)                                                                        |
 | :---: | :------------------------------------------------------------------------------------------------------ |

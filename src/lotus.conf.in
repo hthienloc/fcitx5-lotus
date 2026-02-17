@@ -1,6 +1,6 @@
 [InputMethod]
-Name=Vmk
-Icon=fcitx-vmk
+Name=Lotus
+Icon=fcitx-lotus
 LangCode=vi
-Addon=vmk
+Addon=Lotus
 Configurable=True

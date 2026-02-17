@@ -1,187 +1,186 @@
-# Vietnamese translations for fcitx5-vmk package.
-# Copyright (C) 2026 THE fcitx5-vmk'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the fcitx5-vmk package.
+# Vietnamese translations for fcitx-lotus package.
+# Copyright (C) 2026 THE fcitx-lotus'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the fcitx-lotus package.
 # Automatically generated, 2026.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: nhktmdzhg@gmail.com\n"
-"POT-Creation-Date: 2026-02-17 20:07+0700\n"
-"PO-Revision-Date: 2026-02-17 20:44+0700\n"
-"Last-Translator: Loc Huynh <https://github.com/hthienloc>\n"
+"Project-Id-Version: fcitx5-lotus\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-17 22:17+0700\n"
+"PO-Revision-Date: 2026-02-17 22:17+0700\n"
+"Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.8\n"
 
-#: src/vmk-config.h:116
+#: src/lotus-config.h:131
 msgid "Key"
-msgstr "Phím"
+msgstr ""
 
-#: src/vmk-config.h:116
+#: src/lotus-config.h:132
 msgid "Value"
-msgstr "Giá trị"
+msgstr ""
 
-#: src/vmk-config.h:120
+#: src/lotus-config.h:139
 msgid "Macro"
-msgstr "Gõ tắt"
+msgstr ""
 
-#: src/vmk-config.h:124 src/vmk-config.h:139
+#: src/lotus-config.h:150 src/lotus-config.h:191
 msgid "Custom Keymap"
-msgstr "Keymap tùy chỉnh"
+msgstr ""
 
-#: src/vmk-config.h:129
+#: src/lotus-config.h:160
 msgid "Mode"
-msgstr "Chế độ"
+msgstr ""
 
-#: src/vmk-config.h:131
+#: src/lotus-config.h:165
 msgid "Input Method"
-msgstr "Kiểu gõ"
+msgstr ""
 
-#: src/vmk-config.h:132
+#: src/lotus-config.h:173
 msgid "Output Charset"
-msgstr "Bảng mã"
+msgstr ""
 
-#: src/vmk-config.h:133 src/vmk.cpp:1399
+#: src/lotus-config.h:178 src/lotus.cpp:1485
 msgid "Enable spell check"
-msgstr "Bật kiểm tra chính tả"
+msgstr ""
 
-#: src/vmk-config.h:133 src/vmk.cpp:1411
+#: src/lotus-config.h:179 src/lotus.cpp:1499
 msgid "Enable Macro"
-msgstr "Bật gõ tắt"
+msgstr ""
 
-#: src/vmk-config.h:134 src/vmk.cpp:1423
+#: src/lotus-config.h:180 src/lotus.cpp:1512
 msgid "Capitalize Macro"
-msgstr "Gõ tắt chữ hoa"
+msgstr ""
 
-#: src/vmk-config.h:135 src/vmk.cpp:1435
+#: src/lotus-config.h:183 src/lotus.cpp:1528
 msgid "Auto restore keys with invalid words"
-msgstr "Tự động khôi phục phím với từ sai"
+msgstr ""
 
-#: src/vmk-config.h:136 src/vmk.cpp:1447
+#: src/lotus-config.h:186 src/lotus.cpp:1543
 msgid "Use oà, _uý (instead of òa, úy)"
-msgstr "Dùng oà, _uý (thay vì òa, úy)"
+msgstr ""
 
-#: src/vmk-config.h:137 src/vmk.cpp:1459
+#: src/lotus-config.h:188 src/lotus.cpp:1557
 msgid "Allow type with more freedom"
-msgstr "Cho phép gõ dấu tự do"
+msgstr ""
 
-#: src/vmk-config.h:138 src/vmk.cpp:1471
+#: src/lotus-config.h:190 src/lotus.cpp:1571
 msgid "Fix uinput mode with ack"
-msgstr "Sửa lỗi chế độ uinput với ack"
+msgstr ""
 
-#: src/vmk.cpp:420
+#: src/lotus.cpp:442
 msgid "Page "
-msgstr "Trang "
+msgstr ""
 
-#: src/vmk.cpp:1317
+#: src/lotus.cpp:1395
 msgid "Typing Mode"
-msgstr "Chế độ gõ"
+msgstr ""
 
-#: src/vmk.cpp:1371
+#: src/lotus.cpp:1455
 msgid "Charset"
-msgstr "Bảng mã"
+msgstr ""
 
-#: src/vmk.cpp:1878
+#: src/lotus.cpp:2004
 msgid "Typing Mode: "
-msgstr "Chế độ gõ: "
+msgstr ""
 
-#: src/vmk.cpp:1909
+#: src/lotus.cpp:2039
 msgid "Spell Check: On"
-msgstr "Kiểm tra chính tả: Bật"
+msgstr ""
 
-#: src/vmk.cpp:1909
+#: src/lotus.cpp:2039
 msgid "Spell Check: Off"
-msgstr "Kiểm tra chính tả: Tắt"
+msgstr ""
 
-#: src/vmk.cpp:1917
+#: src/lotus.cpp:2047
 msgid "Macro: On"
-msgstr "Gõ tắt: Bật"
+msgstr ""
 
-#: src/vmk.cpp:1917
+#: src/lotus.cpp:2048
 msgid "Macro: Off"
-msgstr "Gõ tắt: Tắt"
+msgstr ""
 
-#: src/vmk.cpp:1925
+#: src/lotus.cpp:2057
 msgid "Capitalize Macro: On"
-msgstr "Gõ tắt chữ hoa: Bật"
+msgstr ""
 
-#: src/vmk.cpp:1925
+#: src/lotus.cpp:2058
 msgid "Capitalize Macro: Off"
-msgstr "Gõ tắt chữ hoa: Tắt"
+msgstr ""
 
-#: src/vmk.cpp:1933
+#: src/lotus.cpp:2067
 msgid "Auto Non-VN Restore: On"
-msgstr "Tự động khôi phục từ không phải Tiếng Việt: Bật"
+msgstr ""
 
-#: src/vmk.cpp:1933
+#: src/lotus.cpp:2068
 msgid "Auto Non-VN Restore: Off"
-msgstr "Tự động khôi phục từ không phải Tiếng Việt: Tắt"
+msgstr ""
 
-#: src/vmk.cpp:1941
+#: src/lotus.cpp:2077
 msgid "Modern Style: On"
-msgstr "Dấu chuẩn: Bật"
+msgstr ""
 
-#: src/vmk.cpp:1941
+#: src/lotus.cpp:2077
 msgid "Modern Style: Off"
-msgstr "Dấu chuẩn: Tắt"
+msgstr ""
 
-#: src/vmk.cpp:1949
+#: src/lotus.cpp:2086
 msgid "Free Marking: On"
-msgstr "Dấu tự do: Bật"
+msgstr ""
 
-#: src/vmk.cpp:1949
+#: src/lotus.cpp:2086
 msgid "Free Marking: Off"
-msgstr "Dấu tự do: Tắt"
+msgstr ""
 
-#: src/vmk.cpp:1957
-msgid "Fix Vmk1 With Ack: On"
-msgstr "Sửa lỗi Vmk1 với Ack: Bật"
+#: src/lotus.cpp:2095
+msgid "Fix Uinput With Ack: On"
+msgstr ""
 
-#: src/vmk.cpp:1957
-msgid "Fix Vmk1 With Ack: Off"
-msgstr "Sửa lỗi Vmk1 với Ack: Tắt"
+#: src/lotus.cpp:2096
+msgid "Fix Uinput With Ack: Off"
+msgstr ""
 
-#: src/vmk.cpp:2063
+#: src/lotus.cpp:2208
 msgid "App: "
-msgstr "Ứng dụng: "
+msgstr ""
 
-#: src/vmk.cpp:2064
+#: src/lotus.cpp:2210
 msgid "[1] Uinput (smooth)"
-msgstr "[1] Uinput (mượt)"
+msgstr ""
 
-#: src/vmk.cpp:2065
+#: src/lotus.cpp:2213
 msgid "[2] Uinput (Slow)"
-msgstr "[2] Uinput (chậm)"
+msgstr ""
 
-#: src/vmk.cpp:2066
+#: src/lotus.cpp:2216
 msgid "[3] Uinput (Hardcore)"
-msgstr "[3] Uinput (Hardcore)"
+msgstr ""
 
-#: src/vmk.cpp:2067
+#: src/lotus.cpp:2219
 msgid "[4] Surrounding Text"
-msgstr "[4] Văn bản xung quanh"
+msgstr ""
 
-#: src/vmk.cpp:2068
+#: src/lotus.cpp:2222
 msgid "[q] Preedit"
-msgstr "[q] Gạch chân"
+msgstr ""
 
-#: src/vmk.cpp:2069
+#: src/lotus.cpp:2225
 msgid "[w] Emoji Picker"
-msgstr "[w] Chọn Emoji"
+msgstr ""
 
-#: src/vmk.cpp:2070
+#: src/lotus.cpp:2228
 msgid "[e] OFF"
-msgstr "[e] Tắt"
+msgstr ""
 
-#: src/vmk.cpp:2072
+#: src/lotus.cpp:2231
 msgid "[r] Remove App Settings"
-msgstr "[r] Xóa cài đặt ứng dụng"
+msgstr ""
 
-#: src/vmk.cpp:2080
+#: src/lotus.cpp:2240
 msgid "[`] Type `"
-msgstr "[`] Nhập `"
+msgstr ""

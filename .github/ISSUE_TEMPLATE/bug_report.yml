@@ -50,7 +50,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Phiên bản fcitx5-vmk
+      label: Phiên bản fcitx5-lotus
       description: Bạn đang sử dụng phiên bản nào?
       placeholder: 'ví dụ: 1.2.3'
     validations:
@@ -60,11 +60,11 @@ body:
     id: install_method
     attributes:
       label: Cách cài đặt
-      description: Bạn đã cài đặt fcitx5-vmk bằng cách nào?
+      description: Bạn đã cài đặt fcitx5-lotus bằng cách nào?
       options:
-        - AUR (fcitx5-vmk)
-        - AUR (fcitx5-vmk-bin)
-        - AUR (fcitx5-vmk-git)
+        - AUR (fcitx5-lotus)
+        - AUR (fcitx5-lotus-bin)
+        - AUR (fcitx5-lotus-git)
         - Open Build Service (OBS)
         - NixOS
         - Tự build từ source

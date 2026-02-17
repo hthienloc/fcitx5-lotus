@@ -1,4 +1,4 @@
-name: Build VMK (Dev Branch)
+name: Build fcitx5-lotus (Dev Branch)
 
 on:
   push:
@@ -54,11 +54,11 @@ jobs:
 
       - name: Compress Artifact
         run: |
-          tar -czf fcitx5-vmk-dev-${{ github.run_id }}.tar.gz -C dist .
+          tar -czf fcitx5-lotus-dev-${{ github.run_id }}.tar.gz -C dist .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vmk-dev-package
-          path: fcitx5-vmk-dev-${{ github.run_id }}.tar.gz
+          name: lotus-dev-package
+          path: fcitx5-lotus-dev-${{ github.run_id }}.tar.gz
           retention-days: 7

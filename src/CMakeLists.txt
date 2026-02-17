@@ -1,10 +1,10 @@
-set(fcitx_vmk_sources
-  vmk.cpp
+set(fcitx_lotus_sources
+  lotus.cpp
 )
 
-add_library(vmk MODULE ${fcitx_vmk_sources})
-set_target_properties(vmk PROPERTIES OUTPUT_NAME "vmk")
-target_link_libraries(vmk
+add_library(lotus MODULE ${fcitx_lotus_sources})
+set_target_properties(lotus PROPERTIES OUTPUT_NAME "lotus")
+target_link_libraries(lotus
 	Fcitx5::Core
 	Fcitx5::Config
 	Bamboo::Core
@@ -12,14 +12,14 @@ target_link_libraries(vmk
 	X11::X11
 )
 
-target_include_directories(vmk PRIVATE
+target_include_directories(lotus PRIVATE
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/data/emoji
 )
-install(TARGETS vmk DESTINATION "${CMAKE_INSTALL_LIBDIR}/fcitx5")
+install(TARGETS lotus DESTINATION "${CMAKE_INSTALL_LIBDIR}/fcitx5")
 
-fcitx5_translate_desktop_file(vmk.conf.in vmk.conf)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/vmk.conf" DESTINATION "${CMAKE_INSTALL_DATADIR}/fcitx5/inputmethod")
-configure_file(vmk-addon.conf.in.in vmk-addon.conf.in)
-fcitx5_translate_desktop_file("${CMAKE_CURRENT_BINARY_DIR}/vmk-addon.conf.in" vmk-addon.conf)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/vmk-addon.conf" RENAME vmk.conf DESTINATION "${FCITX_INSTALL_PKGDATADIR}/addon")
+fcitx5_translate_desktop_file(lotus.conf.in lotus.conf)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lotus.conf" DESTINATION "${CMAKE_INSTALL_DATADIR}/fcitx5/inputmethod")
+configure_file(lotus-addon.conf.in.in lotus-addon.conf.in)
+fcitx5_translate_desktop_file("${CMAKE_CURRENT_BINARY_DIR}/lotus-addon.conf.in" lotus-addon.conf)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/lotus-addon.conf" RENAME lotus.conf DESTINATION "${FCITX_INSTALL_PKGDATADIR}/addon")
