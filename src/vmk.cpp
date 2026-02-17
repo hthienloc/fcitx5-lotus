@@ -1600,12 +1600,14 @@ namespace fcitx {
 
         if (*config_.fixVmk1WithAck) {
             if (targetMode == VMKMode::VMK1 || targetMode == VMKMode::VMK1HC || targetMode == VMKMode::VMKSmooth) {
+                bool needWaitAck = false;
                 for (const auto& ackApp : ack_apps) {
                     if (appName.find(ackApp) != std::string::npos) {
-                        waitAck = true;
+                        needWaitAck = true;
                         break;
                     }
                 }
+                waitAck = needWaitAck;
             }
         }
 
