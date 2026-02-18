@@ -23,13 +23,13 @@ namespace fcitx {
 
     enum class LotusMode {
         Off             = 0,
-        Uinput          = 1,
-        SurroundingText = 2,
-        Preedit         = 3,
-        UinputHC        = 4,
-        NoMode          = 5,
+        Smooth          = 1,
+        Uinput          = 2,
+        UinputHC        = 3,
+        SurroundingText = 4,
+        Preedit         = 5,
         Emoji           = 6,
-        Smooth          = 7,
+        NoMode          = 7,
     };
 
     // Convert mode enum to string for UI display
