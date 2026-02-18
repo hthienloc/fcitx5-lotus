@@ -130,8 +130,7 @@ namespace fcitx {
         }
 
         if (waitAck_) {
-            char ack;
-            recv(uinput_client_fd_, &ack, sizeof(ack), MSG_NOSIGNAL);
+            std::this_thread::sleep_for(std::chrono::milliseconds(count * 5));
         }
     }
 

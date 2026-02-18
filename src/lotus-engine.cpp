@@ -14,6 +14,8 @@
 #include "lotus-utils.h"
 #include "ack-apps.h"
 
+#include <fcntl.h>
+
 #include <cstdlib>
 #include <fcitx-config/iniparser.h>
 #include <fcitx-utils/standardpath.h>
