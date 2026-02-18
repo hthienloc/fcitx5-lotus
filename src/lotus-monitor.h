@@ -1,12 +1,16 @@
 /*
- * SPDX-FileCopyrightText: 2022-2022 CSSlayer <wengxt@gmail.com>
  * SPDX-FileCopyrightText: 2025 Võ Ngô Hoàng Thành <thanhpy2009@gmail.com>
  * SPDX-FileCopyrightText: 2026 Nguyễn Hoàng Kỳ  <nhktmdzhg@gmail.com>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
  */
-#include "lotus.h"
-#include "lotus-engine.h"
+#ifndef _FCITX5_LOTUS_MONITOR_H_
+#define _FCITX5_LOTUS_MONITOR_H_
 
-FCITX_ADDON_FACTORY(fcitx::LotusFactory)
+void deletingTimeMonitor();
+void startMonitoringOnce();
+void mousePressResetThread();
+void startMouseReset();
+
+#endif // _FCITX5_LOTUS_MONITOR_H_
