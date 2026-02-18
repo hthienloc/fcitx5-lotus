@@ -42,7 +42,11 @@
 
 Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https://github.com/thanhpy2009/VMK). Chân thành cảm ơn tác giả Thành đã đặt nền móng cho bộ gõ này.
 
-> **Lưu ý:** Phiên bản này đã loại bỏ công cụ cấu hình cũ viết bằng FLTK. Mọi cấu hình giờ đây được thực hiện trực tiếp qua giao diện chuẩn của Fcitx5 hoặc qua menu phím tắt mới.
+> **Lưu ý:** Nếu bạn đã cài đặt bộ gõ fcitx5-vmk trước đây, vui lòng gỡ cài đặt nó trước khi cài đặt bộ gõ này để tránh xung đột và tiết kiệm tài nguyên máy. Mọi config của bộ gõ cũ sẽ không được sử dụng lại trong bản mới này, bạn có thể xoá bỏ nó bằng lệnh sau sau:
+>
+> ```bash
+> rm ~/.config/fcitx5/conf/vmk-*.conf
+> ```
 
 <details>
   <summary><b>Mục lục</b></summary>
