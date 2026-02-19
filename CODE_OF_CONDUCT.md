@@ -1,3 +1,5 @@
+[English](CODE_OF_CONDUCT.en.md) | [Tiếng Việt](CODE_OF_CONDUCT.md)
+
 # Quy tắc ứng xử của Người đóng góp
 
 ## Cam kết của chúng tôi
