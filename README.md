@@ -7,9 +7,9 @@
     <img src="data/icons/scalable/apps/fcitx-lotus.svg" alt="Logo" width="80" height="80">
   </a>
 
-  <h2 align="center">Fcitx5 Lotus</h2>
+<h2 align="center">Fcitx5 Lotus</h2>
 
-  <p align="center">
+<p align="center">
     <b>Bộ gõ tiếng Việt đơn giản, hiệu năng cao cho Linux</b>
     <br />
     <br />
@@ -30,12 +30,12 @@
     </a>
   </p>
 
-  <p align="center">
+<p align="center">
     <a href="#cài-đặt"><strong>Cài đặt »</strong></a>
     <br />
     <br />
     <a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues/new?template=bug_report.yml">Báo lỗi</a>
-    &middot;
+    ·
     <a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues/new?template=feature_request.yml">Yêu cầu tính năng</a>
   </p>
 </div>
@@ -45,84 +45,84 @@
 Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https://github.com/thanhpy2009/VMK). Chân thành cảm ơn tác giả Thành đã đặt nền móng cho bộ gõ này.
 
 > **Lưu ý:** Gỡ và xoá cấu hình `fcitx5-vmk` trước khi cài đặt `fcitx5-lotus` để tránh phát sinh lỗi.
->
+> 
 > <details>
 > <summary><b>Gỡ và xoá cấu hình <code>fcitx5-vmk</code></b></summary>
->
+> 
 > <details>
 > <summary><b>Arch / Arch-based - AUR</b></summary>
 > <br>
->
+> 
 > Bạn có thể dùng `pacman` (khuyên dùng), `yay` hoặc `paru` để gỡ cài đặt:
->
+> 
 > ```bash
 > sudo pacman -Rns fcitx5-vmk
 > ```
->
+> 
 > ```bash
 > yay -Rns fcitx5-vmk
 > ```
->
+> 
 > ```bash
 > paru -Rns fcitx5-vmk
 > ```
->
+> 
 > > **Lưu ý:** Các file config ở `$HOME` sẽ được giữ lại.
->
+> 
 > </details>
->
+> 
 > <details>
 > <summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
 > <br>
->
+> 
 > - <b>Debian/Ubuntu</b>
->
+> 
 > ```bash
 > sudo apt remove fcitx5-vmk
 > ```
->
+> 
 > - <b>Fedora</b>
->
+> 
 > ```bash
 > sudo dnf remove fcitx5-vmk
 > ```
->
+> 
 > - <b>openSUSE</b>
->
+> 
 > ```bash
 > sudo zypper remove fcitx5-vmk
 > ```
->
+> 
 > </details>
->
+> 
 > <details>
 > <summary><b>NixOS</b></summary>
 > <br>
->
+> 
 > Xóa (hoặc comment) dòng `services.fcitx5-vmk` và `inputs` trong file config, sau đó rebuild lại system. NixOS sẽ tự dọn dẹp.
->
+> 
 > </details>
->
+> 
 > <details>
 > <summary><b>Biên dịch từ nguồn</b></summary>
 > <br>
->
+> 
 > Vào lại thư mục source code đã build và chạy:
->
+> 
 > ```bash
 > sudo make uninstall
 > ```
->
+> 
 > </details>
->
+> 
 > ---
->
+> 
 > Xóa cấu hình `vmk` không tương thích:
->
+> 
 > ```bash
 > rm ~/.config/fcitx5/conf/vmk-*.conf
 > ```
->
+> 
 > </details>
 
 <details>
@@ -236,9 +236,9 @@ Rebuild lại system để cài đặt.
 <br>
 
 > **KHUYẾN CÁO QUAN TRỌNG:**
->
+> 
 > Vui lòng **KHÔNG** sử dụng cách này nếu distro của bạn đã được hỗ trợ thông qua **Open Build Service**.
->
+> 
 > Việc biên dịch thủ công đòi hỏi bạn phải hiểu rõ về cấu trúc thư mục của hệ thống. Nếu bạn gặp lỗi "Not Available" hoặc thiếu thư viện khi cài theo cách này trên các distro phổ biến (Ubuntu/Fedora...), hãy quay lại dùng Open Build Service để đảm bảo tính ổn định và tự động cập nhật.
 
 ##### Yêu cầu hệ thống
@@ -354,7 +354,7 @@ killall ibus-daemon || ibus exit
 <summary><b>Thêm Fcitx5 vào Autostart cho từng DE / WM (GNOME, Hyprland ...)</b></summary>
 
 | DE / WM        | Hướng dẫn chi tiết                                                                                                           |
-| :------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+|:-------------- |:---------------------------------------------------------------------------------------------------------------------------- |
 | **GNOME**      | _GNOME Tweaks_ → _Startup Applications_ → Add → `Fcitx 5`                                                                    |
 | **KDE Plasma** | _System Settings_ → _Autostart_ → Add... → Add Application... → `Fcitx 5`                                                    |
 | **Xfce**       | _Settings_ → _Session and Startup_ → _Application Autostart_ → Add → `Fcitx 5`                                               |
@@ -379,14 +379,16 @@ Sau khi đã log out và log in lại:
 2. Tìm **Lotus** ở cột bên phải.
 3. Nhấn mũi tên **<** để thêm nó sang cột bên trái.
 4. Apply.
-<details>
-<summary><b>Cấu hình thêm cho Wayland (KDE, Hyprland)</b></summary>
-
+   
+   <details>
+   <summary><b>Cấu hình thêm cho Wayland (KDE, Hyprland)</b></summary>
 - **KDE Plasma:** _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Chọn **Fcitx 5**.
 - **Hyprland:** Thêm dòng sau vào `~/.config/hypr/hyprland.conf`:
+  
   ```ini
   permission = fcitx5-lotus-server, keyboard, allow
   ```
+  
   </details>
 
 ---
@@ -398,23 +400,35 @@ Sau khi đã log out và log in lại:
 ### 1. Tùy chỉnh bộ gõ
 
 - **Cách truy cập:** Nhấp chuột phải vào biểu tượng Lotus trên system tray để mở tuỳ chỉnh.
-- **Các lựa chọn để tuỳ chỉnh:** _Typing Mode_, _Input Method_, _Charset_, _Spell Check_, _Macro_, _Capitalize Macro_, _Auto non-VN restore_, _Modern Style_, _Free Marking_, _Fix Uinput with ack_.
+
+| Tùy chọn                | Mô tả                                                                                                             | Mặc định        |
+|:----------------------- |:----------------------------------------------------------------------------------------------------------------- |:--------------- |
+| **Typing Mode**         | Chọn chế độ gõ.                                                                                                   | Uinput (Smooth) |
+| **Input Method**        | Chọn kiểu gõ.                                                                                                     | Telex           |
+| **Charset**             | Chọn bảng mã.                                                                                                     | Unicode         |
+| **Spell Check**         | Bật/tắt kiểm tra lỗi chính tả tiếng Việt.                                                                         | Bật             |
+| **Macro**               | Bật/tắt gõ tắt.                                                                                                   | Bật             |
+| **Capitalize Macro**    | Bật/tắt gõ tắt chữ hoa.                                                                                           | Bật             |
+| **Auto non-VN restore** | Bât/tắt tự động khôi phục với từ không phải tiếng Việt.                                                           | Bật             |
+| **Modern Style**        | Bật/tắt kiểu đặt dấu thanh hiện đại *(ví dụ: oà, _uý thay vì òa, _úy)*.                                           | Bật             |
+| **Free Marking**        | Bật/tắt bỏ dấu tự do.                                                                                             | Bật             |
+| **Fix Uinput with ack** | Bật/tắt sửa lỗi chế độ `uinput` với ack<br/>Nên bật khi sử dụng các ứng dụng Chromium (Chrome, Brave, Edge, ...). | Tắt             |
 
 ### 2. Menu chuyển chế độ gõ
 
 Khi đang ở trong bất kỳ ứng dụng nào, nhấn phím **`** để mở menu chọn chế độ gõ, có thể dùng chuột hoặc phím tắt để chọn.
 
 | Chế độ                | Phím tắt | Mô tả                                                                                                                                |
-| :-------------------- | :------: | :----------------------------------------------------------------------------------------------------------------------------------- |
-| **Uinput (Smooth)**   |  **1**   | Chế độ mặc định, phản hồi nhanh.<br>**Tối ưu:** ứng dụng có tốc độ xử lý input cao.                                                  |
-| **Uinput (Slow)**     |  **2**   | Tương tự Uinput (Smooth) nhưng tốc độ gửi phím chậm hơn.<br>**Tối ưu:** ứng dụng có tốc độ xử lý input thấp _(ví dụ: Libre Office)_. |
-| **Uinput (Hardcore)** |  **3**   | Biến thể của Uinput (Smooth).<br>**Tối ưu:** ứng dụng Windows qua Wine.                                                              |
-| **Surrounding Text**  |  **4**   | Cho phép sửa dấu trên văn bản đã gõ, hoạt động mượt. <br> **Tối ưu:** ứng dụng Qt/GTK.                                               |
-| **Preedit**           |  **Q**   | Hiển thị gạch chân khi gõ. <br> **Tối ưu:** hầu hết ứng dụng.                                                                        |
-| **Emoji Picker**      |  **W**   | Tìm kiếm và nhập Emoji (nguồn EmojiOne, hỗ trợ fuzzy search).                                                                        |
-| **OFF**               |  **E**   | Tắt bộ gõ.                                                                                                                           |
-| **Default Typing**    |  **R**   | Chế độ gõ mặc định được cấu hình tại tuỳ chọn _Typing mode_.                                                                         |
-| **Type `**            |  **`**   | Nhập ký tự **`**.                                                                                                                    |
+|:--------------------- |:--------:|:------------------------------------------------------------------------------------------------------------------------------------ |
+| **Uinput (Smooth)**   | **1**    | Chế độ mặc định, phản hồi nhanh.<br>**Tối ưu:** ứng dụng có tốc độ xử lý input cao.                                                  |
+| **Uinput (Slow)**     | **2**    | Tương tự Uinput (Smooth) nhưng tốc độ gửi phím chậm hơn.<br>**Tối ưu:** ứng dụng có tốc độ xử lý input thấp _(ví dụ: Libre Office)_. |
+| **Uinput (Hardcore)** | **3**    | Biến thể của Uinput (Smooth).<br>**Tối ưu:** ứng dụng Windows qua Wine.                                                              |
+| **Surrounding Text**  | **4**    | Cho phép sửa dấu trên văn bản đã gõ, hoạt động mượt. <br> **Tối ưu:** ứng dụng Qt/GTK.                                               |
+| **Preedit**           | **Q**    | Hiển thị gạch chân khi gõ. <br> **Tối ưu:** hầu hết ứng dụng.                                                                        |
+| **Emoji Picker**      | **W**    | Tìm kiếm và nhập Emoji (nguồn EmojiOne, hỗ trợ fuzzy search).                                                                        |
+| **OFF**               | **E**    | Tắt bộ gõ.                                                                                                                           |
+| **Default Typing**    | **R**    | Chế độ gõ mặc định được cấu hình tại tuỳ chọn _Typing mode_.                                                                         |
+| **Type `**            | **`**    | Nhập ký tự **`**.                                                                                                                    |
 
 Bộ gõ sẽ tự động lưu chế độ gõ đã dùng gần nhất cho từng ứng dụng và khôi phục cấu hình đó khi bạn mở lại chúng.
 
