@@ -1,3 +1,5 @@
+[English](CONTRIBUTING.en.md) | [Tiếng Việt](CONTRIBUTING.md)
+
 # Đóng góp cho fcitx5-lotus
 
 Cảm ơn bạn quan tâm đến việc đóng góp cho dự án fcitx5-lotus! Tài liệu này hướng dẫn bạn cách tham gia phát triển dự án.

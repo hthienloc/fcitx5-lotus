@@ -1,8 +1,10 @@
+[English](README.en.md) | [Tiếng Việt](README.md)
+
 <a id="readme-top"></a>
 
 <div align="center">
   <a href="https://github.com/nhktmdzhg/fcitx5-lotus">
-    <img src="data/icons/scalable/apps/fcitx-lotus-logo.svg" alt="Logo" width="80" height="80">
+    <img src="data/icons/scalable/apps/fcitx-lotus.svg" alt="Logo" width="80" height="80">
   </a>
 
   <h2 align="center">Fcitx5 Lotus</h2>
@@ -43,6 +45,7 @@
 Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https://github.com/thanhpy2009/VMK). Chân thành cảm ơn tác giả Thành đã đặt nền móng cho bộ gõ này.
 
 > **Lưu ý:** Gỡ và xoá cấu hình `fcitx5-vmk` trước khi cài đặt `fcitx5-lotus` để tránh phát sinh lỗi.
+>
 > <details>
 > <summary><b>Gỡ và xoá cấu hình <code>fcitx5-vmk</code></b></summary>
 >
@@ -113,6 +116,7 @@ Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https:/
 > </details>
 >
 > ---
+>
 > Xóa cấu hình `vmk` không tương thích:
 >
 > ```bash
@@ -120,8 +124,6 @@ Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https:/
 > ```
 >
 > </details>
-
-
 
 <details>
   <summary><b>Mục lục</b></summary>
@@ -411,7 +413,7 @@ Khi đang ở trong bất kỳ ứng dụng nào, nhấn phím **`** để mở 
 | **Preedit**           |  **Q**   | Hiển thị gạch chân khi gõ. <br> **Tối ưu:** hầu hết ứng dụng.                                                                        |
 | **Emoji Picker**      |  **W**   | Tìm kiếm và nhập Emoji (nguồn EmojiOne, hỗ trợ fuzzy search).                                                                        |
 | **OFF**               |  **E**   | Tắt bộ gõ.                                                                                                                           |
-| **Default Typing**    |  **R**   | Chế độ gõ mặc định được cấu hình tại tuỳ chọn _Typing mode_.                                                               |
+| **Default Typing**    |  **R**   | Chế độ gõ mặc định được cấu hình tại tuỳ chọn _Typing mode_.                                                                         |
 | **Type `**            |  **`**   | Nhập ký tự **`**.                                                                                                                    |
 
 Bộ gõ sẽ tự động lưu chế độ gõ đã dùng gần nhất cho từng ứng dụng và khôi phục cấu hình đó khi bạn mở lại chúng.
