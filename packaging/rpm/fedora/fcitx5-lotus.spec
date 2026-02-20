@@ -1,5 +1,5 @@
 %global _lto_cflags %nil
-%endif%global optflags %(echo "%{optflags}" | sed 's/-g[^ ]*//g')
+%global optflags %(echo "%{optflags}" | sed 's/-g[^ ]*//g')
 
 Name:           fcitx5-lotus
 Version:        1.0.0
@@ -106,4 +106,5 @@ echo "------------------------------------------------"
 %systemd_postun_with_restart fcitx5-lotus-server@.service
 
 %changelog
-* First stable release
+* Sun Feb 19 2026 Nguyen Hoang Ky <nhktmdzhg@gmail.com> - 1.0.0-1
+- First stable release
