@@ -404,8 +404,9 @@ Sau khi đã log out và log in lại:
 3. Nhấn mũi tên **<** để thêm nó sang cột bên trái.
 4. Apply.
    
-   <details>
+<details>
    <summary><b>Cấu hình thêm cho Wayland (KDE, Hyprland)</b></summary>
+   
 - **KDE Plasma:** _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Chọn **Fcitx 5**.
 - **Hyprland:** Thêm dòng sau vào `~/.config/hypr/hyprland.conf`:
   
@@ -413,7 +414,7 @@ Sau khi đã log out và log in lại:
   permission = fcitx5-lotus-server, keyboard, allow
   ```
   
-  </details>
+</details>
 
 ---
 
@@ -433,14 +434,14 @@ Sau khi đã log out và log in lại:
 | **Spell Check**         | Bật/tắt kiểm tra lỗi chính tả tiếng Việt.                                                                         | Bật             |
 | **Macro**               | Bật/tắt gõ tắt.                                                                                                   | Bật             |
 | **Capitalize Macro**    | Bật/tắt gõ tắt chữ hoa.                                                                                           | Bật             |
-| **Auto non-VN restore** | Bât/tắt tự động khôi phục với từ không phải tiếng Việt.                                                           | Bật             |
+| **Auto non-VN restore** | Bật/tắt tự động khôi phục với từ không phải tiếng Việt.                                                           | Bật             |
 | **Modern Style**        | Bật/tắt kiểu đặt dấu thanh hiện đại *(ví dụ: oà, _uý thay vì òa, _úy)*.                                           | Bật             |
 | **Free Marking**        | Bật/tắt bỏ dấu tự do.                                                                                             | Bật             |
 | **Fix Uinput with ack** | Bật/tắt sửa lỗi chế độ `uinput` với ack<br/>Nên bật khi sử dụng các ứng dụng Chromium (Chrome, Brave, Edge, ...). | Tắt             |
 
 ### 2. Menu chuyển chế độ gõ
 
-Khi đang ở trong bất kỳ ứng dụng nào, nhấn phím **`** để mở menu chọn chế độ gõ, có thể dùng chuột hoặc phím tắt để chọn.
+Khi đang ở trong bất kỳ ứng dụng nào, nhấn phím **`** để mở menu chọn chế độ gõ, có thể dùng chuột hoặc phím tắt để chọn.  Nếu dieu nay gây khó chịu (ví dụ khi viết mã Markdown), bạn có thể tắt tiện ích này trong cài đặt Lotus bằng công tắc **Backtick menu**.
 
 | Chế độ                | Phím tắt | Mô tả                                                                                                                                |
 |:--------------------- |:--------:|:------------------------------------------------------------------------------------------------------------------------------------ |

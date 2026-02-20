@@ -428,7 +428,7 @@ After logging out and logging in again:
 
 ### 2. Typing Mode Menu
 
-In any application, press the **`** key to open the typing mode selection menu, where you can use the mouse or shortcuts to select.
+In any application, press the **`** key to open the typing mode selection menu, where you can use the mouse or shortcuts to select.  If the backtick shortcut interferes with your workflow (e.g. when writing Markdown code fences), you can turn it off in Lotus' settings using the **Backtick menu** toggle.
 
 | Mode                  | Shortcut | Description                                                                                                                                         |
 | :-------------------- | :------: | :-------------------------------------------------------------------------------------------------------------------------------------------------- |

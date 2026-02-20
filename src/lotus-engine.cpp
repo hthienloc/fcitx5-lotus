@@ -261,6 +261,19 @@ namespace fcitx {
         }));
         uiManager.registerAction("lotus-fixuinputwithack", fixUinputWithAckAction_.get());
 
+        /* backtick menu toggle */
+        backtickMenuAction_ = std::make_unique<SimpleAction>();
+        backtickMenuAction_->setLongText(_("Enable typing mode menu with ` key"));
+        backtickMenuAction_->setIcon("input-keyboard");
+        backtickMenuAction_->setCheckable(true);
+        connections_.emplace_back(backtickMenuAction_->connect<SimpleAction::Activated>([this](InputContext* ic) {
+            config_.backtickMenu.setValue(!*config_.backtickMenu);
+            saveConfig();
+            /* nothing to refresh besides UI state */
+            updateBacktickMenuAction(ic);
+        }));
+        uiManager.registerAction("lotus-backtickmenu", backtickMenuAction_.get());
+
         reloadConfig();
         globalMode_ = modeStringToEnum(config_.mode.value());
         updateModeAction(nullptr);
@@ -329,6 +342,7 @@ namespace fcitx {
         updateModernStyleAction(nullptr);
         updateFreeMarkingAction(nullptr);
         updateFixUinputWithAckAction(nullptr);
+        updateBacktickMenuAction(nullptr);
     }
 
     void LotusEngine::setSubConfig(const std::string& path, const RawConfig& config) {
@@ -562,7 +576,7 @@ namespace fcitx {
             return;
         }
 
-        if (!keyEvent.isRelease() && keyEvent.rawKey().check(FcitxKey_grave)) {
+        if (!keyEvent.isRelease() && keyEvent.rawKey().check(FcitxKey_grave) && *config_.backtickMenu) {
             currentConfigureApp_ = ic->program();
             if (currentConfigureApp_.empty())
                 currentConfigureApp_ = "unknown-app";
@@ -728,6 +742,14 @@ namespace fcitx {
         fixUinputWithAckAction_->setShortText(*config_.fixUinputWithAck ? _("Fix Uinput With Ack: On") : _("Fix Uinput With Ack: Off"));
         if (ic) {
             fixUinputWithAckAction_->update(ic);
+        }
+    }
+
+    void LotusEngine::updateBacktickMenuAction(InputContext* ic) {
+        backtickMenuAction_->setChecked(*config_.backtickMenu);
+        backtickMenuAction_->setShortText(*config_.backtickMenu ? _("Backtick menu: On") : _("Backtick menu: Off"));
+        if (ic) {
+            backtickMenuAction_->update(ic);
         }
     }
 

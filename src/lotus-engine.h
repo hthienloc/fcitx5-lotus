@@ -235,6 +235,12 @@ namespace fcitx {
         void updateFixUinputWithAckAction(InputContext* ic);
 
         /**
+         * @brief Updates the backtick-menu toggle UI.
+         * @param ic Current input context.
+         */
+        void updateBacktickMenuAction(InputContext* ic);
+
+        /**
          * @brief Updates the input method action UI.
          * @param ic Current input context.
          */
@@ -315,6 +321,8 @@ namespace fcitx {
         std::unique_ptr<SimpleAction>                    modernStyleAction_;
         std::unique_ptr<SimpleAction>                    freeMarkingAction_;
         std::unique_ptr<SimpleAction>                    fixUinputWithAckAction_;
+        /* toggle for the backtick-triggered mode menu */
+        std::unique_ptr<SimpleAction>                    backtickMenuAction_;
         std::vector<ScopedConnection>                    connections_;
         CGoObject                                        dictionary_;
         std::unordered_map<std::string, LotusMode>       appRules_;
