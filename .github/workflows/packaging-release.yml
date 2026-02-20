@@ -1,12 +1,9 @@
-name: Test Packaging Build
+name: Build & Release
 
 on:
   push:
-    branches:
-      - feat/packaging
-  pull_request:
-    branches:
-      - feat/packaging
+    tags:
+      - 'v*'
 
 jobs:
   build-deb:
@@ -63,7 +60,7 @@ jobs:
         with:
           name: deb-${{ matrix.codename }}
           path: debian/artifacts/*.deb
-          retention-days: 3
+          retention-days: 1
 
   build-rpm-fedora:
     name: RPM [fedora-${{ matrix.releasever }}]
@@ -109,12 +106,28 @@ jobs:
             mkdir -p /work/output
             find ~/rpmbuild/RPMS -name '*.rpm' -exec cp {} /work/output/ \;
 
+      - name: Write GPG key to file
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > /tmp/gpg.key
+
+      - name: Sign RPM
+        uses: signalwire/sign-rpm-packages-action@v1.0.0
+        with:
+          gpg_name: 'Nguyen Hoang Ky'
+          gpg_file: /tmp/gpg.key
+          rpm_path: output/
+          target_path: output/
+
+      - name: Remove GPG key file
+        if: always()
+        run: rm -f /tmp/gpg.key
+
       - name: Upload RPM artifact
         uses: actions/upload-artifact@v4
         with:
           name: rpm-fedora-${{ matrix.releasever }}
           path: output/*.rpm
-          retention-days: 3
+          retention-days: 1
 
   build-rpm-opensuse:
     name: RPM [opensuse-${{ matrix.releasever }}]
@@ -156,9 +169,48 @@ jobs:
             mkdir -p /work/output
             find ~/rpmbuild/RPMS -name '*.rpm' -exec cp {} /work/output/ \;
 
+      - name: Write GPG key to file
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > /tmp/gpg.key
+
+      - name: Sign RPM
+        uses: signalwire/sign-rpm-packages-action@v1.0.0
+        with:
+          gpg_name: 'Nguyen Hoang Ky'
+          gpg_file: /tmp/gpg.key
+          rpm_path: output/
+          target_path: output/
+
+      - name: Remove GPG key file
+        if: always()
+        run: rm -f /tmp/gpg.key
+
       - name: Upload RPM artifact
         uses: actions/upload-artifact@v4
         with:
           name: rpm-opensuse-${{ matrix.releasever }}
           path: output/*.rpm
-          retention-days: 3
+          retention-days: 1
+
+  release:
+    name: Create GitHub Release
+    needs: [build-deb, build-rpm-fedora, build-rpm-opensuse]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**/*.deb
+            artifacts/**/*.rpm
+          generate_release_notes: true
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
