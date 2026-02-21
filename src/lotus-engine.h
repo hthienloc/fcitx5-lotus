@@ -238,7 +238,7 @@ namespace fcitx {
          * @brief Updates the mode-menu action UI.
          * @param ic Current input context.
          */
-        void updateModeMenuAction(InputContext* ic);
+        void updateTypingModeMenuAction(InputContext* ic);
 
         /**
          * @brief Updates the input method action UI.
@@ -321,7 +321,7 @@ namespace fcitx {
         std::unique_ptr<SimpleAction>                    modernStyleAction_;
         std::unique_ptr<SimpleAction>                    freeMarkingAction_;
         std::unique_ptr<SimpleAction>                    fixUinputWithAckAction_;
-        std::unique_ptr<SimpleAction>                    modeMenuAction_;
+        std::unique_ptr<SimpleAction>                    typingModeMenuAction_;
         std::vector<ScopedConnection>                    connections_;
         CGoObject                                        dictionary_;
         std::unordered_map<std::string, LotusMode>       appRules_;

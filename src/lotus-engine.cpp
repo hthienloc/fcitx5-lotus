@@ -261,16 +261,16 @@ namespace fcitx {
         }));
         uiManager.registerAction("lotus-fixuinputwithack", fixUinputWithAckAction_.get());
 
-        modeMenuAction_ = std::make_unique<SimpleAction>();
-        modeMenuAction_->setLongText(_("Enable typing mode menu"));
-        modeMenuAction_->setIcon("input-keyboard");
-        modeMenuAction_->setCheckable(true);
-        connections_.emplace_back(modeMenuAction_->connect<SimpleAction::Activated>([this](InputContext* ic) {
+        typingModeMenuAction_ = std::make_unique<SimpleAction>();
+        typingModeMenuAction_->setLongText(_("Open typing mode menu"));
+        typingModeMenuAction_->setIcon("input-keyboard");
+        typingModeMenuAction_->setCheckable(true);
+        connections_.emplace_back(typingModeMenuAction_->connect<SimpleAction::Activated>([this](InputContext* ic) {
             config_.modeMenu.setValue(!*config_.modeMenu);
             saveConfig();
-            updateModeMenuAction(ic);
+            updateTypingModeMenuAction(ic);
         }));
-        uiManager.registerAction("lotus-modemenu", modeMenuAction_.get());
+        uiManager.registerAction("lotus-modemenu", typingModeMenuAction_.get());
 
         reloadConfig();
         globalMode_ = modeStringToEnum(config_.mode.value());
@@ -340,7 +340,7 @@ namespace fcitx {
         updateModernStyleAction(nullptr);
         updateFreeMarkingAction(nullptr);
         updateFixUinputWithAckAction(nullptr);
-        updateModeMenuAction(nullptr);
+        updateTypingModeMenuAction(nullptr);
     }
 
     void LotusEngine::setSubConfig(const std::string& path, const RawConfig& config) {
@@ -743,11 +743,11 @@ namespace fcitx {
         }
     }
 
-    void LotusEngine::updateModeMenuAction(InputContext* ic) {
-        modeMenuAction_->setChecked(*config_.modeMenu);
-        modeMenuAction_->setShortText(*config_.modeMenu ? _("Mode menu: On") : _("Mode menu: Off"));
+    void LotusEngine::updateTypingModeMenuAction(InputContext* ic) {
+        typingModeMenuAction_->setChecked(*config_.modeMenu);
+        typingModeMenuAction_->setShortText(*config_.modeMenu ? _("Typing Mode Menu: On") : _("Typing Mode Menu: Off"));
         if (ic) {
-            modeMenuAction_->update(ic);
+            typingModeMenuAction_->update(ic);
         }
     }
 
