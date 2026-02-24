@@ -75,7 +75,7 @@ Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https:/
 > </details>
 >
 > <details>
-> <summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+> <summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 > <br>
 >
 > - <b>Debian/Ubuntu</b>
@@ -175,17 +175,10 @@ paru -S fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
-Truy cập trang [Open Build Service](https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-lotus) để xem hướng dẫn cài đặt chi tiết cho distro của bạn.
-
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=default)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-
-Hoặc có thể xem cách cài của từng distro [tại đây](INSTALL.md).
-
-> **Lưu ý:** Arch và Arch-based distro cũng có thể dùng cách cài này.
+Bạn có thể xem cách cài của từng distro [tại đây](INSTALL.md).
 
 </details>
 
@@ -240,9 +233,9 @@ Rebuild lại system để cài đặt.
 
 > **KHUYẾN CÁO QUAN TRỌNG:**
 >
-> Vui lòng **KHÔNG** sử dụng cách này nếu distro của bạn đã được hỗ trợ thông qua **Open Build Service**.
+> Vui lòng **KHÔNG** sử dụng cách này nếu distro của bạn đã được hỗ trợ thông qua **Cloudflare Pages**.
 >
-> Việc biên dịch thủ công đòi hỏi bạn phải hiểu rõ về cấu trúc thư mục của hệ thống. Nếu bạn gặp lỗi "Not Available" hoặc thiếu thư viện khi cài theo cách này trên các distro phổ biến (Ubuntu/Fedora...), hãy quay lại dùng Open Build Service để đảm bảo tính ổn định và tự động cập nhật.
+> Việc biên dịch thủ công đòi hỏi bạn phải hiểu rõ về cấu trúc thư mục của hệ thống. Nếu bạn gặp lỗi "Not Available" hoặc thiếu thư viện khi cài theo cách này trên các distro phổ biến (Ubuntu/Fedora...), hãy quay lại dùng Cloudflare Pages để đảm bảo tính ổn định và tự động cập nhật.
 
 ##### Yêu cầu hệ thống
 
@@ -455,13 +448,31 @@ Sau khi đã log out và log in lại:
 4. Apply.
 
 <details>
-   <summary><b>Cấu hình thêm cho Wayland (KDE, Hyprland)</b></summary>
+  <summary><b>Cấu hình thêm cho Wayland (KDE, Hyprland, Chromium-based, Electron)</b></summary>
    
 - **KDE Plasma:** _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Chọn **Fcitx 5**.
 - **Hyprland:** Thêm dòng sau vào `~/.config/hypr/hyprland.conf`:
 
 ```ini
 permission = fcitx5-lotus-server, keyboard, allow
+```
+
+- **Chromium-based/Electron:** Thêm flags sau vào ứng dụng cần chạy:
+  `--enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3`
+
+</details>
+
+<details>
+   <summary><b>Cấu hình thêm cho Kanata</b></summary>
+
+Thêm dòng sau vào file `~/.config/kanata/kanata.kbd`
+
+```
+(defcfg
+  ...
+  linux-dev-names-exclude ("Lotus-Uinput-Server")
+  ...
+)
 ```
 
 </details>
@@ -542,7 +553,7 @@ paru -Rns fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
 - **Debian/Ubuntu**
@@ -610,7 +621,7 @@ Cảm ơn những con người tuyệt vời ([chú thích emoji](https://allcon
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nhktmdzhg"><img src="https://avatars.githubusercontent.com/u/57983253?v=4?s=100" width="100px;" alt="Nguyen Hoang Ky"/><br /><sub><b>Nguyen Hoang Ky</b></sub></a><br /><a href="#blog-nhktmdzhg" title="Blogposts">📝</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=nhktmdzhg" title="Code">💻</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=nhktmdzhg" title="Documentation">📖</a> <a href="#projectManagement-nhktmdzhg" title="Project Management">📆</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/pulls?q=is%3Apr+reviewed-by%3Anhktmdzhg" title="Reviewed Pull Requests">👀</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hthienloc"><img src="https://avatars.githubusercontent.com/u/148019203?v=4?s=100" width="100px;" alt="Loc Huynh"/><br /><sub><b>Loc Huynh</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3Ahthienloc" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=hthienloc" title="Documentation">📖</a> <a href="#design-hthienloc" title="Design">🎨</a> <a href="#translation-hthienloc" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hthienloc"><img src="https://avatars.githubusercontent.com/u/148019203?v=4?s=100" width="100px;" alt="Huỳnh Thiện Lộc"/><br /><sub><b>Huỳnh Thiện Lộc</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3Ahthienloc" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=hthienloc" title="Documentation">📖</a> <a href="#design-hthienloc" title="Design">🎨</a> <a href="#translation-hthienloc" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/justanoobcoder"><img src="https://avatars.githubusercontent.com/u/57614330?v=4?s=100" width="100px;" alt="Nguyễn Hồng Hiệp"/><br /><sub><b>Nguyễn Hồng Hiệp</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=justanoobcoder" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Miho1254"><img src="https://avatars.githubusercontent.com/u/83270073?v=4?s=100" width="100px;" alt="Đặng Quang Hiển"/><br /><sub><b>Đặng Quang Hiển</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=Miho1254" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Zebra2711"><img src="https://avatars.githubusercontent.com/u/89755535?v=4?s=100" width="100px;" alt="Zebra2711"/><br /><sub><b>Zebra2711</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3AZebra2711" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=Zebra2711" title="Code">💻</a></td>

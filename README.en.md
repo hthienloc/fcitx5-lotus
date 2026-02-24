@@ -75,7 +75,7 @@ This project is an optimized fork of [VMK input method](https://github.com/thanh
 > </details>
 >
 > <details>
-> <summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+> <summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 > <br>
 >
 > - <b>Debian/Ubuntu</b>
@@ -175,17 +175,10 @@ paru -S fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
-Visit the [Open Build Service](https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-lotus) page for detailed installation instructions for your distro.
-
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=default)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-
-Or you can see the installation method for each distro [here](INSTALL.md).
-
-> **Note:** Arch and Arch-based distros can also use this installation method.
+You can see the installation method for each distro [here](INSTALL.md).
 
 </details>
 
@@ -240,9 +233,9 @@ Rebuild the system to install.
 
 > **IMPORTANT RECOMMENDATION:**
 >
-> Please **DO NOT** use this method if your distro is already supported via **Open Build Service**.
+> Please **DO NOT** use this method if your distro is already supported via **Cloudflare Pages**.
 >
-> Manual compilation requires a good understanding of the system directory structure. If you encounter "Not Available" errors or missing libraries when installing this way on popular distros (Ubuntu/Fedora...), please return to using Open Build Service for stability and automatic updates.
+> Manual compilation requires a good understanding of the system directory structure. If you encounter "Not Available" errors or missing libraries when installing this way on popular distros (Ubuntu/Fedora...), please return to using Cloudflare Pages for stability and automatic updates.
 
 ##### System Requirements
 
@@ -449,14 +442,34 @@ After logging out and logging in again:
 3. Click the **<** arrow to add it to the left column.
 4. Apply.
 <details>
-<summary><b>Additional configuration for Wayland (KDE, Hyprland)</b></summary>
+  <summary><b>Additional configuration for Wayland (KDE, Hyprland Chromium-based, Electron)</b></summary>
 
 - **KDE Plasma:** _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Select **Fcitx 5**.
 - **Hyprland:** Add the following line to `~/.config/hypr/hyprland.conf`:
-  ```ini
-  permission = fcitx5-lotus-server, keyboard, allow
-  ```
-  </details>
+
+```ini
+permission = fcitx5-lotus-server, keyboard, allow
+```
+
+- **Chromium-based/Electron:** Add the following flags to the application to be run:
+  `--enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3`
+
+</details>
+
+<details>
+  <summary><b>Additional configurattion for Kanata</b></summary>
+
+Add this line to file `~/.config/kanata/kanata.kbd`
+
+```
+(defcfg
+  ...
+  linux-dev-names-exclude ("Lotus-Uinput-Server")
+  ...
+)
+```
+
+</details>
 
 ---
 
@@ -520,7 +533,7 @@ paru -Rns fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
 - **Debian/Ubuntu**
@@ -596,7 +609,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nhktmdzhg"><img src="https://avatars.githubusercontent.com/u/57983253?v=4?s=100" width="100px;" alt="Nguyen Hoang Ky"/><br /><sub><b>Nguyen Hoang Ky</b></sub></a><br /><a href="#blog-nhktmdzhg" title="Blogposts">📝</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=nhktmdzhg" title="Code">💻</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=nhktmdzhg" title="Documentation">📖</a> <a href="#projectManagement-nhktmdzhg" title="Project Management">📆</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/pulls?q=is%3Apr+reviewed-by%3Anhktmdzhg" title="Reviewed Pull Requests">👀</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hthienloc"><img src="https://avatars.githubusercontent.com/u/148019203?v=4?s=100" width="100px;" alt="Loc Huynh"/><br /><sub><b>Loc Huynh</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3Ahthienloc" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=hthienloc" title="Documentation">📖</a> <a href="#design-hthienloc" title="Design">🎨</a> <a href="#translation-hthienloc" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hthienloc"><img src="https://avatars.githubusercontent.com/u/148019203?v=4?s=100" width="100px;" alt="Huỳnh Thiện Lộc"/><br /><sub><b>Huỳnh Thiện Lộc</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3Ahthienloc" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=hthienloc" title="Documentation">📖</a> <a href="#design-hthienloc" title="Design">🎨</a> <a href="#translation-hthienloc" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/justanoobcoder"><img src="https://avatars.githubusercontent.com/u/57614330?v=4?s=100" width="100px;" alt="Nguyễn Hồng Hiệp"/><br /><sub><b>Nguyễn Hồng Hiệp</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=justanoobcoder" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Miho1254"><img src="https://avatars.githubusercontent.com/u/83270073?v=4?s=100" width="100px;" alt="Đặng Quang Hiển"/><br /><sub><b>Đặng Quang Hiển</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=Miho1254" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Zebra2711"><img src="https://avatars.githubusercontent.com/u/89755535?v=4?s=100" width="100px;" alt="Zebra2711"/><br /><sub><b>Zebra2711</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3AZebra2711" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=Zebra2711" title="Code">💻</a></td>
