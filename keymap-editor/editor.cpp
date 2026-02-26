@@ -67,6 +67,8 @@ namespace fcitx::lotus {
         connect(btnAdd_, &QPushButton::clicked, this, &KeymapEditor::onAddClicked);
         connect(btnRemove_, &QPushButton::clicked, this, &KeymapEditor::onRemoveClicked);
         connect(btnLoadPreset_, &QPushButton::clicked, this, &KeymapEditor::onLoadPresetClicked);
+        tableWidget_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        load();
     }
 
     QString KeymapEditor::title() {
@@ -153,7 +155,13 @@ namespace fcitx::lotus {
         tableWidget_->setRowCount(0);
 
         lotusCustomKeymap config;
-        fcitx::readAsIni(config, "conf/lotus-custom-keymap.conf");
+#if LOTUS_USE_MODERN_FCITX_API
+        std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
+#else
+        std::string configDir = StandardPath::global().userDirectory(StandardPath::Type::Config) + "/fcitx5/conf";
+#endif
+        std::string path = configDir + "/lotus-custom-keymap.conf";
+        fcitx::readAsIni(config, path);
 
         for (const auto& item : config.customKeymap.value()) {
             QString key        = QString::fromStdString(item.key.value());
@@ -194,7 +202,13 @@ namespace fcitx::lotus {
         }
 
         config.customKeymap.setValue(newList);
-        fcitx::safeSaveAsIni(config, "conf/lotus-custom-keymap.conf");
+#if LOTUS_USE_MODERN_FCITX_API
+        std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
+#else
+        std::string configDir = StandardPath::global().userDirectory(StandardPath::Type::Config) + "/fcitx5/conf";
+#endif
+        std::string path = configDir + "/lotus-custom-keymap.conf";
+        fcitx::safeSaveAsIni(config, path);
 
         emit changed(false);
     }

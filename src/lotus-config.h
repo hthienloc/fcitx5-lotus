@@ -209,7 +209,7 @@ namespace fcitx {
         Option<bool> freeMarking{this, "FreeMarking", _("Allow type with more freedom"), true};
         Option<bool> fixUinputWithAck{this, "FixUinputWithAck", _("Fix uinput mode with ack"), false};
         Option<bool> useLotusIcons{this, "UseLotusIcons", _("Use Lotus status icons"), false};
-#if ENABLE_QT
+#ifdef ENABLE_KEYMAP_EDITOR
         ExternalOption customKeymapUI{this, "CustomKeymapUI", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
 #else
         SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};

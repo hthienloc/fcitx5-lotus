@@ -351,9 +351,12 @@ namespace fcitx {
 
     void LotusEngine::setSubConfig(const std::string& path, const RawConfig& config) {
         if (path == "custom_keymap") {
+#ifdef ENABLE_KEYMAP_EDITOR
+#else
             customKeymap_.load(config, true);
             safeSaveAsIni(customKeymap_, CustomKeymapFile);
             refreshEngine();
+#endif
 #if __cplusplus >= 202002L
         } else if (path.starts_with(MacroPrefix)) {
 #else
