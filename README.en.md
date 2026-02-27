@@ -4,7 +4,7 @@
 
 <div align="center">
   <a href="https://github.com/LotusInputMethod/fcitx5-lotus">
-    <img src="data/icons/scalable/apps/fcitx-lotus.svg" alt="Logo" width="80" height="80">
+    <img src="data/icons/fcitx-lotus-README.svg" alt="Logo" width="80" height="80">
   </a>
 
   <h2 align="center">Fcitx5 Lotus</h2>
@@ -441,6 +441,17 @@ After logging out and logging in again:
 2. Find **Lotus** in the right column.
 3. Click the **<** arrow to add it to the left column.
 4. Apply.
+<<<<<<< HEAD
+ <details>
+ <summary><b>Additional configuration for Wayland (KDE, Hyprland)</b></summary>
+
+- **KDE Plasma:** _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Select **Fcitx 5**.
+- **Hyprland:** Add the following line to `~/.config/hypr/hyprland.conf`:
+    ```ini
+    permission = fcitx5-lotus-server, keyboard, allow
+    ```
+        </details>
+=======
 <details>
   <summary><b>Additional configuration for Wayland (KDE, Hyprland Chromium-based, Electron)</b></summary>
 
@@ -470,6 +481,7 @@ Add this line to file `~/.config/kanata/kanata.kbd`
 ```
 
 </details>
+>>>>>>> 5c735ac89f968d81f626fecf7aa71287bc450612
 
 ---
 
@@ -480,6 +492,9 @@ Add this line to file `~/.config/kanata/kanata.kbd`
 ### 1. Customize input method
 
 - **Access:** Right-click the Lotus icon on the system tray to open customization.
+<<<<<<< HEAD
+- **Customization options:** _Typing Mode_, _Input Method_, _Charset_, _Spell Check_, _Macro_, _Capitalize Macro_, _Auto non-VN restore_, _Modern Style_, _Free Marking_, _Fix Uinput with ack_, _Lotus status icons_, _Mode menu_.
+=======
 
 | Option                  | Description                                                                                                                    | Default         |
 | :---------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :-------------- |
@@ -499,6 +514,7 @@ Add this line to file `~/.config/kanata/kanata.kbd`
   - Macro: click the gear icon next to the _Input Method_ selection row to open the interface for adding or removing macros for the current input method. **Note:** shorthand entries only take effect for the selected input method. If you want to apply them to another input method, switch to that method and re-add the shorthand entries from scratch.
   - Custom Keymap: click the gear icon on the _Custom Keymap_ row to open the keymap customization interface. You can import a keymap from an existing input method or create your own. After customizing, select the **Custom** input method to apply your custom keymap.
   - Mode menu hotkey: by default, this menu uses the `` ` `` key to open the menu in all applications. If your workflow frequently uses this key, or you simply prefer a different key, click the hotkey selection button next to the _Mode menu hotkey_ option to enter your preferred shortcut. You can also click the `+` button to add additional hotkeys if desired.
+>>>>>>> 5c735ac89f968d81f626fecf7aa71287bc450612
 
 ### 2. Typing mode menu
 
