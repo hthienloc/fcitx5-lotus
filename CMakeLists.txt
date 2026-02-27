@@ -54,8 +54,17 @@ if(ENABLE_QT)
     add_subdirectory(keymap-editor)
 endif(ENABLE_QT)
 
-fcitx5_translate_desktop_file(org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml.in
-    org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml XML)
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml.in.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml.in"
+    @ONLY
+)
+
+fcitx5_translate_desktop_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml.in"
+    org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml
+    XML
+)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml" DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
 
