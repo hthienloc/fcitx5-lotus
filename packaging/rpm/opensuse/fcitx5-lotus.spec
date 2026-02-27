@@ -3,7 +3,7 @@
 %global optflags %(echo "%{optflags}" | sed 's/-g[^ ]*//g')
 
 Name:           fcitx5-lotus
-Version:        1.0.0
+Version:        1.2.0
 Release:        1
 Summary:        Vietnamese input method for fcitx5
 License:        GPL-3.0-or-later
@@ -15,6 +15,8 @@ BuildRequires:  extra-cmake-modules
 BuildRequires:  gcc-c++
 BuildRequires:  glibc-devel
 BuildRequires:  fcitx5-devel
+BuildRequires:  fcitx5-qt-devel
+BuildRequires:  qt6-base-devel
 BuildRequires:  libinput-devel
 BuildRequires:  systemd-rpm-macros
 BuildRequires:  pkgconfig(libudev)
@@ -55,6 +57,7 @@ Vietnamese input method for fcitx5
 
 %dir %{_libdir}/fcitx5
 %{_libdir}/fcitx5/liblotus.so
+%{_libdir}/fcitx5/qt6/libfcitx5-lotus-keymap-editor.so
 
 %{_prefix}/lib/modules-load.d/fcitx5-lotus.conf
 %{_unitdir}/fcitx5-lotus-server@.service
@@ -73,6 +76,9 @@ Vietnamese input method for fcitx5
 %{_datadir}/icons/hicolor/scalable/apps/org.fcitx.Fcitx5.fcitx-lotus-off.svg
 %{_datadir}/icons/hicolor/scalable/apps/fcitx-lotus-emoji.svg
 %{_datadir}/icons/hicolor/scalable/apps/org.fcitx.Fcitx5.fcitx-lotus-emoji.svg
+%{_datadir}/icons/hicolor/scalable/apps/fcitx-lotus-emoji-default.svg
+%{_datadir}/icons/hicolor/scalable/apps/fcitx-lotus-default.svg
+%{_datadir}/icons/hicolor/scalable/apps/fcitx-lotus-off-default.svg
 %{_datadir}/metainfo/org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml
 
 %clean
@@ -111,5 +117,7 @@ echo "------------------------------------------------"
 %systemd_postun_with_restart fcitx5-lotus-server@.service
 
 %changelog
-* Thu Feb 19 2026 Nguyen Hoang Ky <nhktmdzhg@gmail.com> - 1.0.0-1
-- First stable release
+* Thu Feb 26 2026 Nguyen Hoang Ky <nhktmdzhg@gmail.com> - 1.2.0-1
+- Add option to set shortcut key for mode menu
+- Add Qt UI for customizing keymap
+- Fix bug: use macro and auto non vn restore at the same time

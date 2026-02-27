@@ -1,5 +1,7 @@
-fcitx5-lotus (1.0.0-0) unstable; urgency=medium
+fcitx5-lotus (1.2.0-1) unstable; urgency=medium
 
-  * First stable release
+  * Add option to set shortcut key for mode menu
+  * Add Qt UI for customizing keymap
+  * Fix bug: use macro and auto non vn restore at the same time
 
- -- Nguyen Hoang Ky <nhktmdzhg@gmail.com>  Sun, 19 Feb 2026 19:35:00 +0700
+ -- Nguyen Hoang Ky <nhktmdzhg@gmail.com>  Thu, 26 Feb 2026 19:17:00 +0700

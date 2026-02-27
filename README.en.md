@@ -75,7 +75,7 @@ This project is an optimized fork of [VMK input method](https://github.com/thanh
 > </details>
 >
 > <details>
-> <summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+> <summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 > <br>
 >
 > - <b>Debian/Ubuntu</b>
@@ -175,17 +175,10 @@ paru -S fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
-Visit the [Open Build Service](https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-lotus) page for detailed installation instructions for your distro.
-
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=default)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-
-Or you can see the installation method for each distro [here](INSTALL.md).
-
-> **Note:** Arch and Arch-based distros can also use this installation method.
+You can see the installation method for each distro [here](INSTALL.md).
 
 </details>
 
@@ -240,28 +233,28 @@ Rebuild the system to install.
 
 > **IMPORTANT RECOMMENDATION:**
 >
-> Please **DO NOT** use this method if your distro is already supported via **Open Build Service**.
+> Please **DO NOT** use this method if your distro is already supported via **Cloudflare Pages**.
 >
-> Manual compilation requires a good understanding of the system directory structure. If you encounter "Not Available" errors or missing libraries when installing this way on popular distros (Ubuntu/Fedora...), please return to using Open Build Service for stability and automatic updates.
+> Manual compilation requires a good understanding of the system directory structure. If you encounter "Not Available" errors or missing libraries when installing this way on popular distros (Ubuntu/Fedora...), please return to using Cloudflare Pages for stability and automatic updates.
 
 ##### System Requirements
 
 - **Debian/Ubuntu**
 
 ```bash
-sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme pkg-config libx11-dev
+sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme pkg-config libx11-dev libfcitx5-qt6-dev qt6-base-dev
 ```
 
 - **Fedora/RHEL**
 
 ```bash
-sudo dnf install cmake extra-cmake-modules fcitx5-devel libinput-devel libudev-devel gcc-c++ golang hicolor-icon-theme systemd-devel libX11-devel
+sudo dnf install cmake extra-cmake-modules fcitx5-devel libinput-devel libudev-devel gcc-c++ golang hicolor-icon-theme systemd-devel libX11-devel fcitx5-qt-devel
 ```
 
 - **openSUSE**
 
 ```bash
-sudo zypper install cmake extra-cmake-modules fcitx5-devel libinput-devel systemd-devel gcc-c++ go hicolor-icon-theme systemd-devel libX11-devel udev
+sudo zypper install cmake extra-cmake-modules fcitx5-devel libinput-devel systemd-devel gcc-c++ go hicolor-icon-theme systemd-devel libX11-devel udev fcitx5-qt-devel
 ```
 
 ##### Compilation and Installation
@@ -359,15 +352,13 @@ EOF
 
 ```fish
 # Add configuration to ~/.config/fish/config.fish
-cat >> ~/.config/fish/config.fish <<'EOF'
-
-# Input Method Configuration for Fcitx5
-set -Ux GTK_IM_MODULE fcitx
-set -Ux QT_IM_MODULE fcitx
-set -Ux XMODIFIERS "@im=fcitx"
-set -gx SDL_IM_MODULE fcitx
-set -gx GLFW_IM_MODULE ibus
-EOF
+echo 'if status is-login
+    set -Ux GTK_IM_MODULE fcitx
+    set -Ux QT_IM_MODULE fcitx
+    set -Ux XMODIFIERS "@im=fcitx"
+    set -gx SDL_IM_MODULE fcitx
+    set -gx GLFW_IM_MODULE ibus
+end' >> ~/.config/fish/config.fish
 ```
 
 </details>
@@ -378,7 +369,10 @@ Log out and log in to apply changes.
 <summary><b>If you still cannot type after logging out</b></summary>
 <br>
 
-If the configuration in `~/.bash_profile` or `~/.zprofile` doesn't work, you can try setting it in `/etc/environment` to apply to the entire system:
+If the configuration in `~/.bash_profile`, `~/.zprofile` or `.config/fish/config.fish` doesn't work, you can try setting it in `/etc/environment` to apply to the entire system:
+
+<details open>
+<summary><b>Bash/Zsh</b></summary>
 
 ```bash
 cat <<EOF | sudo tee -a /etc/environment
@@ -389,6 +383,21 @@ SDL_IM_MODULE=fcitx
 GLFW_IM_MODULE=ibus
 EOF
 ```
+
+</details>
+
+<details open>
+<summary><b>Fish shell</b></summary>
+
+```fish
+echo "GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+GLFW_IM_MODULE=ibus" | sudo tee -a /etc/environment
+```
+
+</details>
 
 > **Note:** A system restart is required after setup.
 
@@ -432,6 +441,7 @@ After logging out and logging in again:
 2. Find **Lotus** in the right column.
 3. Click the **<** arrow to add it to the left column.
 4. Apply.
+<<<<<<< HEAD
  <details>
  <summary><b>Additional configuration for Wayland (KDE, Hyprland)</b></summary>
 
@@ -441,6 +451,37 @@ After logging out and logging in again:
     permission = fcitx5-lotus-server, keyboard, allow
     ```
         </details>
+=======
+<details>
+  <summary><b>Additional configuration for Wayland (KDE, Hyprland Chromium-based, Electron)</b></summary>
+
+- **KDE Plasma:** _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Select **Fcitx 5**.
+- **Hyprland:** Add the following line to `~/.config/hypr/hyprland.conf`:
+
+```ini
+permission = fcitx5-lotus-server, keyboard, allow
+```
+
+- **Chromium-based/Electron:** Add the following flags to the application to be run:
+  `--enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3`
+
+</details>
+
+<details>
+  <summary><b>Additional configurattion for Kanata</b></summary>
+
+Add this line to file `~/.config/kanata/kanata.kbd`
+
+```
+(defcfg
+  ...
+  linux-dev-names-exclude ("Lotus-Uinput-Server")
+  ...
+)
+```
+
+</details>
+>>>>>>> 5c735ac89f968d81f626fecf7aa71287bc450612
 
 ---
 
@@ -451,11 +492,33 @@ After logging out and logging in again:
 ### 1. Customize input method
 
 - **Access:** Right-click the Lotus icon on the system tray to open customization.
+<<<<<<< HEAD
 - **Customization options:** _Typing Mode_, _Input Method_, _Charset_, _Spell Check_, _Macro_, _Capitalize Macro_, _Auto non-VN restore_, _Modern Style_, _Free Marking_, _Fix Uinput with ack_, _Lotus status icons_, _Mode menu_.
+=======
+
+| Option                  | Description                                                                                                                    | Default         |
+| :---------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :-------------- |
+| **Typing Mode**         | Select typing mode.                                                                                                            | Uinput (Smooth) |
+| **Input Method**        | Select input method.                                                                                                           | Telex           |
+| **Charset**             | Select character set.                                                                                                          | Unicode         |
+| **Spell Check**         | Enable/disable Vietnamese spell checking.                                                                                      | On              |
+| **Macro**               | Enable/disable shorthand typing.                                                                                               | On              |
+| **Capitalize Macro**    | Enable/disable uppercase shorthand typing.                                                                                     | On              |
+| **Auto non-VN restore** | Enable/disable auto-restore for non-Vietnamese words.                                                                          | On              |
+| **Modern Style**        | Enable/disable modern tone mark placement style _(e.g. oà, *uý instead of òa, *úy)_.                                           | On              |
+| **Free Marking**        | Enable/disable free tone marking.                                                                                              | On              |
+| **Fix Uinput with ack** | Enable/disable fixing Uinput mode with ack.<br/>Recommended when using Chromium-based applications (Chrome, Brave, Edge, ...). | Off             |
+| **Lotus Icons**         | Enable/disable using Lotus icons instead of the default V E icons.                                                             | Off             |
+
+- Alternatively, you can right-click the Lotus icon in the system tray -> **Input Method Settings** -> Select **Lotus** -> **Configure** (the gear icon in the middle of the _Fcitx Configuration_ interface) to customize some additional options in detail, such as:
+  - Macro: click the gear icon next to the _Input Method_ selection row to open the interface for adding or removing macros for the current input method. **Note:** shorthand entries only take effect for the selected input method. If you want to apply them to another input method, switch to that method and re-add the shorthand entries from scratch.
+  - Custom Keymap: click the gear icon on the _Custom Keymap_ row to open the keymap customization interface. You can import a keymap from an existing input method or create your own. After customizing, select the **Custom** input method to apply your custom keymap.
+  - Mode menu hotkey: by default, this menu uses the `` ` `` key to open the menu in all applications. If your workflow frequently uses this key, or you simply prefer a different key, click the hotkey selection button next to the _Mode menu hotkey_ option to enter your preferred shortcut. You can also click the `+` button to add additional hotkeys if desired.
+>>>>>>> 5c735ac89f968d81f626fecf7aa71287bc450612
 
 ### 2. Typing mode menu
 
-In any application, press the **`** key to open the typing mode selection menu, where you can use the mouse or shortcuts to select. If the backtick shortcut interferes with your workflow (e.g. when writing Markdown code fences), you can turn it off in Lotus' settings using the **Mode menu** toggle.
+In any application, press the **`** key (or the hotkey you have configured above) to open the typing mode selection menu, where you can use the mouse or shortcuts to select.
 
 | Mode                  | Shortcut | Description                                                                                                                                         |
 | :-------------------- | :------: | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -467,7 +530,6 @@ In any application, press the **`** key to open the typing mode selection menu, 
 | **Emoji Picker**      |  **W**   | Search and input Emojis (EmojiOne source, fuzzy search supported).                                                                                  |
 | **OFF**               |  **E**   | Turn off input method.                                                                                                                              |
 | **Default Typing**    |  **R**   | Default typing mode configured in the _Typing mode_ option.                                                                                         |
-| **Type `**            |  **`**   | Type the **`** character.                                                                                                                           |
 
 The input method automatically saves the most recently used typing mode for each application and restores that configuration when you reopen them.
 
@@ -504,7 +566,7 @@ paru -Rns fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
 - **Debian/Ubuntu**
@@ -580,7 +642,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nhktmdzhg"><img src="https://avatars.githubusercontent.com/u/57983253?v=4?s=100" width="100px;" alt="Nguyen Hoang Ky"/><br /><sub><b>Nguyen Hoang Ky</b></sub></a><br /><a href="#blog-nhktmdzhg" title="Blogposts">📝</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=nhktmdzhg" title="Code">💻</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=nhktmdzhg" title="Documentation">📖</a> <a href="#projectManagement-nhktmdzhg" title="Project Management">📆</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/pulls?q=is%3Apr+reviewed-by%3Anhktmdzhg" title="Reviewed Pull Requests">👀</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hthienloc"><img src="https://avatars.githubusercontent.com/u/148019203?v=4?s=100" width="100px;" alt="Loc Huynh"/><br /><sub><b>Loc Huynh</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3Ahthienloc" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=hthienloc" title="Documentation">📖</a> <a href="#design-hthienloc" title="Design">🎨</a> <a href="#translation-hthienloc" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hthienloc"><img src="https://avatars.githubusercontent.com/u/148019203?v=4?s=100" width="100px;" alt="Huỳnh Thiện Lộc"/><br /><sub><b>Huỳnh Thiện Lộc</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3Ahthienloc" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=hthienloc" title="Documentation">📖</a> <a href="#design-hthienloc" title="Design">🎨</a> <a href="#translation-hthienloc" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/justanoobcoder"><img src="https://avatars.githubusercontent.com/u/57614330?v=4?s=100" width="100px;" alt="Nguyễn Hồng Hiệp"/><br /><sub><b>Nguyễn Hồng Hiệp</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=justanoobcoder" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Miho1254"><img src="https://avatars.githubusercontent.com/u/83270073?v=4?s=100" width="100px;" alt="Đặng Quang Hiển"/><br /><sub><b>Đặng Quang Hiển</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=Miho1254" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Zebra2711"><img src="https://avatars.githubusercontent.com/u/89755535?v=4?s=100" width="100px;" alt="Zebra2711"/><br /><sub><b>Zebra2711</b></sub></a><br /><a href="https://github.com/LotusInputMethod/fcitx5-lotus/issues?q=author%3AZebra2711" title="Bug reports">🐛</a> <a href="https://github.com/LotusInputMethod/fcitx5-lotus/commits?author=Zebra2711" title="Code">💻</a></td>

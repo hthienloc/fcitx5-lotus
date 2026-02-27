@@ -75,7 +75,7 @@ Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https:/
 > </details>
 >
 > <details>
-> <summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+> <summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 > <br>
 >
 > - <b>Debian/Ubuntu</b>
@@ -175,17 +175,10 @@ paru -S fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
-Truy cập trang [Open Build Service](https://software.opensuse.org//download.html?project=home%3Aiamnanoka&package=fcitx5-lotus) để xem hướng dẫn cài đặt chi tiết cho distro của bạn.
-
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-[![build result](https://build.opensuse.org/projects/home:iamnanoka/packages/fcitx5-lotus/badge.svg?type=default)](https://build.opensuse.org/package/show/home:iamnanoka/fcitx5-lotus)
-
-Hoặc có thể xem cách cài của từng distro [tại đây](INSTALL.md).
-
-> **Lưu ý:** Arch và Arch-based distro cũng có thể dùng cách cài này.
+Bạn có thể xem cách cài của từng distro [tại đây](INSTALL.md).
 
 </details>
 
@@ -240,28 +233,28 @@ Rebuild lại system để cài đặt.
 
 > **KHUYẾN CÁO QUAN TRỌNG:**
 >
-> Vui lòng **KHÔNG** sử dụng cách này nếu distro của bạn đã được hỗ trợ thông qua **Open Build Service**.
+> Vui lòng **KHÔNG** sử dụng cách này nếu distro của bạn đã được hỗ trợ thông qua **Cloudflare Pages**.
 >
-> Việc biên dịch thủ công đòi hỏi bạn phải hiểu rõ về cấu trúc thư mục của hệ thống. Nếu bạn gặp lỗi "Not Available" hoặc thiếu thư viện khi cài theo cách này trên các distro phổ biến (Ubuntu/Fedora...), hãy quay lại dùng Open Build Service để đảm bảo tính ổn định và tự động cập nhật.
+> Việc biên dịch thủ công đòi hỏi bạn phải hiểu rõ về cấu trúc thư mục của hệ thống. Nếu bạn gặp lỗi "Not Available" hoặc thiếu thư viện khi cài theo cách này trên các distro phổ biến (Ubuntu/Fedora...), hãy quay lại dùng Cloudflare Pages để đảm bảo tính ổn định và tự động cập nhật.
 
 ##### Yêu cầu hệ thống
 
 - **Debian/Ubuntu**
 
 ```bash
-sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme pkg-config libx11-dev
+sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme pkg-config libx11-dev libfcitx5-qt6-dev qt6-base-dev
 ```
 
 - **Fedora/RHEL**
 
 ```bash
-sudo dnf install cmake extra-cmake-modules fcitx5-devel libinput-devel libudev-devel gcc-c++ golang hicolor-icon-theme systemd-devel libX11-devel
+sudo dnf install cmake extra-cmake-modules fcitx5-devel libinput-devel libudev-devel gcc-c++ golang hicolor-icon-theme systemd-devel libX11-devel fcitx5-qt-devel
 ```
 
 - **openSUSE**
 
 ```bash
-sudo zypper install cmake extra-cmake-modules fcitx5-devel libinput-devel systemd-devel gcc-c++ go hicolor-icon-theme systemd-devel libX11-devel udev
+sudo zypper install cmake extra-cmake-modules fcitx5-devel libinput-devel systemd-devel gcc-c++ go hicolor-icon-theme systemd-devel libX11-devel udev fcitx5-qt-devel
 ```
 
 ##### Biên dịch và cài đặt
@@ -364,15 +357,13 @@ EOF
 
 ```fish
 # Thêm cấu hình vào ~/.config/fish/config.fish
-cat >> ~/.config/fish/config.fish <<'EOF'
-
-# Input Method Configuration for Fcitx5
-set -Ux GTK_IM_MODULE fcitx
-set -Ux QT_IM_MODULE fcitx
-set -Ux XMODIFIERS "@im=fcitx"
-set -gx SDL_IM_MODULE fcitx
-set -gx GLFW_IM_MODULE ibus
-EOF
+echo 'if status is-login
+    set -Ux GTK_IM_MODULE fcitx
+    set -Ux QT_IM_MODULE fcitx
+    set -Ux XMODIFIERS "@im=fcitx"
+    set -gx SDL_IM_MODULE fcitx
+    set -gx GLFW_IM_MODULE ibus
+end' >> ~/.config/fish/config.fish
 ```
 
 </details>
@@ -383,7 +374,10 @@ Log out và log in để áp dụng thay đổi.
 <summary><b>Nếu bạn vẫn chưa gõ được sau khi log out</b></summary>
 <br>
 
-Nếu cấu hình tại `~/.bash_profile` hoặc `~/.zprofile` không hoạt động, bạn có thể thử thiết lập tại `/etc/environment` để áp dụng cho toàn bộ hệ thống:
+Nếu cấu hình tại `~/.bash_profile`, `~/.zprofile` hay `.config/fish/config.fish` không hoạt động, bạn có thể thử thiết lập tại `/etc/environment` để áp dụng cho toàn bộ hệ thống:
+
+<details open>
+<summary><b>Bash/Zsh</b></summary>
 
 ```bash
 cat <<EOF | sudo tee -a /etc/environment
@@ -394,6 +388,21 @@ SDL_IM_MODULE=fcitx
 GLFW_IM_MODULE=ibus
 EOF
 ```
+
+</details>
+
+<details open>
+<summary><b>Fish shell</b></summary>
+
+```fish
+echo "GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+GLFW_IM_MODULE=ibus" | sudo tee -a /etc/environment
+```
+
+</details>
 
 > **Lưu ý:** Cần khởi động lại máy sau khi thiết lập.
 
@@ -439,13 +448,31 @@ Sau khi đã log out và log in lại:
 4. Apply.
 
 <details>
-   <summary><b>Cấu hình thêm cho Wayland (KDE, Hyprland)</b></summary>
+  <summary><b>Cấu hình thêm cho Wayland (KDE, Hyprland, Chromium-based, Electron)</b></summary>
    
 - **KDE Plasma:** _System Settings_ → _Keyboard_ → _Virtual Keyboard_ → Chọn **Fcitx 5**.
 - **Hyprland:** Thêm dòng sau vào `~/.config/hypr/hyprland.conf`:
 
 ```ini
 permission = fcitx5-lotus-server, keyboard, allow
+```
+
+- **Chromium-based/Electron:** Thêm flags sau vào ứng dụng cần chạy:
+  `--enable-features=UseOzonePlatform --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3`
+
+</details>
+
+<details>
+   <summary><b>Cấu hình thêm cho Kanata</b></summary>
+
+Thêm dòng sau vào file `~/.config/kanata/kanata.kbd`
+
+```
+(defcfg
+  ...
+  linux-dev-names-exclude ("Lotus-Uinput-Server")
+  ...
+)
 ```
 
 </details>
@@ -473,11 +500,16 @@ permission = fcitx5-lotus-server, keyboard, allow
 | **Free Marking**        | Bật/tắt bỏ dấu tự do.                                                                                            | Bật             |
 | **Fix Uinput with ack** | Bật/tắt sửa lỗi chế độ Uinput với ack.<br/>Nên bật khi sử dụng các ứng dụng Chromium (Chrome, Brave, Edge, ...). | Tắt             |
 | **Lotus Icons**         | Bật/tắt sử dụng icon Lotus thay vì icon mặc định V E.                                                            | Tắt             |
-| **Typing Mode Menu**    | Bật/tắt mở menu chuyển chế độ gõ bằng phím **`** (tắt để nhập ký tự trực tiếp).                                  | Bật             |
+
+- Hoặc có thể nhấp chuột phải vào biểu tượng Lotus trên system tray -> **Input Method Settings** -> Chọn **Lotus** -> **Configure** (biểu tượng bánh răng ở giữa của giao diện _Fcitx Configuration_) để tuỳ chỉnh chi tiết một số tuỳ chọn khác, như:
+
+  + Gõ tắt/ Macro: nhấn vào biểu tượng bánh răng bên cạnh dòng chọn _Input Method_ để mở giao diện thêm bớt macro cho kiểu gõ hiện tại. **Lưu ý:** các từ gõ tắt chỉ có hiệu lực với kiểu gõ được chọn, nếu muốn áp dụng cho kiểu gõ khác, hãy đổi kiểu gõ và thêm từ gõ tắt từ đầu như trên.
+  + Keymap tuỳ chỉnh: nhấn vào biểu tượng bánh răng trên dòng _Custom Keymap_ để mở giao diện tuỳ chỉnh keymap, bạn có thể nhập keymap từ một kiểu gõ có sẵn, hoặc tự tạo keymap của riêng mình. Sau khi tuỳ chỉnh, chọn kiểu gõ **Custom** để áp dụng keymap tuỳ chỉnh.
+  + Phím tắt cho menu chế độ gõ: mặc định, menu này sử dụng phím `` ` `` để mở menu ở tất cả các ứng dụng, nếu công việc của bạn thường xuyên dùng phím này hoặc đơn giản bạn chỉ không thích phím `` ` ``, nhấn vào nút chọn phím tắt bên cạnh tuỳ chọn _Mode menu hotkey_ để nhập phím tắt mà bạn muốn. Bạn cũng có thể nhấn nút `+` để tạo thêm phím tắt mới nếu muốn.
 
 ### 2. Menu chuyển chế độ gõ
 
-Khi con trỏ đang ở trong ô nhập liệu (có thể gõ văn bản), nhấn phím **`** để mở menu chọn chế độ gõ; bạn có thể dùng chuột hoặc phím tắt để chọn chế độ mong muốn.
+Khi con trỏ đang ở trong ô nhập liệu (có thể gõ văn bản), nhấn phím `` ` `` (hoặc phím tắt bạn đã tuỳ chỉnh ở trên) để mở menu chọn chế độ gõ; bạn có thể dùng chuột hoặc phím tắt để chọn chế độ mong muốn.
 
 | Chế độ                | Phím tắt | Mô tả                                                                                                                                |
 | :-------------------- | :------: | :----------------------------------------------------------------------------------------------------------------------------------- |
@@ -489,7 +521,6 @@ Khi con trỏ đang ở trong ô nhập liệu (có thể gõ văn bản), nhấ
 | **Emoji Picker**      |  **W**   | Tìm kiếm và nhập Emoji (nguồn EmojiOne, hỗ trợ fuzzy search).                                                                        |
 | **OFF**               |  **E**   | Tắt bộ gõ.                                                                                                                           |
 | **Default Typing**    |  **R**   | Chế độ gõ mặc định được cấu hình tại tuỳ chọn _Typing mode_.                                                                         |
-| **Type `**            |  **`**   | Nhập ký tự **`**.                                                                                                                    |
 
 Bộ gõ sẽ tự động lưu chế độ gõ đã dùng gần nhất cho từng ứng dụng và khôi phục cấu hình đó khi bạn mở lại chúng.
 
@@ -526,7 +557,7 @@ paru -Rns fcitx5-lotus
 </details>
 
 <details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE - Open Build Service</b></summary>
+<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
 <br>
 
 - **Debian/Ubuntu**
