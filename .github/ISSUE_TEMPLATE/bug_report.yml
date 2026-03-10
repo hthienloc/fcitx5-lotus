@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Cảm ơn bạn đã dành thởi gian báo cáo lỗi! Vui lòng điền đầy đủ thông tin bên dưới.
+        Cảm ơn bạn đã dành thời gian báo cáo lỗi! Vui lòng điền đầy đủ thông tin bên dưới.
 
   - type: textarea
     id: description
@@ -107,17 +107,17 @@ body:
       render: shell
 
   - type: textarea
-    id: diagnose
+    id: log_server
     attributes:
-      label: Diagnose
+      label: Log của Uinput server
       description: |
         Log của uinput server (Lấy ở `/tmp/fcitx5-lotus-server.log`, tốt nhất nên dừng dịch vụ trước khi lấy log)
-      render: shell
+      placeholder: Dán nội dung file log vào đây
 
   - type: textarea
-    id: diagnose
+    id: log_fcitx5
     attributes:
-      label: Diagnose
+      label: Log của fcitx5
       description: |
         Log của fcitx5 (Chạy lệnh `fcitx5 --verbose lotus=4` ở terminal trong quá trình tái hiện lỗi)
       render: shell
