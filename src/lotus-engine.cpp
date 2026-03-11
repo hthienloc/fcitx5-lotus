@@ -525,19 +525,17 @@ namespace fcitx {
 
     void LotusEngine::deactivate(const InputMethodEntry& entry, InputContextEvent& event) {
         FCITX_UNUSED(entry);
-        auto* state = event.inputContext()->propertyFor(&factory_);
-        if (realMode == LotusMode::Preedit) {
-            if (event.type() != EventType::InputContextFocusOut)
-                state->commitBuffer();
-            else
-                state->reset();
+        auto* ic    = event.inputContext();
+        auto* state = ic->propertyFor(&factory_);
+        if (realMode == LotusMode::Preedit && event.type() != EventType::InputContextFocusOut) {
+            state->commitBuffer();
         } else {
             state->clearAllBuffers();
             is_deleting_.store(false);
             needEngineReset.store(false);
-            event.inputContext()->inputPanel().reset();
-            event.inputContext()->updateUserInterface(UserInterfaceComponent::InputPanel);
-            event.inputContext()->updatePreedit();
+            ic->inputPanel().reset();
+            ic->updateUserInterface(UserInterfaceComponent::InputPanel);
+            ic->updatePreedit();
         }
     }
 
