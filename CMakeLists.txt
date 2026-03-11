@@ -47,11 +47,13 @@ add_subdirectory(misc)
 if(ENABLE_QT)
     message(STATUS "QT is enabled, adding keymap editor GUI")
     target_compile_definitions(lotus PRIVATE ENABLE_KEYMAP_EDITOR)
+    target_compile_definitions(lotus PRIVATE ENABLE_MACRO_EDITOR)
     set(QT_MAJOR_VERSION 6)
     find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
     find_package(Fcitx5Qt${QT_MAJOR_VERSION}WidgetsAddons 5.0.10 REQUIRED)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
     add_subdirectory(keymap-editor)
+    add_subdirectory(macro-editor)
 endif(ENABLE_QT)
 
 configure_file(

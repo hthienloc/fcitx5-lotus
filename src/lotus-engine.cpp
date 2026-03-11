@@ -237,6 +237,7 @@ namespace fcitx {
     }
 
     void LotusEngine::setSubConfig(const std::string& path, const RawConfig& config) {
+        FCITX_UNUSED(config);
         if (path == "custom_keymap") {
 #ifdef ENABLE_KEYMAP_EDITOR
 #else
@@ -245,10 +246,17 @@ namespace fcitx {
             refreshEngine();
 #endif
         } else if (path == "macro") {
+#ifdef ENABLE_MACRO_EDITOR
+            // External editor writes directly to file; reload from disk to pick up changes.
+            readAsIni(macroTables_, MacroTableFile);
+            macroTableObject_.reset(newMacroTable(macroTables_));
+            refreshEngine();
+#else
             macroTables_.load(config, true);
             safeSaveAsIni(macroTables_, MacroTableFile);
             macroTableObject_.reset(newMacroTable(macroTables_));
             refreshEngine();
+#endif
         }
     }
 

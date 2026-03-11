@@ -28,3 +28,10 @@ Makefile
 compile_commands.json
 !.all-contributorsrc
 refresh-contributor
+
+# Qt AUTOMOC generated files
+*_autogen/
+
+# Compiled outputs
+*.so
+lotus-version.h

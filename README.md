@@ -47,126 +47,6 @@
 
 Dự án này là bản fork được tối ưu hóa từ [bộ gõ VMK](https://github.com/thanhpy2009/VMK). Chân thành cảm ơn tác giả Thành đã đặt nền móng cho bộ gõ này.
 
-> **Lưu ý:** Vui lòng gỡ cấu hình `fcitx5-vmk` và gỡ repo OBS cũ (nếu có) trước khi cài đặt `fcitx5-lotus` để tránh phát sinh lỗi.
-
-<details>
-<summary><b>Gỡ và xoá cấu hình <code>fcitx5-vmk</code></b></summary>
-
-<details>
-<summary><img src="https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white" alt="Arch Linux" height="25"></summary>
-<br>
-
-Bạn có thể dùng `pacman` (khuyên dùng), `yay` hoặc `paru` để gỡ cài đặt:
-
-```bash
-sudo pacman -Rns fcitx5-vmk
-```
-
-```bash
-yay -Rns fcitx5-vmk
-```
-
-```bash
-paru -Rns fcitx5-vmk
-```
-
-> **Lưu ý:** Các file config ở `$HOME` sẽ được giữ lại.
-
-</details>
-
-<details>
-<summary><b>Debian / Ubuntu / Fedora / openSUSE</b></summary>
-<br>
-
-- **Debian/Ubuntu**
-
-```bash
-sudo apt remove fcitx5-vmk
-```
-
-- **Fedora**
-
-```bash
-sudo dnf remove fcitx5-vmk
-```
-
-- **openSUSE**
-
-```bash
-sudo zypper remove fcitx5-vmk
-```
-
-</details>
-
-<details>
-<summary><img src="https://img.shields.io/badge/NixOS-5277C3?style=for-the-badge&logo=nixos&logoColor=white" alt="NixOS" height="25"></summary>
-<br>
-
-Xóa (hoặc comment) dòng `services.fcitx5-vmk` và `inputs` trong file config, sau đó rebuild lại system. NixOS sẽ tự dọn dẹp.
-
-</details>
-
-<details>
-<summary><img src="https://img.shields.io/badge/Source-000000?style=for-the-badge&logo=github&logoColor=white" alt="Source" height="25"></summary>
-<br>
-
-Vào lại thư mục source code đã build và chạy:
-
-```bash
-sudo make uninstall
-```
-
-</details>
-
----
-
-Xóa cấu hình `vmk` không tương thích:
-
-```bash
-rm ~/.config/fcitx5/conf/vmk-*.conf
-```
-
-</details>
-
-<details>
-<summary><b>Gỡ repo OBS cũ (nếu có)</b></summary>
-<br>
-
-Nếu bạn đã cài `fcitx5-lotus` qua OBS trước đây, hãy chạy lệnh sau để gỡ repo cũ:
-
-- **Arch Linux:**
-
-```bash
-# Xoá repo trong /etc/pacman.conf
-# Xoá key:
-sudo pacman-key --finger | grep "home:iamnanoka" -B 1
-sudo pacman-key --delete "ID_OF_KEY"
-sudo pacman-key --updatedb
-sudo pacman -Syy
-```
-
-- **Debian / Ubuntu:**
-
-```bash
-sudo rm -f /etc/apt/sources.list.d/home:iamnanoka.list
-sudo rm -f /etc/apt/trusted.gpg.d/home_iamnanoka.gpg
-sudo apt update
-```
-
-- **Fedora:**
-
-```bash
-sudo rm /etc/yum.repos.d/home:iamnanoka.repo
-```
-
-- **openSUSE:**
-
-```bash
-sudo zypper removerepo home_iamnanoka
-```
-
-</details>
-
 <details>
   <summary><b>Mục lục</b></summary>
   <ol>
@@ -421,7 +301,7 @@ end
 
 </details>
 
-<p><b>Kiểm tra status (nếu thấy <span style="color: green;">active (running)</span> là OK):</b></p>
+Kiểm tra status (nếu thấy active (running) là OK):
 
 ```bash
 systemctl status fcitx5-lotus-server@$(whoami).service
