@@ -5,7 +5,7 @@ set(fcitx_lotus_sources
   lotus-candidates.cpp
   lotus-utils.cpp
   lotus-monitor.cpp
-  "${PROJECT_SOURCE_DIR}/data/emoji/emoji_data.cpp"
+  emoji.cpp
 )
 
 add_library(lotus MODULE ${fcitx_lotus_sources})
@@ -13,6 +13,7 @@ set_target_properties(lotus PROPERTIES OUTPUT_NAME "lotus")
 target_link_libraries(lotus
 	Fcitx5::Core
 	Fcitx5::Config
+  Fcitx5::Module::Emoji
 	Bamboo::Core
 	Pthread::Pthread
 	X11::X11
@@ -20,7 +21,6 @@ target_link_libraries(lotus
 
 target_include_directories(lotus PRIVATE
     ${PROJECT_BINARY_DIR}
-    ${PROJECT_SOURCE_DIR}/data/emoji
 )
 install(TARGETS lotus DESTINATION "${CMAKE_INSTALL_LIBDIR}/fcitx5")
 

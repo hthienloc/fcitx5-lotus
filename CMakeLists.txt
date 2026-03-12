@@ -21,6 +21,7 @@ include(ECMUninstallTarget)
 option(ENABLE_QT "Enable Qt based keymap editor" On)
 
 find_package(Fcitx5Core ${REQUIRED_FCITX_VERSION} REQUIRED)
+find_package(Fcitx5ModuleEmoji REQUIRED)
 find_package(Pthread REQUIRED)
 find_package(Gettext REQUIRED)
 find_package(X11 REQUIRED)

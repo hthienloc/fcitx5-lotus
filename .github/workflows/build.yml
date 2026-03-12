@@ -68,7 +68,7 @@ jobs:
           path: fcitx5
           cmake-option: >-
             -DENABLE_KEYBOARD=Off -DENABLE_X11=Off -DENABLE_WAYLAND=Off -DENABLE_ENCHANT=Off
-            -DENABLE_DBUS=Off -DENABLE_SERVER=Off -DENABLE_EMOJI=Off -DUSE_SYSTEMD=Off
+            -DENABLE_DBUS=Off -DENABLE_SERVER=Off -DUSE_SYSTEMD=Off -DENABLE_EMOJI=On
       - uses: actions/checkout@v6
         with:
           repository: fcitx/fcitx5-qt

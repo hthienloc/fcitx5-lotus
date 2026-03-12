@@ -118,25 +118,34 @@ rm -rf %{_builddir}/%{name}-%{version}
 
 %post
 %systemd_post fcitx5-lotus-server@.service
-if [ $1 -ge 1 ]; then
-    if [ -x /usr/bin/udevadm ]; then
-        /usr/sbin/modprobe uinput >/dev/null 2>&1 || :
-        /usr/bin/udevadm control --reload-rules >/dev/null 2>&1 || :
-        /usr/bin/udevadm trigger >/dev/null 2>&1 || :
-    fi
+if [ -x /usr/bin/udevadm ]; then
+    /usr/sbin/modprobe uinput >/dev/null 2>&1 || :
+    /usr/bin/udevadm control --reload-rules >/dev/null 2>&1 || :
+    /usr/bin/udevadm trigger >/dev/null 2>&1 || :
 fi
 
-echo "--- Cấu hình Lotus ---"
-echo "Hướng dẫn sau cài đặt:"
-echo "1. Kích hoạt Server cho user của bạn:"
-echo "   sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service"
-echo ""
-echo "2. Cấu hình Fcitx5:"
-echo "   - Mở 'Fcitx5 Configuration', thêm bộ gõ Lotus"
-echo ""
-echo "3. Lưu ý cho Wayland (KDE):"
-echo "   - Hãy chọn 'Fcitx 5' trong phần Virtual Keyboard của hệ thống."
-echo "------------------------------------------------"
+if [ $1 -eq 1 ]; then
+    echo "--- Cấu hình Lotus ---"
+    echo "Hướng dẫn sau cài đặt:"
+    echo "1. Kích hoạt Server cho user của bạn:"
+    echo "   sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service"
+    echo ""
+    echo "2. Cấu hình Fcitx5:"
+    echo "   - Mở 'Fcitx5 Configuration', thêm bộ gõ Lotus"
+    echo ""
+    echo "3. Lưu ý cho Wayland (KDE):"
+    echo "   - Hãy chọn 'Fcitx 5' trong phần Virtual Keyboard của hệ thống."
+    echo "------------------------------------------------"
+elif [ $1 -eq 2 ]; then
+    echo "--- Cấu hình Lotus ---"
+    echo "Hướng dẫn sau cập nhật:"
+    echo "1. Khởi động lại Server cho user của bạn:"
+    echo "   sudo systemctl restart fcitx5-lotus-server@\$(whoami).service"
+    echo ""
+    echo "2. Cấu hình Fcitx5:"
+    echo "   - Mở 'Fcitx5 Configuration', nhấn restart để khởi động lại."
+fi
+
 
 %preun
 %systemd_preun fcitx5-lotus-server@.service

@@ -16,7 +16,7 @@
 #define _FCITX5_LOTUS_STATE_H_
 
 #include "lotus.h"
-#include "emoji_data.h"
+#include "emoji-entry.h"
 #include "lotus-utils.h"
 
 #include <cstddef>

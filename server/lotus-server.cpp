@@ -184,8 +184,8 @@ int main(int argc, char* argv[]) {
     sa.sa_handler = signal_handler;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, nullptr);
+    sigaction(SIGINT, &sa, nullptr);
 
     while (true) {
         int poll_timeout = (pending_backspaces > 0) ? 1 : -1;

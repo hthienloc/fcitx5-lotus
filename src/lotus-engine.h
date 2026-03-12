@@ -183,7 +183,10 @@ namespace fcitx {
          * @return Reference to emoji loader instance.
          */
         EmojiLoader& emojiLoader() {
-            return emojiLoader_;
+            if (!emojiLoader_) {
+                emojiLoader_ = std::make_unique<EmojiLoader>(&instance_->addonManager());
+            }
+            return *emojiLoader_;
         }
 
       private:
@@ -214,7 +217,8 @@ namespace fcitx {
         bool                                       isSelectingAppMode_ = false;
         std::string                                currentConfigureApp_;
         LotusMode                                  globalMode_;
-        EmojiLoader                                emojiLoader_;
+        FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
+        std::unique_ptr<EmojiLoader> emojiLoader_;
 
         /**
          * @brief Refreshes the bamboo engine with current settings.
