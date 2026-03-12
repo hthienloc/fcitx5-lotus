@@ -13,102 +13,49 @@
 #ifndef EMOJI_H
 #define EMOJI_H
 
-#include "emoji_data.h"
+#include "emoji-entry.h"
 
-#include <algorithm>
 #include <string>
 #include <vector>
+
+#include <fcitx/addonmanager.h>
 
 /**
  * @brief Emoji loader with fuzzy search capability.
  *
- * Loads emoji list and provides fuzzy matching search.
+ * Loads emoji list from Fcitx5 emoji addon and provides fuzzy matching search.
  */
 class EmojiLoader {
-  private:
-    std::vector<EmojiEntry> emojiList; ///< Internal emoji storage
-
   public:
     /**
-     * @brief Constructs loader and initializes emoji list.
+     * @brief Constructs loader and initializes emoji list from Fcitx5.
+     * @param addonManager Fcitx5 addon manager instance.
+     * @param language Language code for emoji data.
      */
-    EmojiLoader() : emojiList(EMOJI_LIST) {}
+    EmojiLoader(fcitx::AddonManager* addonManager);
 
     /**
      * @brief Searches emoji by prefix with fuzzy matching.
      * @param prefix Search query.
      * @return Sorted list of matching emojis.
      */
-    std::vector<EmojiEntry> search(const std::string& prefix) {
-        if (prefix.empty())
-            return {};
-
-        struct EmojiEntryFuzzy {
-            EmojiEntry entry;
-            int        score;
-        };
-        std::vector<EmojiEntryFuzzy> results;
-
-        for (const auto& entry : emojiList) {
-            int    score              = 0;
-            size_t queryIndex         = 0;
-            int    lastMatchIndex     = -1;
-            int    consecutiveMatches = 0;
-            int    firstMatchIndex    = -1;
-
-            for (size_t i = 0; i < entry.trigger.size() && queryIndex < prefix.size(); ++i) {
-                if (entry.trigger[i] == prefix[queryIndex]) {
-                    if (queryIndex == 0)
-                        firstMatchIndex = i; // NOLINT
-
-                    if (lastMatchIndex != -1 && (int)i == lastMatchIndex + 1) {
-                        ++consecutiveMatches;
-                        score += (20 * consecutiveMatches);
-                    } else {
-                        consecutiveMatches = 0;
-                    }
-
-                    if (i == 0 || entry.trigger[i - 1] == '_' || entry.trigger[i - 1] == '-') {
-                        score += 50;
-                    }
-
-                    lastMatchIndex = i; // NOLINT
-                    ++queryIndex;
-                }
-            }
-            if (queryIndex == prefix.size()) {
-                if (firstMatchIndex == 0)
-                    score += 100;
-
-                score -= static_cast<int>(entry.trigger.size());
-
-                score -= (lastMatchIndex - firstMatchIndex);
-
-                results.push_back({entry, score});
-            }
-        }
-
-        std::sort(results.begin(), results.end(), [](const auto& a, const auto& b) {
-            if (a.score != b.score)
-                return a.score > b.score;
-            return a.entry.trigger.size() < b.entry.trigger.size();
-        });
-
-        std::vector<EmojiEntry> finalResults;
-        finalResults.reserve(results.size());
-        for (const auto& result : results) {
-            finalResults.push_back(result.entry);
-        }
-        return finalResults;
-    }
+    std::vector<EmojiEntry> search(const std::string& prefix);
 
     /**
      * @brief Gets total emoji count.
      * @return Number of emojis loaded.
      */
-    size_t size() const {
-        return emojiList.size();
-    }
+    size_t size() const;
+
+  private:
+    std::vector<EmojiEntry> emojiList;     ///< Internal emoji storage
+    fcitx::AddonInstance*   emojiAddon_{}; ///< Fcitx5 emoji addon
+
+    /**
+     * @brief Load emoji data from Fcitx5 emoji addon.
+     * @param language Language code for emoji data.
+     */
+    void loadFromFcitx5(const std::string& language = "en");
 };
 
 #endif // EMOJI_H

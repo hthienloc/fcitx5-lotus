@@ -117,7 +117,7 @@ sudo apt update && sudo apt install fcitx5-lotus
 
 ```bash
 # Tự động nhận diện codename và cài đặt
-CODENAME=$(grep '^VERSION_CODENAME=' /etc/os-release | cut -d'=' -f2)
+CODENAME=$(grep '^UBUNTU_CODENAME=' /etc/os-release | cut -d'=' -f2)
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://fcitx5-lotus.pages.dev/pubkey.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/fcitx5-lotus.gpg
 echo "deb [signed-by=/etc/apt/keyrings/fcitx5-lotus.gpg] https://fcitx5-lotus.pages.dev/apt/$CODENAME $CODENAME main" | sudo tee /etc/apt/sources.list.d/fcitx5-lotus.list
@@ -232,7 +232,7 @@ sudo rpm -i fcitx5-lotus-*.rpm
 - **Debian/Ubuntu**
 
 ```bash
-sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme pkg-config libx11-dev libfcitx5-qt6-dev qt6-base-dev
+sudo apt-get install cmake extra-cmake-modules libfcitx5core-dev libfcitx5config-dev libfcitx5utils-dev libinput-dev libudev-dev g++ golang hicolor-icon-theme pkg-config libx11-dev libfcitx5-qt6-dev qt6-base-dev fcitx5-modules-dev
 ```
 
 - **Fedora/RHEL**
@@ -529,7 +529,7 @@ Khi con trỏ đang ở trong ô nhập liệu (có thể gõ văn bản), nhấ
 | **Uinput (Hardcore)** |     **3**     | Biến thể của Uinput (Smooth).<br>**Tối ưu:** ứng dụng Windows qua Wine.                                                              |
 | **Surrounding Text**  |     **4**     | Cho phép sửa dấu trên văn bản đã gõ, hoạt động mượt. <br> **Tối ưu:** ứng dụng Qt/GTK.                                               |
 | **Preedit**           |     **Q**     | Hiển thị gạch chân khi gõ. <br> **Tối ưu:** hầu hết ứng dụng.                                                                        |
-| **Emoji Picker**      |     **W**     | Tìm kiếm và nhập Emoji (nguồn EmojiOne, hỗ trợ fuzzy search).                                                                        |
+| **Emoji Picker**      |     **W**     | Tìm kiếm và nhập Emoji (hỗ trợ fuzzy search).                                                                                        |
 | **OFF**               |     **E**     | Tắt bộ gõ.                                                                                                                           |
 | **Default Typing**    |     **R**     | Chế độ gõ mặc định được cấu hình tại tuỳ chọn _Typing mode_.                                                                         |
 | **Type X**            | **X** / **F** | Gõ phím X (nếu phím để bật menu được thiết lập trong Fcitx5 configuration là phím đơn, ví dụ như phím X).                            |
