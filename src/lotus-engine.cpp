@@ -580,7 +580,7 @@ namespace fcitx {
         clipboardHistory_.insert(clipboardHistory_.begin(), str);
 
         // Limit history size
-        if (clipboardHistory_.size() > 20) {
+        if (clipboardHistory_.size() > MAX_CLIPBOARD_HISTORY) {
             clipboardHistory_.pop_back();
         }
 
@@ -655,7 +655,7 @@ namespace fcitx {
             return;
 
         file << "# Lotus Per-App Configuration\n";
-        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
+        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker, 7 = NoMode, 8 = Clipboard\n";
         for (const auto& pair : appRules_) {
             file << pair.first << "=" << static_cast<int>(pair.second) << "\n";
         }

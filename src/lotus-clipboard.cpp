@@ -20,14 +20,14 @@ std::string ClipboardManager::primary(InputContext* ic) {
     if (clipboardAddon_ && ic) {
         return clipboardAddon_->call<IClipboard::primary>(ic);
     }
-    return "";
+    return {};
 }
 
 std::string ClipboardManager::clipboard(InputContext* ic) {
     if (clipboardAddon_ && ic) {
         return clipboardAddon_->call<IClipboard::clipboard>(ic);
     }
-    return "";
+    return {};
 }
 
 void ClipboardManager::setPrimary(const std::string& str) {

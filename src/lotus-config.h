@@ -33,8 +33,8 @@ namespace fcitx {
         SurroundingText = 4,
         Preedit         = 5,
         Emoji           = 6,
-        Clipboard       = 8,
         NoMode          = 7,
+        Clipboard       = 8,
     };
 
     /**

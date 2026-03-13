@@ -18,8 +18,8 @@ class ClipboardManager {
 public:
     ClipboardManager(AddonManager* addonManager);
     
-    std::string primary(InputContext* ic);
-    std::string clipboard(InputContext* ic);
+    [[nodiscard]] std::string primary(InputContext* ic);
+    [[nodiscard]] std::string clipboard(InputContext* ic);
     
     void setPrimary(const std::string& str);
     void setClipboard(const std::string& str);
