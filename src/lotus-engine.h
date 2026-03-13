@@ -206,7 +206,7 @@ namespace fcitx {
          * @brief Gets the global input mode.
          * @return The global input mode.
          */
-        LotusMode globalMode() const {
+        [[nodiscard]] LotusMode globalMode() const {
             return globalMode_;
         }
 
@@ -218,9 +218,11 @@ namespace fcitx {
         static void setMode(LotusMode mode, InputContext* ic);
         
         void addClipboardHistory(const std::string& str, bool triggerUpdate = true);
-        const std::vector<std::string>& clipboardHistory() const { return clipboardHistory_; }
+        [[nodiscard]] const std::vector<std::string>& clipboardHistory() const { return clipboardHistory_; }
 
       private:
+        static constexpr size_t                    MAX_CLIPBOARD_HISTORY = 20;
+
         Instance*                                  instance_;
         lotusConfig                                config_;
         lotusCustomKeymap                          customKeymap_;

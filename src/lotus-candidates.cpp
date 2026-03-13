@@ -17,16 +17,15 @@ namespace fcitx {
         CandidateWord(std::move(text)), state_(state), emojiOutput_(emojiOutput) {}
 
     void EmojiCandidateWord::select(InputContext* inputContext) const {
-        FCITX_UNUSED(inputContext);
-        state_->ic_->commitString(emojiOutput_);
+        inputContext->commitString(emojiOutput_);
         LOTUS_INFO("Emoji committed: " + emojiOutput_);
 
         state_->emojiBuffer_.clear();
         state_->emojiCandidates_.clear();
 
-        state_->ic_->inputPanel().reset();
-        state_->ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
-        state_->ic_->updatePreedit();
+        inputContext->inputPanel().reset();
+        inputContext->updateUserInterface(UserInterfaceComponent::InputPanel);
+        inputContext->updatePreedit();
     }
 
     // AppModeCandidateWord implementation
@@ -48,7 +47,8 @@ namespace fcitx {
         state_->reset();
         
         ic->commitString(content_);
-        LOTUS_INFO("Clipboard item committed: " + content_);
+        std::string preview = content_.size() > 50 ? content_.substr(0, 50) + "..." : content_;
+        LOTUS_INFO("Clipboard item committed: " + preview);
 
         ic->updateUserInterface(UserInterfaceComponent::InputPanel);
         ic->updatePreedit();
