@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <fcitx-utils/misc.h>
 #include <fcitx/inputcontext.h>
+#include <fcitx/instance.h>
 
 #include <atomic>
 
@@ -83,6 +84,7 @@ namespace fcitx {
          */
         bool isEmptyHistory();
         friend class EmojiCandidateWord;
+        friend class ClipboardCandidateWord;
         friend class LotusEngine;
 
       private:
@@ -99,8 +101,11 @@ namespace fcitx {
         std::atomic<int>        current_thread_id_{0};
         std::string             emojiBuffer_;
         std::vector<EmojiEntry> emojiCandidates_;
+        std::string             clipboardFilter_;
+        LotusMode               previousMode_ = LotusMode::Smooth;
         bool                    waitAck_ = false;
         std::vector<KeyEntry>   buffered_keys_; ///< Keystrokes buffered during replacement
+        std::vector<ScopedConnection> connections_;
 
         /**
          * @brief Connects to the uinput server.
@@ -161,6 +166,28 @@ namespace fcitx {
          * @brief Updates preedit display for emoji mode.
          */
         void updateEmojiPreedit();
+        /**
+         * @brief Handles key events in clipboard mode.
+         * @param keyEvent The key event to process.
+         */
+        void handleClipboardMode(KeyEvent& keyEvent);
+
+        /**
+         * @brief Updates preedit display for clipboard mode.
+         */
+        void updateClipboardPreedit();
+
+        /**
+         * @brief Updates clipboard page status in candidate list.
+         * @param commonList The candidate list to update.
+         */
+        void updateClipboardPageStatus(CommonCandidateList* commonList);
+
+        /**
+         * @brief Adds a string to clipboard history.
+         * @param str The string to add.
+         */
+        void addClipboardHistory(const std::string& str, bool triggerUpdate = true);
 
         /**
          * @brief Handles key press in uinput mode.

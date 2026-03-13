@@ -17,6 +17,7 @@
 
 #include "lotus-config.h"
 #include "emoji.h"
+#include "lotus-clipboard.h"
 #include "lotus.h"
 #include <fcitx-config/iniparser.h>
 #include <fcitx/action.h>
@@ -24,6 +25,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputmethodengine.h>
 #include <fcitx/instance.h>
+#include <fcitx-utils/handlertable.h>
 
 namespace fcitx {
 
@@ -189,6 +191,35 @@ namespace fcitx {
             return *emojiLoader_;
         }
 
+        /**
+         * @brief Gets the clipboard manager.
+         * @return Reference to clipboard manager instance.
+         */
+        ClipboardManager& clipboardManager() {
+            if (!clipboardManager_) {
+                clipboardManager_ = std::make_unique<ClipboardManager>(&instance_->addonManager());
+            }
+            return *clipboardManager_;
+        }
+
+        /**
+         * @brief Gets the global input mode.
+         * @return The global input mode.
+         */
+        LotusMode globalMode() const {
+            return globalMode_;
+        }
+
+        /**
+         * @brief Sets the current input mode.
+         * @param mode The mode to set.
+         * @param ic Current input context.
+         */
+        static void setMode(LotusMode mode, InputContext* ic);
+        
+        void addClipboardHistory(const std::string& str, bool triggerUpdate = true);
+        const std::vector<std::string>& clipboardHistory() const { return clipboardHistory_; }
+
       private:
         Instance*                                  instance_;
         lotusConfig                                config_;
@@ -219,6 +250,11 @@ namespace fcitx {
         LotusMode                                  globalMode_;
         FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
         std::unique_ptr<EmojiLoader> emojiLoader_;
+        FCITX_ADDON_DEPENDENCY_LOADER(clipboard, instance_->addonManager());
+        std::unique_ptr<ClipboardManager> clipboardManager_;
+        std::vector<std::string>          clipboardHistory_;
+        std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>
+            clipboardHistoryHandlers_;
 
         /**
          * @brief Refreshes the bamboo engine with current settings.
@@ -292,18 +328,6 @@ namespace fcitx {
          */
         void closeAppModeMenu();
 
-        /**
-         * @brief Sets the current input mode.
-         * @param mode The mode to set.
-         * @param ic Current input context.
-         */
-        static void setMode(LotusMode mode, InputContext* ic);
-
-        /**
-         * @brief Get name of current program
-         * @param ic Current input context.
-         * @return Name of current program
-         */
         static std::string getProgramName(InputContext* ic);
     };
 

@@ -19,6 +19,7 @@
 #include <fcitx/userinterface.h>
 
 #include <algorithm>
+#include <cctype>
 #include <string>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -882,6 +883,33 @@ namespace fcitx {
         }
         if (keyEvent.rawKey().check(FcitxKey_Shift_L) || keyEvent.rawKey().check(FcitxKey_Shift_R))
             return;
+            
+        // Handle Clipboard Paste Shortcut (Ctrl+Alt+V)
+        if (keyEvent.rawKey().sym() == FcitxKey_v && 
+            keyEvent.rawKey().states().test(KeyState::Ctrl) && 
+            keyEvent.rawKey().states().test(KeyState::Alt)) {
+            std::string content = engine_->clipboardManager().clipboard(ic_);
+            if (!content.empty()) {
+                ic_->commitString(content);
+                LOTUS_INFO("Clipboard paste triggered via shortcut");
+            }
+            keyEvent.filterAndAccept();
+            return;
+        }
+
+        if (realMode == LotusMode::Off)
+            return;
+
+        if (realMode == LotusMode::Emoji) {
+            handleEmojiMode(keyEvent);
+            return;
+        }
+
+        if (realMode == LotusMode::Clipboard) {
+            handleClipboardMode(keyEvent);
+            return;
+        }
+
         const KeySym currentSym = keyEvent.rawKey().sym();
 
         switch (realMode) {
@@ -938,6 +966,7 @@ namespace fcitx {
         }
 
         clearAllBuffers();
+        clipboardFilter_.clear();
 
         switch (realMode) {
             case LotusMode::Preedit: {
@@ -1148,5 +1177,219 @@ namespace fcitx {
             }
         }
         LOTUS_INFO("Replay buffered keys done");
+    }
+    void LotusState::handleClipboardMode(KeyEvent& keyEvent) {
+        if (keyEvent.key().hasModifier()) {
+            keyEvent.forward();
+            return;
+        }
+
+        const KeySym currentSym = keyEvent.rawKey().sym();
+        auto         baseList   = ic_->inputPanel().candidateList();
+        auto         commonList = std::dynamic_pointer_cast<CommonCandidateList>(baseList);
+
+        if (commonList && currentSym >= FcitxKey_1 && currentSym <= FcitxKey_9) {
+            int offset      = currentSym - FcitxKey_1;
+            int globalIndex = (commonList->currentPage() * commonList->pageSize()) + offset;
+
+            if (globalIndex < commonList->totalSize()) {
+                commonList->candidateFromAll(globalIndex).select(ic_);
+                keyEvent.filterAndAccept();
+                return;
+            }
+        }
+
+        if (commonList && !commonList->empty()) {
+            int  globalCursorIndex = commonList->globalCursorIndex();
+            int  totalSize         = commonList->totalSize();
+            int  currentPage       = commonList->currentPage();
+            int  pageSize          = commonList->pageSize();
+            int  localCursorIndex  = globalCursorIndex - (currentPage * pageSize);
+
+            bool handled = false;
+
+            switch (currentSym) {
+                case FcitxKey_Tab:
+                case FcitxKey_Down: {
+                    if (globalCursorIndex == totalSize - 1) {
+                        commonList->setGlobalCursorIndex(globalCursorIndex);
+                    } else if (localCursorIndex < pageSize - 1) {
+                        commonList->setGlobalCursorIndex(globalCursorIndex + 1);
+                    } else {
+                        commonList->next();
+                        int newPage = commonList->currentPage();
+                        commonList->setGlobalCursorIndex(newPage * pageSize);
+                    }
+                    handled = true;
+                    break;
+                }
+                case FcitxKey_ISO_Left_Tab:
+                case FcitxKey_Up: {
+                    if (globalCursorIndex == 0) {
+                        commonList->setGlobalCursorIndex(globalCursorIndex);
+                    } else if (localCursorIndex > 0) {
+                        commonList->setGlobalCursorIndex(globalCursorIndex - 1);
+                    } else {
+                        commonList->prev();
+                        int newPage  = commonList->currentPage();
+                        int newIndex = (newPage * pageSize) + pageSize - 1;
+                        commonList->setGlobalCursorIndex(newIndex);
+                    }
+                    handled = true;
+                    break;
+                }
+                case FcitxKey_Page_Down:
+                case FcitxKey_Right: {
+                    if (commonList->hasNext()) {
+                        commonList->next();
+                        int newPage = commonList->currentPage();
+                        commonList->setGlobalCursorIndex(newPage * pageSize);
+                        handled = true;
+                    }
+                    break;
+                }
+                case FcitxKey_Page_Up:
+                case FcitxKey_Left: {
+                    if (commonList->hasPrev()) {
+                        commonList->prev();
+                        int newPage = commonList->currentPage();
+                        commonList->setGlobalCursorIndex(newPage * pageSize);
+                        handled = true;
+                    }
+                    break;
+                }
+                default: break;
+            }
+
+            if (handled) {
+                updateClipboardPageStatus(commonList.get());
+                ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+                keyEvent.filterAndAccept();
+                return;
+            }
+        }
+
+        if (isBackspace(currentSym)) {
+            if (!clipboardFilter_.empty()) {
+                clipboardFilter_.pop_back();
+                while (!clipboardFilter_.empty() && (clipboardFilter_.back() & 0xC0) == 0x80) {
+                    clipboardFilter_.pop_back();
+                }
+                keyEvent.filterAndAccept();
+            } else {
+                keyEvent.forward();
+            }
+            updateClipboardPreedit();
+            return;
+        }
+
+        switch (currentSym) {
+            case FcitxKey_space:
+            case FcitxKey_Return: {
+                if (commonList && !commonList->empty()) {
+                    int globalIdx = commonList->globalCursorIndex();
+                    commonList->candidateFromAll(globalIdx).select(ic_);
+                    keyEvent.filterAndAccept();
+                } else {
+                    keyEvent.forward();
+                }
+                return;
+            }
+            case FcitxKey_Escape: {
+                clipboardFilter_.clear();
+                engine_->setMode(previousMode_, ic_);
+                reset();
+                ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+                keyEvent.filterAndAccept();
+                return;
+            }
+            default: break;
+        }
+
+        std::string utf8Char = Key::keySymToUTF8(currentSym);
+        if (!utf8Char.empty()) {
+            clipboardFilter_ += utf8Char;
+            keyEvent.filterAndAccept();
+            updateClipboardPreedit();
+            return;
+        }
+
+        keyEvent.forward();
+    }
+
+    void LotusState::updateClipboardPreedit() {
+        // Refresh with current system clipboard before showing
+        std::string current = engine_->clipboardManager().clipboard(ic_);
+        engine_->addClipboardHistory(current, false); // Don't trigger recursive update
+
+        ic_->inputPanel().reset();
+        
+        const auto& history = engine_->clipboardHistory();
+        if (history.empty()) {
+            ic_->updatePreedit();
+            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+            return;
+        }
+
+        auto candidateList = std::make_unique<CommonCandidateList>();
+        candidateList->setLayoutHint(CandidateLayoutHint::Vertical);
+        candidateList->setPageSize(9);
+
+        for (const auto& item : history) {
+            // Filter logic: case insensitive search
+            if (!clipboardFilter_.empty()) {
+                auto it = std::search(
+                    item.begin(), item.end(),
+                    clipboardFilter_.begin(), clipboardFilter_.end(),
+                    [](char ch1, char ch2) { return std::tolower(ch1) == std::tolower(ch2); }
+                );
+                if (it == item.end()) continue;
+            }
+
+            // Limit display length in candidate list
+            std::string display = item;
+            size_t charLen = fcitx_utf8_strlen(display.c_str());
+            if (charLen > 50) {
+                display = SubstrChar(display, 0, 47) + "...";
+            }
+            candidateList->append(std::make_unique<ClipboardCandidateWord>(Text(display), this, item));
+        }
+
+        if (candidateList->empty()) {
+            ic_->updatePreedit();
+            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+            return;
+        }
+
+        candidateList->setGlobalCursorIndex(0);
+        ic_->inputPanel().setCandidateList(std::move(candidateList));
+        
+        Text preedit;
+        preedit.append(_("Clipboard: ") + clipboardFilter_);
+        if (ic_->capabilityFlags().test(CapabilityFlag::Preedit)) {
+            ic_->inputPanel().setClientPreedit(preedit);
+        } else {
+            ic_->inputPanel().setPreedit(preedit);
+        }
+
+        updateClipboardPageStatus(static_cast<CommonCandidateList*>(ic_->inputPanel().candidateList().get()));
+        ic_->updatePreedit();
+        ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+    }
+
+    void LotusState::updateClipboardPageStatus(CommonCandidateList* commonList) {
+        if ((commonList == nullptr) || commonList->empty()) {
+            return;
+        }
+
+        int pageSize = commonList->pageSize();
+        if (pageSize <= 0) pageSize = 9;
+
+        int totalItems  = commonList->totalSize();
+        int currentPage = commonList->currentPage() + 1;
+        int totalPages  = (totalItems + pageSize - 1) / pageSize;
+
+        std::string status = _("Page ") + std::to_string(currentPage) + "/" + std::to_string(totalPages);
+        ic_->inputPanel().setAuxDown(Text(status));
     }
 } // namespace fcitx

@@ -70,6 +70,30 @@ namespace fcitx {
         std::function<void(InputContext*)> callback_;
     };
 
+    /**
+     * @brief Candidate word for clipboard selection.
+     */
+    class ClipboardCandidateWord : public CandidateWord {
+      public:
+        /**
+         * @brief Constructs a clipboard candidate.
+         * @param text Display text for the candidate.
+         * @param state Pointer to LotusState.
+         * @param content The clipboard content to commit.
+         */
+        ClipboardCandidateWord(Text text, LotusState* state, const std::string& content);
+
+        /**
+         * @brief Handles candidate selection.
+         * @param ic Current input context.
+         */
+        void select(InputContext* ic) const override;
+
+      private:
+        LotusState* state_;
+        std::string content_;
+    };
+
 } // namespace fcitx
 
 #endif // _FCITX5_LOTUS_CANDIDATES_H_

@@ -33,6 +33,7 @@ namespace fcitx {
         SurroundingText = 4,
         Preedit         = 5,
         Emoji           = 6,
+        Clipboard       = 8,
         NoMode          = 7,
     };
 
@@ -49,6 +50,7 @@ namespace fcitx {
             case LotusMode::Preedit: return "Preedit";
             case LotusMode::UinputHC: return "Uinput (Hardcore)";
             case LotusMode::Emoji: return "Emoji Picker";
+            case LotusMode::Clipboard: return "Clipboard";
             case LotusMode::Smooth: return "Uinput (Smooth)";
             default: return "";
         }
@@ -67,6 +69,7 @@ namespace fcitx {
             {"Preedit", LotusMode::Preedit},
             {"Uinput (Hardcore)", LotusMode::UinputHC},
             {"Emoji Picker", LotusMode::Emoji},
+            {"Clipboard", LotusMode::Clipboard},
             {"Uinput (Smooth)", LotusMode::Smooth},
         };
         auto it = modeMap.find(mode);

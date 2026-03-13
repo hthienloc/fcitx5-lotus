@@ -6,6 +6,7 @@
  */
 #include "lotus-candidates.h"
 #include "lotus-state.h"
+#include "lotus-engine.h"
 
 #include <fcitx/inputpanel.h>
 
@@ -35,6 +36,22 @@ namespace fcitx {
         if (callback_) {
             callback_(ic);
         }
+    }
+
+    // ClipboardCandidateWord implementation
+    ClipboardCandidateWord::ClipboardCandidateWord(Text text, LotusState* state, const std::string& content) :
+        CandidateWord(std::move(text)), state_(state), content_(content) {}
+
+    void ClipboardCandidateWord::select(InputContext* ic) const {
+        // Reset the mode and close menu (input panel) first to avoid conflicts
+        state_->engine_->setMode(state_->previousMode_, ic);
+        state_->reset();
+        
+        ic->commitString(content_);
+        LOTUS_INFO("Clipboard item committed: " + content_);
+
+        ic->updateUserInterface(UserInterfaceComponent::InputPanel);
+        ic->updatePreedit();
     }
 
 } // namespace fcitx

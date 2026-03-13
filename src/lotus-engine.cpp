@@ -15,6 +15,8 @@
 #include "ack-apps.h"
 #include "lotus-version.h"
 
+#include <fcitx-utils/utf8.h>
+#include <algorithm>
 #include <fcitx-config/iniparser.h>
 #include <fcitx/menu.h>
 #include <fcitx/userinterfacemanager.h>
@@ -44,6 +46,7 @@ namespace fcitx {
             case FcitxKey_w:
             case FcitxKey_e:
             case FcitxKey_r:
+            case FcitxKey_a:
             case FcitxKey_Escape:
             case FcitxKey_Tab:
             case FcitxKey_ISO_Left_Tab:
@@ -170,6 +173,25 @@ namespace fcitx {
         appRulesPath_ = configDir + "/lotus-app-rules.conf";
         loadAppRules();
         toggleActions_ = {versionAction_.get(), charsetAction_.get(), spellCheckAction_.get(), macroAction_.get(), capitalizeMacroAction_.get(), autoNonVnRestoreAction_.get()};
+
+        // Register global clipboard tracking
+        clipboardHistoryHandlers_.push_back(std::move(instance_->watchEvent(
+            EventType::InputContextCommitString, EventWatcherPhase::PostInputMethod,
+            [this](Event& event) {
+                auto& commitEvent = static_cast<CommitStringEvent&>(event);
+                addClipboardHistory(commitEvent.text());
+            })));
+
+        clipboardHistoryHandlers_.push_back(std::move(instance_->watchEvent(
+            EventType::InputContextFocusIn, EventWatcherPhase::PostInputMethod,
+            [this](Event& event) {
+                auto& focusEvent = static_cast<InputContextEvent&>(event);
+                auto* ic = focusEvent.inputContext();
+                if (ic) {
+                    std::string current = clipboardManager().clipboard(ic);
+                    addClipboardHistory(current);
+                }
+            })));
     }
 
     void LotusEngine::initToggleAction(std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& actionId, const std::string& iconName,
@@ -423,10 +445,28 @@ namespace fcitx {
                 }
                 case FcitxKey_r: {
                     if (appRules_.erase(currentConfigureApp_) > 0) {
+                        if (currentConfigureApp_ == getProgramName(keyEvent.inputContext())) {
+                            setMode(globalMode_, keyEvent.inputContext());
+                        }
                         saveAppRules();
                     }
                     selectedMode  = globalMode_;
                     selectionMade = true;
+                    break;
+                }
+                case FcitxKey_a: {
+                    auto* ic = keyEvent.inputContext();
+                    auto* state = ic->propertyFor(&factory_);
+                    if (state) {
+                        state->previousMode_ = realMode;
+                        isSelectingAppMode_ = false;
+                        ic->inputPanel().reset();
+                        ic->updateUserInterface(UserInterfaceComponent::InputPanel);
+                        state->reset();
+                        setMode(LotusMode::Clipboard, ic);
+                        state->updateClipboardPreedit();
+                        return;
+                    }
                     break;
                 }
                 case FcitxKey_Escape: {
@@ -502,6 +542,10 @@ namespace fcitx {
         }
 
         if (event.type() == EventType::InputContextFocusOut) {
+            isSelectingAppMode_ = false;
+            if (realMode == LotusMode::Clipboard) {
+                setMode(state->previousMode_, event.inputContext());
+            }
             state->reset();
         }
     }
@@ -519,6 +563,36 @@ namespace fcitx {
             ic->inputPanel().reset();
             ic->updateUserInterface(UserInterfaceComponent::InputPanel);
             ic->updatePreedit();
+        }
+    }
+
+    void LotusEngine::addClipboardHistory(const std::string& str, bool triggerUpdate) {
+        if (str.empty() || !utf8::validate(str)) {
+            return;
+        }
+
+        // Remove duplicate if exists and move to top
+        auto it = std::find(clipboardHistory_.begin(), clipboardHistory_.end(), str);
+        if (it != clipboardHistory_.end()) {
+            clipboardHistory_.erase(it);
+        }
+
+        clipboardHistory_.insert(clipboardHistory_.begin(), str);
+
+        // Limit history size
+        if (clipboardHistory_.size() > 20) {
+            clipboardHistory_.pop_back();
+        }
+
+        if (triggerUpdate && realMode == LotusMode::Clipboard) {
+            // We need to trigger update on the current focused IC
+            auto* ic = instance_->inputContextManager().lastFocusedInputContext();
+            if (ic) {
+                auto* state = ic->propertyFor(&factory_);
+                if (state) {
+                    state->updateClipboardPreedit();
+                }
+            }
         }
     }
 
@@ -645,6 +719,19 @@ namespace fcitx {
             cleanup(ic);
         }));
 
+        candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[a] Clipboard")), [this, cleanup](InputContext* ic) {
+            auto* state = ic->propertyFor(&factory_);
+            if (state) {
+                state->previousMode_ = realMode;
+                cleanup(ic); // Note: cleanup calls state->reset() which clears preedit/candidates
+                setMode(LotusMode::Clipboard, ic);
+                state->updateClipboardPreedit();
+            } else {
+                cleanup(ic);
+                setMode(LotusMode::Clipboard, ic);
+            }
+        }));
+
         {
             const auto& kl = *config_.modeMenuKey;
             if (kl.size() == 1 && !kl[0].hasModifier()) {
@@ -670,6 +757,7 @@ namespace fcitx {
             case LotusMode::Preedit: selectedIndex = 5; break;
             case LotusMode::Emoji: selectedIndex = 6; break;
             case LotusMode::Off: selectedIndex = 7; break;
+            case LotusMode::Clipboard: selectedIndex = 9; break;
             default: selectedIndex = 1; break;
         }
         candidateList->setGlobalCursorIndex(selectedIndex);

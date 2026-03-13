@@ -6,6 +6,7 @@ set(fcitx_lotus_sources
   lotus-utils.cpp
   lotus-monitor.cpp
   emoji.cpp
+  lotus-clipboard.cpp
 )
 
 add_library(lotus MODULE ${fcitx_lotus_sources})
@@ -14,6 +15,7 @@ target_link_libraries(lotus
 	Fcitx5::Core
 	Fcitx5::Config
   Fcitx5::Module::Emoji
+  Fcitx5::Module::Clipboard
 	Bamboo::Core
 	Pthread::Pthread
 	X11::X11
