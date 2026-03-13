@@ -42,12 +42,14 @@ namespace fcitx {
         CandidateWord(std::move(text)), state_(state), content_(content) {}
 
     void ClipboardCandidateWord::select(InputContext* ic) const {
+        std::string contentToCommit = content_;
+        
         // Reset the mode and close menu (input panel) first to avoid conflicts
         state_->engine_->setMode(state_->previousMode_, ic);
         state_->reset();
         
-        ic->commitString(content_);
-        std::string preview = content_.size() > 50 ? content_.substr(0, 50) + "..." : content_;
+        ic->commitString(contentToCommit);
+        std::string preview = contentToCommit.size() > 50 ? contentToCommit.substr(0, 50) + "..." : contentToCommit;
         LOTUS_INFO("Clipboard item committed: " + preview);
 
         ic->updateUserInterface(UserInterfaceComponent::InputPanel);

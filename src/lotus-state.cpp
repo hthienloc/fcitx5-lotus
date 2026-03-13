@@ -970,7 +970,8 @@ namespace fcitx {
                 ic_->inputPanel().reset();
                 break;
             }
-            case LotusMode::Emoji: {
+            case LotusMode::Emoji:
+            case LotusMode::Clipboard: {
                 ic_->inputPanel().reset();
                 ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
                 ic_->updatePreedit();
@@ -1311,6 +1312,14 @@ namespace fcitx {
         engine_->addClipboardHistory(current, false); // Don't trigger recursive update
 
         ic_->inputPanel().reset();
+
+        Text preedit;
+        preedit.append(_("Clipboard: ") + clipboardFilter_);
+        if (ic_->capabilityFlags().test(CapabilityFlag::Preedit)) {
+            ic_->inputPanel().setClientPreedit(preedit);
+        } else {
+            ic_->inputPanel().setPreedit(preedit);
+        }
         
         const auto& history = engine_->clipboardHistory();
         if (history.empty()) {
@@ -1351,14 +1360,6 @@ namespace fcitx {
 
         candidateList->setGlobalCursorIndex(0);
         ic_->inputPanel().setCandidateList(std::move(candidateList));
-        
-        Text preedit;
-        preedit.append(_("Clipboard: ") + clipboardFilter_);
-        if (ic_->capabilityFlags().test(CapabilityFlag::Preedit)) {
-            ic_->inputPanel().setClientPreedit(preedit);
-        } else {
-            ic_->inputPanel().setPreedit(preedit);
-        }
 
         updateClipboardPageStatus(static_cast<CommonCandidateList*>(ic_->inputPanel().candidateList().get()));
         ic_->updatePreedit();
