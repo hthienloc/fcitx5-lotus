@@ -625,6 +625,10 @@ namespace fcitx {
 
                 cleanup(ic);
                 setMode(mode, ic);
+                if (mode == LotusMode::Emoji) {
+                    auto* state = ic->propertyFor(&factory_);
+                    state->updateEmojiPreedit();
+                }
             };
         };
 
