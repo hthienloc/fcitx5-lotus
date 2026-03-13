@@ -884,18 +884,6 @@ namespace fcitx {
         if (keyEvent.rawKey().check(FcitxKey_Shift_L) || keyEvent.rawKey().check(FcitxKey_Shift_R))
             return;
             
-        // Handle Clipboard Paste Shortcut (Ctrl+Alt+V)
-        if (keyEvent.rawKey().sym() == FcitxKey_v && 
-            keyEvent.rawKey().states().test(KeyState::Ctrl) && 
-            keyEvent.rawKey().states().test(KeyState::Alt)) {
-            std::string content = engine_->clipboardManager().clipboard(ic_);
-            if (!content.empty()) {
-                ic_->commitString(content);
-                LOTUS_INFO("Clipboard paste triggered via shortcut");
-            }
-            keyEvent.filterAndAccept();
-            return;
-        }
 
         if (realMode == LotusMode::Off)
             return;
