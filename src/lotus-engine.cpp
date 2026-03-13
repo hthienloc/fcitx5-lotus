@@ -459,8 +459,6 @@ namespace fcitx {
                     appRules_[currentConfigureApp_] = selectedMode;
                     saveAppRules();
                 }
-
-                setMode(selectedMode, ic);
                 selectionMade = true;
             }
 
@@ -470,6 +468,9 @@ namespace fcitx {
                 ic->updateUserInterface(UserInterfaceComponent::InputPanel);
                 auto* state = ic->propertyFor(&factory_);
                 state->reset();
+                if (selectedMode != LotusMode::NoMode) {
+                    setMode(selectedMode, ic);
+                }
             }
             return;
         }
@@ -622,8 +623,8 @@ namespace fcitx {
                     saveAppRules();
                 }
 
-                setMode(mode, ic);
                 cleanup(ic);
+                setMode(mode, ic);
             };
         };
 
