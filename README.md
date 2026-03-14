@@ -484,8 +484,7 @@ Thêm dòng sau vào file `~/.config/kanata/kanata.kbd`
 
 Bạn có thể tùy chỉnh các thông số của bộ gõ qua 2 cách sau:
 
-<details open>
-<summary><b>Cách 1: Menu chuột phải (Quick Settings)</b></summary>
+**Cách 1: Menu chuột phải (Quick Settings)**
 
 Nhấp chuột phải vào biểu tượng Lotus trên system tray để mở nhanh các tùy chỉnh:
 
@@ -497,16 +496,13 @@ Nhấp chuột phải vào biểu tượng Lotus trên system tray để mở nh
 | **Capitalize Macro**    | Bật/tắt gõ tắt chữ hoa.                                 | Bật      |
 | **Auto non-VN restore** | Bật/tắt tự động khôi phục với từ không phải tiếng Việt. | Bật      |
 
-</details>
-
-<details open>
-<summary><b>Cách 2: Menu cấu hình Lotus - Fcitx (Advanced Settings)</b></summary>
+**Cách 2: Menu cấu hình Lotus - Fcitx (Advanced Settings)**
 
 Nhấp chuột phải vào biểu tượng Lotus hoặc icon Fcitx -> **Input Method Settings** (Cấu hình bộ gõ) -> Chọn **Lotus** -> Nhấn biểu tượng **Configure** (bánh răng) ở giữa.
 
 Tại đây bạn có thể tùy chỉnh chi tiết:
 
-- **Gõ tắt / Macro:** Nhấn bánh răng cạnh dòng _Input Method_ để quản lý danh sách gõ tắt. (Lưu ý: Macro theo từng kiểu gõ).
+- **Gõ tắt / Macro:** Nhấn bánh răng cạnh dòng _Macro_ để quản lý danh sách gõ tắt toàn cục.
 - **Keymap tùy chỉnh:** Nhấn bánh răng dòng _Custom Keymap_ để tự định nghĩa phím. Chọn kiểu gõ **Custom** để áp dụng.
 - **Phím tắt Menu:** Đổi phím nóng mở menu chế độ gõ (mặc định là `` ` ``) tại dòng _Mode menu hotkey_.
 
@@ -519,8 +515,6 @@ Tại đây bạn có thể tùy chỉnh chi tiết:
 | **Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On** | Bật/tắt cho phép "dd" tạo "đ" khi dùng _Auto non-VN restore_. | Bật             |
 | **Fix Uinput Mode With Ack**                                              | Khuyên dùng cho ứng dụng Chromium (Chrome, Brave, Edge, ...). | Tắt             |
 | **Use Lotus Status Icons**                                                | Dùng icon Lotus thay vì icon V/E mặc định.                    | Tắt             |
-
-</details>
 
 ### 2. Menu chuyển chế độ gõ
 
@@ -540,7 +534,11 @@ Khi con trỏ đang ở trong ô nhập liệu (có thể gõ văn bản), nhấ
 
 Bộ gõ sẽ tự động lưu chế độ gõ đã dùng gần nhất cho từng ứng dụng và khôi phục cấu hình đó khi bạn mở lại chúng.
 
-### 3. Đặt lại trạng thái đang gõ
+### 3. Chỉnh sửa nhanh (Quick Phrase)
+
+Lotus tương thích với tính năng **Quick Phrase** có sẵn của Fcitx5 (mặc định dùng `Super` + `` ` ``). Bạn có thể gõ nhanh Emoji hoặc ký tự đặc biệt bằng cách nhập từ khóa.
+
+### 4. Đặt lại trạng thái đang gõ
 
 Nhấp chuột hoặc chạm touchpad trong khi gõ sẽ tự động đặt lại trạng thái đang gõ, ngăn chặn hiện tượng dính ký tự giữa các từ.
 

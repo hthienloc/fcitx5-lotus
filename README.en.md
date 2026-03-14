@@ -485,8 +485,7 @@ Add this line to file `~/.config/kanata/kanata.kbd`
 
 You can customize the input method settings in two ways:
 
-<details open>
-<summary><b>Option 1: Right-click Menu (Quick Settings)</b></summary>
+**Option 1: Right-click Menu (Quick Settings)**
 
 Right-click the Lotus icon on the system tray to quickly toggle settings:
 
@@ -500,14 +499,13 @@ Right-click the Lotus icon on the system tray to quickly toggle settings:
 
 </details>
 
-<details>
-<summary><b>Option 2: Lotus - Fcitx Configuration Menu (Advanced Settings)</b></summary>
+**Option 2: Lotus - Fcitx Configuration Menu (Advanced Settings)**
 
 Right-click the Lotus or Fcitx icon -> **Input Method Settings** -> Select **Lotus** -> Click the **Configure** (gear icon) in the middle.
 
 Advanced options available here:
 
-- **Macro:** Click the gear icon next to the _Input Method_ selection row to manage macros. (Note: Macros are per-input-method).
+- **Macro:** Click the gear icon next to the _Macro_ row to manage the global shorthand list.
 - **Custom Keymap:** Click the gear icon on the _Custom Keymap_ row to customize your keymap. Select **Custom** input method to apply.
 - **Menu Hotkey:** Change the key to open the mode menu (default is `` ` ``) at _Mode menu hotkey_.
 
@@ -520,8 +518,6 @@ Advanced options available here:
 | **Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On** | Enable/disable allowing "dd" to produce "đ" when _Auto non-VN restore_ is On   | On              |
 | **Fix Uinput Mode With Ack**                                              | Recommended when using Chromium-based applications (Chrome, Brave, Edge, ...). | Off             |
 | **Use Lotus Status Icons**                                                | Enable/disable using Lotus icons instead of the default V/E icons.             | Off             |
-
-</details>
 
 ### 2. Typing mode menu
 
@@ -541,7 +537,11 @@ In any application, press the **`** key (or the hotkey you have configured above
 
 The input method automatically saves the most recently used typing mode for each application and restores that configuration when you reopen them.
 
-### 3. Reset typing state
+### 3. Quick Phrase
+
+Lotus is compatible with Fcitx5’s built-in **Quick Phrase** (default shortcut `Super` + `` ` ``). It allows you to quickly type Emojis or special characters by entering keywords.
+
+### 4. Reset typing state
 
 Clicking the mouse or touching the touchpad while typing will automatically reset the typing state, preventing character sticking between words.
 
