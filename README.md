@@ -280,7 +280,7 @@ sudo make install PREFIX=/usr/local
 
 Sau khi cài đặt xong, bạn cần thực hiện các bước sau để bật bộ gõ fcitx5-lotus:
 
-> **💡 Tự động hoá:** Nếu bạn cài qua **Debian/Ubuntu** (`.deb`), post-install script sẽ tự hỏi bạn từng bước 1–3 bên dưới với lựa chọn `[y/n]`. Bạn chỉ cần xác nhận là xong — không cần chạy thủ công.
+> **💡 Tự động hoá:** Nếu bạn cài qua **Debian/Ubuntu** (`.deb`), post-install script sẽ tự động thực hiện các bước 1–3 bên dưới. Sau khi cài đặt, bạn chỉ cần làm tiếp từ bước 4.
 
 ### 1. Bật Lotus Server
 
@@ -406,7 +406,7 @@ GLFW_IM_MODULE=ibus" | sudo tee -a /etc/environment
 
 </details>
 
-### 3. Tắt bộ gõ cũ (IBus) và thêm Fcitx5 vào Autostart
+### 3. Tắt bộ gõ cũ (IBus)
 
 Nếu máy bạn đang dùng IBus, hãy tắt nó đi trước khi chuyển sang Fcitx5 để tránh xung đột.
 
@@ -415,8 +415,9 @@ Nếu máy bạn đang dùng IBus, hãy tắt nó đi trước khi chuyển sang
 killall ibus-daemon || ibus exit
 ```
 
-<details>
-<summary><b>Thêm Fcitx5 vào Autostart cho từng DE / WM (GNOME, Hyprland ...)</b></summary>
+> **Lưu ý:** Hãy tắt autostart của IBus (thường là `ibus-daemon` hoặc `ibus`) để tránh xung đột. Tốt nhất là gỡ cài đặt IBus nếu không sử dụng.
+
+### 4. Thêm Fcitx5 vào Autostart
 
 | DE / WM        | Hướng dẫn chi tiết                                                                                                           |
 | :------------- | :--------------------------------------------------------------------------------------------------------------------------- |
@@ -432,11 +433,9 @@ killall ibus-daemon || ibus exit
 | **i3 / Sway**  | Thêm `exec --no-startup-id fcitx5 -d` vào file config (`~/.config/i3/config` hoặc `~/.config/sway/config`)                   |
 | **Hyprland**   | Thêm `exec-once = fcitx5 -d` vào `~/.config/hypr/hyprland.conf`                                                              |
 
-> **Lưu ý:** Hãy tắt autostart của IBus (thường là `ibus-daemon` hoặc `ibus`) để tránh xung đột. Tốt nhất là gỡ cài đặt IBus nếu không sử dụng.
-
 </details>
 
-### 4. Cấu hình Fcitx5
+### 5. Cấu hình Fcitx5
 
 Sau khi đã log out và log in lại:
 

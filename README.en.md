@@ -280,7 +280,7 @@ sudo make install PREFIX=/usr/local
 
 After installation, you need to follow these steps to enable the fcitx5-lotus input method:
 
-> **💡 Automated:** If you install via **Debian/Ubuntu** (`.deb`), the post-install script will interactively walk you through steps 1–3 below with `[y/n]` prompts. Just confirm each step — no manual commands needed.
+> **💡 Automated:** If you install via **Debian/Ubuntu** (`.deb`), the post-install script will automatically perform steps 1–3 below. After installation, you only need to proceed from step 4.
 
 ### 1. Enable Lotus Server
 
@@ -407,7 +407,7 @@ GLFW_IM_MODULE=ibus" | sudo tee -a /etc/environment
 
 </details>
 
-### 3. Turn off old input method (IBus) and add Fcitx5 to Autostart
+### 3. Turn off old input method (IBus)
 
 If your machine is using IBus, turn it off before switching to Fcitx5 to avoid conflicts.
 
@@ -416,8 +416,9 @@ If your machine is using IBus, turn it off before switching to Fcitx5 to avoid c
 killall ibus-daemon || ibus exit
 ```
 
-<details>
-<summary><b>Add Fcitx5 to Autostart for each DE / WM (GNOME, Hyprland ...)</b></summary>
+> **Note:** Turn off IBus autostart (usually `ibus-daemon` or `ibus`) to avoid conflicts. It's best to uninstall IBus if not in use.
+
+### 4. Add Fcitx5 to Autostart
 
 | DE / WM        | Detailed Instructions                                                                                                        |
 | :------------- | :--------------------------------------------------------------------------------------------------------------------------- |
@@ -433,11 +434,9 @@ killall ibus-daemon || ibus exit
 | **i3 / Sway**  | Add `exec --no-startup-id fcitx5 -d` to the config file (`~/.config/i3/config` or `~/.config/sway/config`)                   |
 | **Hyprland**   | Add `exec-once = fcitx5 -d` to `~/.config/hypr/hyprland.conf`                                                                |
 
-> **Note:** Turn off IBus autostart (usually `ibus-daemon` or `ibus`) to avoid conflicts. It's best to uninstall IBus if not in use.
-
 </details>
 
-### 4. Configure Fcitx5
+### 5. Configure Fcitx5
 
 After logging out and logging in again:
 

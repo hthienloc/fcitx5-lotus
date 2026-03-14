@@ -25,7 +25,7 @@ if [ "$1" = "configure" ]; then
     echo ""
 
     if [ -z "$2" ]; then
-        printf "%b\n" "${bold}[1/4] Đang bật Lotus Server cho ${REAL_USER}...${all_off}"
+        printf "%b\n" "${bold}[1/3] Đang bật Lotus Server cho ${REAL_USER}...${all_off}"
         if systemctl enable --now "fcitx5-lotus-server@${REAL_USER}.service" 2>/dev/null; then
             printf "%b\n" "  ${green}✓ Lotus Server đã được kích hoạt.${all_off}"
         else
@@ -33,7 +33,7 @@ if [ "$1" = "configure" ]; then
         fi
         echo ""
 
-        printf "%b\n" "${bold}[2/4] Đang thiết lập biến môi trường hệ thống...${all_off}"
+        printf "%b\n" "${bold}[2/3] Đang thiết lập biến môi trường hệ thống...${all_off}"
         ENV_FILE="/etc/environment"
         
         add_env_var() {
@@ -51,7 +51,7 @@ if [ "$1" = "configure" ]; then
         printf "%b\n" "  ${green}✓ Đã cập nhật biến môi trường vào ${ENV_FILE}.${all_off}"
         echo ""
 
-        printf "%b\n" "${bold}[3/4] Đang dọn dẹp IBus (nếu có)...${all_off}"
+        printf "%b\n" "${bold}[3/3] Đang dọn dẹp IBus (nếu có)...${all_off}"
         killall ibus-daemon 2>/dev/null || true
         USER_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
         rm -f "$USER_HOME/.config/autostart/ibus"* 2>/dev/null || true
@@ -62,8 +62,9 @@ if [ "$1" = "configure" ]; then
         printf "%b\n" "${bold}Cần làm tiếp (Xem chi tiết trên GitHub README):${all_off}"
         printf "%b\n" "  4. Thêm fcitx5 vào autostart cho DE/WM của bạn."
         printf "%b\n" "  5. Cấu hình bộ gõ: Chạy ${green}fcitx5-configtool${all_off} để thêm Lotus."
-        printf "%b\n" "  6. Wayland (KDE/Hyprland): Thiết lập Virtual Keyboard & Permission."
-        printf "%b\n" "  7. Kanata: Exclude 'Lotus-Uinput-Server' trong cấu hình."
+        printf "%b\n" "${bold}Các bước bổ sung nếu cần:${all_off}"
+        printf "%b\n" "  - Wayland (KDE/Hyprland): Thiết lập Virtual Keyboard & Permission."
+        printf "%b\n" "  - Kanata: Exclude 'Lotus-Uinput-Server' trong cấu hình."
         printf "%b\n" "${blue}─────────────────────────────────────────────${all_off}"
         printf "%b\n" "  ${yellow}→ Vui lòng khởi động lại máy để áp dụng thay đổi.${all_off}"
         echo ""
