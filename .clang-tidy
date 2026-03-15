@@ -6,6 +6,7 @@ Checks: >
   readability-*,
   clang-analyzer-*,
   cppcoreguidelines-*,
+  unused-*,
   -readability-braces-around-statements,
   -readability-magic-numbers,
   -modernize-use-trailing-return-type,

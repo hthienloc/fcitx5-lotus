@@ -280,7 +280,7 @@ sudo make install PREFIX=/usr/local
 
 After installation, you need to follow these steps to enable the fcitx5-lotus input method:
 
-> **💡 Automated:** If you install via **Debian/Ubuntu** (`.deb`), the post-install script will interactively walk you through steps 1–3 below with `[y/n]` prompts. Just confirm each step — no manual commands needed.
+> **💡 Automated:** If you install via **Debian/Ubuntu** (`.deb`), the post-install script will automatically perform steps 1–3 below. After installation, you only need to proceed from step 4.
 
 ### 1. Enable Lotus Server
 
@@ -407,7 +407,7 @@ GLFW_IM_MODULE=ibus" | sudo tee -a /etc/environment
 
 </details>
 
-### 3. Turn off old input method (IBus) and add Fcitx5 to Autostart
+### 3. Turn off old input method (IBus)
 
 If your machine is using IBus, turn it off before switching to Fcitx5 to avoid conflicts.
 
@@ -416,8 +416,9 @@ If your machine is using IBus, turn it off before switching to Fcitx5 to avoid c
 killall ibus-daemon || ibus exit
 ```
 
-<details>
-<summary><b>Add Fcitx5 to Autostart for each DE / WM (GNOME, Hyprland ...)</b></summary>
+> **Note:** Turn off IBus autostart (usually `ibus-daemon` or `ibus`) to avoid conflicts. It's best to uninstall IBus if not in use.
+
+### 4. Add Fcitx5 to Autostart
 
 | DE / WM        | Detailed Instructions                                                                                                        |
 | :------------- | :--------------------------------------------------------------------------------------------------------------------------- |
@@ -433,11 +434,9 @@ killall ibus-daemon || ibus exit
 | **i3 / Sway**  | Add `exec --no-startup-id fcitx5 -d` to the config file (`~/.config/i3/config` or `~/.config/sway/config`)                   |
 | **Hyprland**   | Add `exec-once = fcitx5 -d` to `~/.config/hypr/hyprland.conf`                                                                |
 
-> **Note:** Turn off IBus autostart (usually `ibus-daemon` or `ibus`) to avoid conflicts. It's best to uninstall IBus if not in use.
-
 </details>
 
-### 4. Configure Fcitx5
+### 5. Configure Fcitx5
 
 After logging out and logging in again:
 
@@ -486,8 +485,7 @@ Add this line to file `~/.config/kanata/kanata.kbd`
 
 You can customize the input method settings in two ways:
 
-<details open>
-<summary><b>Option 1: Right-click Menu (Quick Settings)</b></summary>
+**Option 1: Right-click Menu (Quick Settings)**
 
 Right-click the Lotus icon on the system tray to quickly toggle settings:
 
@@ -501,14 +499,13 @@ Right-click the Lotus icon on the system tray to quickly toggle settings:
 
 </details>
 
-<details>
-<summary><b>Option 2: Lotus - Fcitx Configuration Menu (Advanced Settings)</b></summary>
+**Option 2: Lotus - Fcitx Configuration Menu (Advanced Settings)**
 
 Right-click the Lotus or Fcitx icon -> **Input Method Settings** -> Select **Lotus** -> Click the **Configure** (gear icon) in the middle.
 
 Advanced options available here:
 
-- **Macro:** Click the gear icon next to the _Input Method_ selection row to manage macros. (Note: Macros are per-input-method).
+- **Macro:** Click the gear icon next to the _Macro_ row to manage the global shorthand list.
 - **Custom Keymap:** Click the gear icon on the _Custom Keymap_ row to customize your keymap. Select **Custom** input method to apply.
 - **Menu Hotkey:** Change the key to open the mode menu (default is `` ` ``) at _Mode menu hotkey_.
 
@@ -521,8 +518,6 @@ Advanced options available here:
 | **Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On** | Enable/disable allowing "dd" to produce "đ" when _Auto non-VN restore_ is On   | On              |
 | **Fix Uinput Mode With Ack**                                              | Recommended when using Chromium-based applications (Chrome, Brave, Edge, ...). | Off             |
 | **Use Lotus Status Icons**                                                | Enable/disable using Lotus icons instead of the default V/E icons.             | Off             |
-
-</details>
 
 ### 2. Typing mode menu
 
@@ -542,7 +537,15 @@ In any application, press the **`** key (or the hotkey you have configured above
 
 The input method automatically saves the most recently used typing mode for each application and restores that configuration when you reopen them.
 
-### 3. Reset typing state
+### 3. Quick Phrase
+
+Lotus is compatible with Fcitx5’s built-in **Quick Phrase** (default shortcut `Super` + `` ` ``). You can quickly input:
+
+- **LaTeX**: Math symbols (e.g., `\alpha` → `α`).
+- **Emoji Code**: Emoji characters (e.g., `:smile:` → `😄`).
+- **Emoji**: Kaomoji-style phrases (e.g., `smile` → `(・∀・)`).
+
+### 4. Reset typing state
 
 Clicking the mouse or touching the touchpad while typing will automatically reset the typing state, preventing character sticking between words.
 
@@ -582,6 +585,9 @@ paru -Rns fcitx5-lotus
 
 ```bash
 sudo apt remove fcitx5-lotus
+sudo rm /etc/apt/sources.list.d/fcitx5-lotus.list
+sudo rm /etc/apt/keyrings/fcitx5-lotus.gpg
+sudo apt update
 ```
 
 </details>
@@ -592,6 +598,9 @@ sudo apt remove fcitx5-lotus
 
 ```bash
 sudo apt remove fcitx5-lotus
+sudo rm /etc/apt/sources.list.d/fcitx5-lotus.list
+sudo rm /etc/apt/keyrings/fcitx5-lotus.gpg
+sudo apt update
 ```
 
 </details>
@@ -602,6 +611,7 @@ sudo apt remove fcitx5-lotus
 
 ```bash
 sudo dnf remove fcitx5-lotus
+sudo rm /etc/yum.repos.d/fcitx5-lotus-*.repo
 ```
 
 </details>
@@ -612,6 +622,7 @@ sudo dnf remove fcitx5-lotus
 
 ```bash
 sudo zypper remove fcitx5-lotus
+sudo zypper removerepo fcitx5-lotus
 ```
 
 </details>
@@ -658,6 +669,15 @@ sudo make uninstall
 ```
 
 </details>
+
+### 🧹 System Cleanup (Optional)
+
+If you want to completely remove shorthand data and configuration:
+
+```bash
+rm -rf ~/.local/share/fcitx5/lotus
+rm -rf ~/.config/fcitx5/conf/lotus.conf
+```
 
 ---
 

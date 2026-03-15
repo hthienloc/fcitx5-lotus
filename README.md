@@ -280,7 +280,7 @@ sudo make install PREFIX=/usr/local
 
 Sau khi cài đặt xong, bạn cần thực hiện các bước sau để bật bộ gõ fcitx5-lotus:
 
-> **💡 Tự động hoá:** Nếu bạn cài qua **Debian/Ubuntu** (`.deb`), post-install script sẽ tự hỏi bạn từng bước 1–3 bên dưới với lựa chọn `[y/n]`. Bạn chỉ cần xác nhận là xong — không cần chạy thủ công.
+> **💡 Tự động hoá:** Nếu bạn cài qua **Debian/Ubuntu** (`.deb`), post-install script sẽ tự động thực hiện các bước 1–3 bên dưới. Sau khi cài đặt, bạn chỉ cần làm tiếp từ bước 4.
 
 ### 1. Bật Lotus Server
 
@@ -406,7 +406,7 @@ GLFW_IM_MODULE=ibus" | sudo tee -a /etc/environment
 
 </details>
 
-### 3. Tắt bộ gõ cũ (IBus) và thêm Fcitx5 vào Autostart
+### 3. Tắt bộ gõ cũ (IBus)
 
 Nếu máy bạn đang dùng IBus, hãy tắt nó đi trước khi chuyển sang Fcitx5 để tránh xung đột.
 
@@ -415,8 +415,9 @@ Nếu máy bạn đang dùng IBus, hãy tắt nó đi trước khi chuyển sang
 killall ibus-daemon || ibus exit
 ```
 
-<details>
-<summary><b>Thêm Fcitx5 vào Autostart cho từng DE / WM (GNOME, Hyprland ...)</b></summary>
+> **Lưu ý:** Hãy tắt autostart của IBus (thường là `ibus-daemon` hoặc `ibus`) để tránh xung đột. Tốt nhất là gỡ cài đặt IBus nếu không sử dụng.
+
+### 4. Thêm Fcitx5 vào Autostart
 
 | DE / WM        | Hướng dẫn chi tiết                                                                                                           |
 | :------------- | :--------------------------------------------------------------------------------------------------------------------------- |
@@ -432,11 +433,9 @@ killall ibus-daemon || ibus exit
 | **i3 / Sway**  | Thêm `exec --no-startup-id fcitx5 -d` vào file config (`~/.config/i3/config` hoặc `~/.config/sway/config`)                   |
 | **Hyprland**   | Thêm `exec-once = fcitx5 -d` vào `~/.config/hypr/hyprland.conf`                                                              |
 
-> **Lưu ý:** Hãy tắt autostart của IBus (thường là `ibus-daemon` hoặc `ibus`) để tránh xung đột. Tốt nhất là gỡ cài đặt IBus nếu không sử dụng.
-
 </details>
 
-### 4. Cấu hình Fcitx5
+### 5. Cấu hình Fcitx5
 
 Sau khi đã log out và log in lại:
 
@@ -485,8 +484,7 @@ Thêm dòng sau vào file `~/.config/kanata/kanata.kbd`
 
 Bạn có thể tùy chỉnh các thông số của bộ gõ qua 2 cách sau:
 
-<details open>
-<summary><b>Cách 1: Menu chuột phải (Quick Settings)</b></summary>
+**Cách 1: Menu chuột phải (Quick Settings)**
 
 Nhấp chuột phải vào biểu tượng Lotus trên system tray để mở nhanh các tùy chỉnh:
 
@@ -498,16 +496,13 @@ Nhấp chuột phải vào biểu tượng Lotus trên system tray để mở nh
 | **Capitalize Macro**    | Bật/tắt gõ tắt chữ hoa.                                 | Bật      |
 | **Auto non-VN restore** | Bật/tắt tự động khôi phục với từ không phải tiếng Việt. | Bật      |
 
-</details>
-
-<details open>
-<summary><b>Cách 2: Menu cấu hình Lotus - Fcitx (Advanced Settings)</b></summary>
+**Cách 2: Menu cấu hình Lotus - Fcitx (Advanced Settings)**
 
 Nhấp chuột phải vào biểu tượng Lotus hoặc icon Fcitx -> **Input Method Settings** (Cấu hình bộ gõ) -> Chọn **Lotus** -> Nhấn biểu tượng **Configure** (bánh răng) ở giữa.
 
 Tại đây bạn có thể tùy chỉnh chi tiết:
 
-- **Gõ tắt / Macro:** Nhấn bánh răng cạnh dòng _Input Method_ để quản lý danh sách gõ tắt. (Lưu ý: Macro theo từng kiểu gõ).
+- **Gõ tắt / Macro:** Nhấn bánh răng cạnh dòng _Macro_ để quản lý danh sách gõ tắt toàn cục.
 - **Keymap tùy chỉnh:** Nhấn bánh răng dòng _Custom Keymap_ để tự định nghĩa phím. Chọn kiểu gõ **Custom** để áp dụng.
 - **Phím tắt Menu:** Đổi phím nóng mở menu chế độ gõ (mặc định là `` ` ``) tại dòng _Mode menu hotkey_.
 
@@ -520,8 +515,6 @@ Tại đây bạn có thể tùy chỉnh chi tiết:
 | **Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On** | Bật/tắt cho phép "dd" tạo "đ" khi dùng _Auto non-VN restore_. | Bật             |
 | **Fix Uinput Mode With Ack**                                              | Khuyên dùng cho ứng dụng Chromium (Chrome, Brave, Edge, ...). | Tắt             |
 | **Use Lotus Status Icons**                                                | Dùng icon Lotus thay vì icon V/E mặc định.                    | Tắt             |
-
-</details>
 
 ### 2. Menu chuyển chế độ gõ
 
@@ -541,7 +534,15 @@ Khi con trỏ đang ở trong ô nhập liệu (có thể gõ văn bản), nhấ
 
 Bộ gõ sẽ tự động lưu chế độ gõ đã dùng gần nhất cho từng ứng dụng và khôi phục cấu hình đó khi bạn mở lại chúng.
 
-### 3. Đặt lại trạng thái đang gõ
+### 3. Chỉnh sửa nhanh (Quick Phrase)
+
+Lotus tương thích với tính năng **Quick Phrase** có sẵn của Fcitx5 (mặc định dùng `Super` + `` ` ``). Bạn có thể nhập nhanh:
+
+- **LaTeX**: Ký tự toán học (vd: `\alpha` → `α`).
+- **Emoji Code**: Biểu tượng cảm xúc (vd: `:smile:` → `😄`).
+- **Emoji**: Các đoạn văn bản mẫu hoặc Kaomoji (vd: `smile` → `(・∀・)`).
+
+### 4. Đặt lại trạng thái đang gõ
 
 Nhấp chuột hoặc chạm touchpad trong khi gõ sẽ tự động đặt lại trạng thái đang gõ, ngăn chặn hiện tượng dính ký tự giữa các từ.
 
@@ -581,6 +582,9 @@ paru -Rns fcitx5-lotus
 
 ```bash
 sudo apt remove fcitx5-lotus
+sudo rm /etc/apt/sources.list.d/fcitx5-lotus.list
+sudo rm /etc/apt/keyrings/fcitx5-lotus.gpg
+sudo apt update
 ```
 
 </details>
@@ -591,6 +595,9 @@ sudo apt remove fcitx5-lotus
 
 ```bash
 sudo apt remove fcitx5-lotus
+sudo rm /etc/apt/sources.list.d/fcitx5-lotus.list
+sudo rm /etc/apt/keyrings/fcitx5-lotus.gpg
+sudo apt update
 ```
 
 </details>
@@ -601,6 +608,7 @@ sudo apt remove fcitx5-lotus
 
 ```bash
 sudo dnf remove fcitx5-lotus
+sudo rm /etc/yum.repos.d/fcitx5-lotus-*.repo
 ```
 
 </details>
@@ -611,6 +619,7 @@ sudo dnf remove fcitx5-lotus
 
 ```bash
 sudo zypper remove fcitx5-lotus
+sudo zypper removerepo fcitx5-lotus
 ```
 
 </details>
@@ -657,6 +666,15 @@ sudo make uninstall
 ```
 
 </details>
+
+### 🧹 Dọn dẹp hệ thống (Tùy chọn)
+
+Nếu muốn xóa hoàn toàn dữ liệu gõ tắt và cấu hình:
+
+```bash
+rm -rf ~/.local/share/fcitx5/lotus
+rm -rf ~/.config/fcitx5/conf/lotus.conf
+```
 
 ---
 

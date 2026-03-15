@@ -104,7 +104,7 @@ namespace fcitx {
         return connect_uinput_server() ? uinput_client_fd_ : -1;
     }
 
-    void LotusState::send_backspace_uinput(size_t count) const {
+    void LotusState::send_backspace_uinput(int count) const {
         if (uinput_client_fd_ < 0 && !connect_uinput_server()) {
             LOTUS_ERROR("Cannot send backspace since cannot connect to uinput server");
             return;
@@ -351,8 +351,7 @@ namespace fcitx {
                 } else if (currentSym == FcitxKey_Return && !emojiBuffer_.empty()) {
                     ic_->commitString(emojiBuffer_);
                     emojiBuffer_.clear();
-                    ic_->inputPanel().reset();
-                    ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+                    updateEmojiPreedit();
                     keyEvent.filterAndAccept();
                 } else {
                     keyEvent.forward();
@@ -383,28 +382,18 @@ namespace fcitx {
             }
         }
     }
-
-    void LotusState::selectEmojiCandidate(int index) {
-        if (index >= 0 && index < static_cast<int>(emojiCandidates_.size())) {
-            ic_->commitString(emojiCandidates_[index].output);
-            LOTUS_INFO("Emoji committed: " + emojiCandidates_[index].output);
-            emojiBuffer_.clear();
-            emojiCandidates_.clear();
-            ic_->inputPanel().reset();
-            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
-        }
-    }
-
     void LotusState::updateEmojiPreedit() {
         if (emojiBuffer_.empty()) {
-            emojiCandidates_.clear();
-            ic_->inputPanel().reset();
-            ic_->updatePreedit();
-            ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
-            return;
+            emojiCandidates_ = engine_->emojiLoader().history();
+            if (emojiCandidates_.empty()) {
+                ic_->inputPanel().reset();
+                ic_->updatePreedit();
+                ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+                return;
+            }
+        } else {
+            emojiCandidates_ = engine_->emojiLoader().search(emojiBuffer_);
         }
-
-        emojiCandidates_ = engine_->emojiLoader().search(emojiBuffer_);
 
         if (!emojiBuffer_.empty()) {
             Text preeditText;
@@ -414,6 +403,9 @@ namespace fcitx {
                 ic_->inputPanel().setClientPreedit(preeditText);
             else
                 ic_->inputPanel().setPreedit(preeditText);
+        } else {
+            ic_->inputPanel().setClientPreedit(Text());
+            ic_->inputPanel().setPreedit(Text());
         }
 
         if (!emojiCandidates_.empty()) {
@@ -423,8 +415,13 @@ namespace fcitx {
 
             for (size_t i = 0; i < emojiCandidates_.size(); ++i) {
                 size_t localIndex = (i % 9) + 1;
-                Text   displayLabel(std::to_string(localIndex) + ": " + emojiCandidates_[i].trigger + " " + emojiCandidates_[i].output);
-                candidateList->append(std::make_unique<EmojiCandidateWord>(displayLabel, this, emojiCandidates_[i].output));
+                Text   displayLabel;
+                if (emojiBuffer_.empty()) {
+                    displayLabel.append(std::to_string(localIndex) + ": " + emojiCandidates_[i].output, TextFormatFlag::NoFlag);
+                } else {
+                    displayLabel.append(std::to_string(localIndex) + ": " + emojiCandidates_[i].trigger + " " + emojiCandidates_[i].output, TextFormatFlag::NoFlag);
+                }
+                candidateList->append(std::make_unique<EmojiCandidateWord>(displayLabel, this, emojiCandidates_[i]));
             }
             candidateList->setGlobalCursorIndex(0);
 
@@ -455,7 +452,7 @@ namespace fcitx {
             ic_->commitString(pending_commit_string_);
             LOTUS_INFO("Commit: " + pending_commit_string_);
             expected_backspaces_     = 0;
-            current_backspace_count_ = -1;
+            current_backspace_count_ = 0;
             pending_commit_string_   = "";
 
             event.filterAndAccept(); // Filter out the final trigger backspace.
@@ -476,7 +473,7 @@ namespace fcitx {
         // The isAutofillCertain function has been optimized to differentiate
         // between browser autofill and AI ghost text.
         int autofillOffset   = isAutofillCertain(surrounding) ? 1 : 0;
-        expected_backspaces_ = utf8::length(deletedPart) + 1 + autofillOffset;
+        expected_backspaces_ = static_cast<int>(utf8::length(deletedPart)) + 1 + autofillOffset;
         replacement_thread_id_.store(my_id, std::memory_order_release);
         replacement_start_ms_.store(now_ms(), std::memory_order_release);
         is_deleting_.store(true, std::memory_order_release);
@@ -854,7 +851,7 @@ namespace fcitx {
         }
         if (current_backspace_count_ >= expected_backspaces_ && is_deleting_.load()) {
             is_deleting_.store(false);
-            current_backspace_count_ = -1;
+            current_backspace_count_ = 0;
             expected_backspaces_     = 0;
         }
         if (needEngineReset.load() && realMode != LotusMode::Off) {
@@ -863,7 +860,7 @@ namespace fcitx {
             history_.clear();
             ResetEngine(lotusEngine_.handle());
             is_deleting_.store(false);
-            current_backspace_count_ = -1;
+            current_backspace_count_ = 0;
             needEngineReset.store(false);
         }
 

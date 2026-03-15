@@ -76,15 +76,6 @@ int64_t now_ms();
 bool isBackspace(uint32_t sym);
 
 /**
- * @brief Extracts substring by character count.
- * @param s Source string.
- * @param start Start character index.
- * @param len Number of characters.
- * @return Substring.
- */
-std::string SubstrChar(const std::string& s, size_t start, size_t len);
-
-/**
  * @brief Compares two strings and computes diff.
  * @param A First string.
  * @param B Second string.

@@ -40,7 +40,7 @@ namespace fcitx::lotus {
         btnRemove_->setFixedSize(30, 30);
 
         inputLayout->addWidget(new QLabel(_("Key:"), this));
-        inputLayout->addWidget(inputKey_);
+        inputLayout->addWidget(inputKey_, 1);
         inputLayout->addWidget(new QLabel(_("Value:"), this));
         inputLayout->addWidget(inputValue_, 2);
         inputLayout->addWidget(btnAdd_);

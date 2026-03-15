@@ -19,6 +19,7 @@
 #ifndef _LOTUS_LOGGER_H_
 #define _LOTUS_LOGGER_H_
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
@@ -119,14 +120,14 @@ class LotusLogger {
     /**
      * @brief Get log level string
      */
-    static std::string levelToString(LogLevel level);
+    static std::string    levelToString(LogLevel level);
 
-    std::string        log_file_;
-    size_t             max_size_;
-    size_t             max_files_;
-    size_t             current_size_;
-    LogLevel           level_;
-    std::ofstream      file_;
-    std::mutex         mutex_;
+    std::string           log_file_;
+    size_t                max_size_;
+    size_t                max_files_;
+    size_t                current_size_;
+    std::atomic<LogLevel> level_;
+    std::ofstream         file_;
+    std::mutex            mutex_;
 };
 #endif // _LOTUS_LOGGER_H_

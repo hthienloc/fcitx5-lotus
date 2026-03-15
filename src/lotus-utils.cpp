@@ -54,18 +54,6 @@ bool isBackspace(uint32_t sym) {
     return sym == 65288 || sym == 8 || sym == FcitxKey_BackSpace;
 }
 
-std::string SubstrChar(const std::string& s, size_t start, size_t len) {
-    if (s.empty())
-        return "";
-    const char* start_ptr = fcitx_utf8_get_nth_char(s.c_str(), static_cast<uint32_t>(start));
-    if (*start_ptr == '\0')
-        return "";
-    if (len == std::string::npos)
-        return {start_ptr};
-    const char* end_ptr = fcitx_utf8_get_nth_char(start_ptr, static_cast<uint32_t>(len));
-    return std::string(start_ptr, end_ptr - start_ptr);
-}
-
 int compareAndSplitStrings(const std::string& A, const std::string& B, std::string& commonPrefix, std::string& deletedPart, std::string& addedPart) {
     size_t i = 0;
     size_t j = 0;
