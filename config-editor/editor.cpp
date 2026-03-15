@@ -14,10 +14,39 @@
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
+#include <QStringList>
 #include <QUrl>
 #include <QVBoxLayout>
 
 namespace fcitx::lotus {
+
+    namespace {
+
+        QString keyListToText(const std::vector<fcitx::Key>& keyList) {
+            QStringList keyLabels;
+            keyLabels.reserve(static_cast<int>(keyList.size()));
+
+            for (const auto& key : keyList) {
+                keyLabels.push_back(QString::fromStdString(key.toString()));
+            }
+
+            return keyLabels.join(", ");
+        }
+
+        std::vector<fcitx::Key> textToKeyList(const QString& text) {
+            std::vector<fcitx::Key> keyList;
+
+            for (const auto& keyLabel : text.split(",", Qt::SkipEmptyParts)) {
+                const auto trimmed = keyLabel.trimmed();
+                if (!trimmed.isEmpty()) {
+                    keyList.emplace_back(trimmed.toStdString());
+                }
+            }
+
+            return keyList;
+        }
+
+    } // namespace
 
     LotusConfigEditor::LotusConfigEditor(QWidget* parent) :
         FcitxQtConfigUIWidget(parent),
@@ -80,7 +109,7 @@ namespace fcitx::lotus {
         auto* layout = new QVBoxLayout(page);
         auto* form   = new QFormLayout();
 
-        mode_->addItems({"Uinput (Smooth)", "Uinput (Simple)", "Off"});
+        mode_->addItems({"Uinput (Smooth)", "Uinput (Slow)", "Uinput (Hardcore)", "Surrounding Text", "Preedit", "Emoji Picker", "OFF"});
         inputMethod_->addItems({"Telex", "VNI", "VIQR", "Custom"});
 
         form->addRow(_("Mode"), mode_);
@@ -128,7 +157,7 @@ namespace fcitx::lotus {
         auto* layout = new QVBoxLayout(page);
         auto* form   = new QFormLayout();
 
-        modeMenuKey_->setPlaceholderText(_("Example: grave"));
+        modeMenuKey_->setPlaceholderText(_("Example: grave, Control+grave"));
 
         form->addRow(_("Mode Menu Hotkey"), modeMenuKey_);
 
@@ -194,11 +223,7 @@ namespace fcitx::lotus {
         fixUinputWithAck_->setChecked(config.fixUinputWithAck.value());
         useLotusIcons_->setChecked(config.useLotusIcons.value());
 
-        if (!config.modeMenuKey.value().empty()) {
-            modeMenuKey_->setText(QString::fromStdString(config.modeMenuKey.value().front().toString()));
-        } else {
-            modeMenuKey_->clear();
-        }
+        modeMenuKey_->setText(keyListToText(config.modeMenuKey.value()));
 
         emit changed(false);
     }
@@ -221,12 +246,7 @@ namespace fcitx::lotus {
         config.fixUinputWithAck.setValue(fixUinputWithAck_->isChecked());
         config.useLotusIcons.setValue(useLotusIcons_->isChecked());
 
-        std::vector<fcitx::Key> modeMenuKey;
-        auto                    modeMenuKeyText = modeMenuKey_->text().trimmed();
-        if (!modeMenuKeyText.isEmpty()) {
-            modeMenuKey.emplace_back(modeMenuKeyText.toStdString());
-        }
-        config.modeMenuKey.setValue(modeMenuKey);
+        config.modeMenuKey.setValue(textToKeyList(modeMenuKey_->text()));
 
         fcitx::safeSaveAsIni(config, "conf/lotus.conf");
         emit changed(false);
