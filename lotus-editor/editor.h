@@ -11,6 +11,9 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QKeySequenceEdit>
+#include <QListWidget>
+#include <QMap>
+#include <QStackedWidget>
 
 namespace fcitx::lotus {
 
@@ -26,7 +29,19 @@ class LotusConfigEditor : public FcitxQtConfigUIWidget {
 
   private:
     std::string configPath() const;
-    void        setupConnections();
+    void     buildUI();
+    QWidget* buildSidebar();
+    QWidget* buildGeneralPage();
+    QWidget* buildTypingPage();
+    QWidget* buildMacroPage();
+    QWidget* buildShortcutsPage();
+    QWidget* buildAppearancePage();
+
+    void setupConnections();
+
+    QListWidget*   sidebar_;
+    QStackedWidget* pageStack_;
+    QMap<int, int> sidebarRowToPageIndex_;
 
     QComboBox*       mode_;
     QComboBox*       inputMethod_;

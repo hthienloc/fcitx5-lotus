@@ -20,6 +20,19 @@ include(ECMUninstallTarget)
 
 option(ENABLE_QT "Enable Qt based keymap editor" On)
 
+# Official releases should always ship the Qt-based configuration UI.
+# Maintainers can opt out in special packaging/debug scenarios.
+option(REQUIRE_QT_FOR_RELEASE "Require Qt dependencies for official release builds" On)
+
+if(REQUIRE_QT_FOR_RELEASE AND NOT ENABLE_QT)
+    message(FATAL_ERROR
+        "ENABLE_QT=OFF sẽ tắt toàn bộ custom Qt config UI (keymap/macro/config editor). "
+        "Bản phát hành chính thức của fcitx5-lotus yêu cầu UI mới, vui lòng bật ENABLE_QT=ON "
+        "hoặc chỉ tắt REQUIRE_QT_FOR_RELEASE cho build nội bộ/dev."
+    )
+endif()
+
+
 find_package(Fcitx5Core ${REQUIRED_FCITX_VERSION} REQUIRED)
 find_package(Fcitx5ModuleEmoji REQUIRED)
 find_package(Pthread REQUIRED)
@@ -49,8 +62,28 @@ if(ENABLE_QT)
     target_compile_definitions(lotus PRIVATE ENABLE_KEYMAP_EDITOR)
     target_compile_definitions(lotus PRIVATE ENABLE_MACRO_EDITOR)
     set(QT_MAJOR_VERSION 6)
-    find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
-    find_package(Fcitx5Qt${QT_MAJOR_VERSION}WidgetsAddons 5.0.10 REQUIRED)
+
+    find_package(Qt6 COMPONENTS Core Gui Widgets)
+    if(NOT Qt6_FOUND)
+        message(FATAL_ERROR
+            "ENABLE_QT=ON nhưng không tìm thấy Qt6 (Core/Gui/Widgets). "
+            "Custom UI sẽ KHÔNG được build nếu thiếu Qt6. "
+            "Hãy cài Qt6 dev packages (ví dụ: qt6-base-dev / qt6-qtbase-devel) hoặc build với -DENABLE_QT=OFF "
+            "nếu bạn chấp nhận fallback sang menu cấu hình mặc định của Fcitx5."
+        )
+    endif()
+
+    find_package(Fcitx5Qt${QT_MAJOR_VERSION}WidgetsAddons 5.0.10)
+    if(NOT Fcitx5Qt${QT_MAJOR_VERSION}WidgetsAddons_FOUND)
+        message(FATAL_ERROR
+            "ENABLE_QT=ON nhưng thiếu Fcitx5Qt6WidgetsAddons >= 5.0.10. "
+            "Không có thư viện này thì plugin config editor (libfcitx5-lotus-config-editor.so) sẽ không được cài. "
+            "Hãy cài gói fcitx5-qt dev (ví dụ: libfcitx5-qt6-dev / fcitx5-qt-devel) rồi chạy lại CMake, "
+            "hoặc dùng -DENABLE_QT=OFF để fallback sang menu cấu hình mặc định."
+        )
+    endif()
+
+
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
     add_subdirectory(keymap-editor)
     add_subdirectory(macro-editor)
