@@ -117,25 +117,25 @@ class DynamicSettingsPage(QWidget):
                     option_items.append(item)
 
         if hotkey_items:
-            card_hk = CardWidget(_("Phím tắt"))
+            card_hk = CardWidget(_("Mode Menu Hotkey"))
             for item in hotkey_items:
                 self._render_hotkey(item, card_hk.content_layout)
             self.container_layout.addWidget(card_hk)
 
         if im_items:
-            card_im = CardWidget(_("Kiểu gõ / Chế độ"))
+            card_im = CardWidget(_("Input Method"))
             for item in im_items:
                 self._render_radio_group(item, card_im.content_layout, columns=1)
             self.container_layout.addWidget(card_im)
 
         if charset_items:
-            card_cs = CardWidget(_("Bảng mã"))
+            card_cs = CardWidget(_("Output Charset"))
             for item in charset_items:
                 self._render_radio_group(item, card_cs.content_layout, columns=2)
             self.container_layout.addWidget(card_cs)
 
         if option_items:
-            card_opt = CardWidget(_("Tùy chọn"))
+            card_opt = CardWidget(_("Options"))
             for item in option_items:
                 self._render_checkbox(item, card_opt.content_layout)
             self.container_layout.addWidget(card_opt)

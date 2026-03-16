@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-11 18:05+0700\n"
+"POT-Creation-Date: 2026-03-16 09:02+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,21 +17,89 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/lotus-state.cpp:236
-msgid "Page "
+#: src/lotus-engine.cpp:124
+msgid "Charset"
 msgstr ""
 
-#: src/lotus-config.h:177 keymap-editor/editor.cpp:68
+#: src/lotus-engine.cpp:151 src/lotus-config.h:197
+msgid "Enable Spell Check"
+msgstr ""
+
+#: src/lotus-engine.cpp:151 src/lotus-engine.cpp:234
+msgid "Spell Check"
+msgstr ""
+
+#: src/lotus-engine.cpp:152 src/lotus-config.h:197
+msgid "Enable Macro"
+msgstr ""
+
+#: src/lotus-engine.cpp:152 src/lotus-engine.cpp:235 src/lotus-config.h:181
+#: src/lotus-config.h:206 src/lotus-config.h:208
+msgid "Macro"
+msgstr ""
+
+#: src/lotus-engine.cpp:153 src/lotus-engine.cpp:236 src/lotus-config.h:198
+msgid "Capitalize Macro"
+msgstr ""
+
+#: src/lotus-engine.cpp:155
+msgid "Auto Restore Keys With Invalid Wwords"
+msgstr ""
+
+#: src/lotus-engine.cpp:156 src/lotus-engine.cpp:237
+msgid "Auto Non-VN Restore"
+msgstr ""
+
+#: src/lotus-engine.cpp:649
+msgid "App: "
+msgstr ""
+
+#: src/lotus-engine.cpp:650
+msgid "[1] Uinput (Smooth)"
+msgstr ""
+
+#: src/lotus-engine.cpp:651
+msgid "[2] Uinput (Slow)"
+msgstr ""
+
+#: src/lotus-engine.cpp:652
+msgid "[3] Uinput (Hardcore)"
+msgstr ""
+
+#: src/lotus-engine.cpp:653
+msgid "[4] Surrounding Text"
+msgstr ""
+
+#: src/lotus-engine.cpp:654
+msgid "[q] Preedit"
+msgstr ""
+
+#: src/lotus-engine.cpp:655
+msgid "[w] Emoji Picker"
+msgstr ""
+
+#: src/lotus-engine.cpp:656
+msgid "[e] OFF"
+msgstr ""
+
+#: src/lotus-engine.cpp:658
+msgid "[r] Default Typing"
+msgstr ""
+
+#: src/lotus-engine.cpp:673
+msgid "Type"
+msgstr ""
+
+#: src/lotus-engine.cpp:728
+msgid "Lotus - Off"
+msgstr ""
+
+#: src/lotus-config.h:177 keymap-editor/editor.cpp:70
 msgid "Key"
 msgstr ""
 
 #: src/lotus-config.h:177
 msgid "Value"
-msgstr ""
-
-#: src/lotus-config.h:181 src/lotus-config.h:200 src/lotus-config.h:202
-#: src/lotus-engine.cpp:151 src/lotus-engine.cpp:234
-msgid "Macro"
 msgstr ""
 
 #: src/lotus-config.h:185 src/lotus-config.h:211 src/lotus-config.h:213
@@ -50,39 +118,27 @@ msgstr ""
 msgid "Output Charset"
 msgstr ""
 
-#: src/lotus-config.h:197 src/lotus-engine.cpp:150
-msgid "Enable Spell Check"
-msgstr ""
-
-#: src/lotus-config.h:197 src/lotus-engine.cpp:151
-msgid "Enable Macro"
-msgstr ""
-
-#: src/lotus-config.h:198 src/lotus-engine.cpp:152 src/lotus-engine.cpp:235
-msgid "Capitalize Macro"
-msgstr ""
-
-#: src/lotus-config.h:204
+#: src/lotus-config.h:199
 msgid "Auto Restore Keys With Invalid Words"
 msgstr ""
 
-#: src/lotus-config.h:205
+#: src/lotus-config.h:200
 msgid "Use oà, uý (Instead Of òa, úy)"
 msgstr ""
 
-#: src/lotus-config.h:206
+#: src/lotus-config.h:201
 msgid "Allow Type With More Freedom"
 msgstr ""
 
-#: src/lotus-config.h:207
+#: src/lotus-config.h:202
 msgid "Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On"
 msgstr ""
 
-#: src/lotus-config.h:208
+#: src/lotus-config.h:203
 msgid "Fix Uinput Mode With Ack"
 msgstr ""
 
-#: src/lotus-config.h:209
+#: src/lotus-config.h:204
 msgid "Use Lotus Status Icons"
 msgstr ""
 
@@ -90,64 +146,8 @@ msgstr ""
 msgid "Mode Menu Hotkey"
 msgstr ""
 
-#: src/lotus-engine.cpp:123
-msgid "Charset"
-msgstr ""
-
-#: src/lotus-engine.cpp:150 src/lotus-engine.cpp:233
-msgid "Spell Check"
-msgstr ""
-
-#: src/lotus-engine.cpp:154
-msgid "Auto Restore Keys With Invalid Wwords"
-msgstr ""
-
-#: src/lotus-engine.cpp:155 src/lotus-engine.cpp:236
-msgid "Auto Non-VN Restore"
-msgstr ""
-
-#: src/lotus-engine.cpp:630
-msgid "App: "
-msgstr ""
-
-#: src/lotus-engine.cpp:631
-msgid "[1] Uinput (Smooth)"
-msgstr ""
-
-#: src/lotus-engine.cpp:632
-msgid "[2] Uinput (Slow)"
-msgstr ""
-
-#: src/lotus-engine.cpp:633
-msgid "[3] Uinput (Hardcore)"
-msgstr ""
-
-#: src/lotus-engine.cpp:634
-msgid "[4] Surrounding Text"
-msgstr ""
-
-#: src/lotus-engine.cpp:635
-msgid "[q] Preedit"
-msgstr ""
-
-#: src/lotus-engine.cpp:636
-msgid "[w] Emoji Picker"
-msgstr ""
-
-#: src/lotus-engine.cpp:637
-msgid "[e] OFF"
-msgstr ""
-
-#: src/lotus-engine.cpp:639
-msgid "[r] Default Typing"
-msgstr ""
-
-#: src/lotus-engine.cpp:654
-msgid "Type"
-msgstr ""
-
-#: src/lotus-engine.cpp:709
-msgid "Lotus - Off"
+#: src/lotus-state.cpp:234
+msgid "Page "
 msgstr ""
 
 #: keymap-editor/editor.cpp:35
@@ -162,111 +162,108 @@ msgstr ""
 msgid "Key (Example: s)"
 msgstr ""
 
-#: keymap-editor/editor.cpp:68
+#: keymap-editor/editor.cpp:70
 msgid "Action"
 msgstr ""
 
-#: keymap-editor/editor.cpp:78 macro-editor/editor.cpp:63
-msgid "Import (TSV)"
+#: keymap-editor/editor.cpp:80 macro-editor/editor.cpp:69
+msgid "Import"
 msgstr ""
 
-#: keymap-editor/editor.cpp:79 macro-editor/editor.cpp:64
-msgid "Export (TSV)"
+#: keymap-editor/editor.cpp:81 keymap-editor/editor.cpp:302
+#: macro-editor/editor.cpp:70 macro-editor/editor.cpp:313
+msgid "Export"
 msgstr ""
 
-#: keymap-editor/editor.cpp:95
+#: keymap-editor/editor.cpp:104
 msgid "Lotus Custom Keymap"
 msgstr ""
 
-#: keymap-editor/editor.cpp:146
+#: keymap-editor/editor.cpp:155
 msgid "Confirm"
 msgstr ""
 
-#: keymap-editor/editor.cpp:146
+#: keymap-editor/editor.cpp:155
 msgid ""
 "This operation will delete all existing keys on the current keymap and "
 "replace them with the input method "
 msgstr ""
 
-#: keymap-editor/editor.cpp:146
+#: keymap-editor/editor.cpp:155
 msgid ". Are you sure?"
 msgstr ""
 
-#: keymap-editor/editor.cpp:195
+#: keymap-editor/editor.cpp:204
 msgid "Import Keymap"
 msgstr ""
 
-#: keymap-editor/editor.cpp:195 keymap-editor/editor.cpp:297
-#: macro-editor/editor.cpp:142 macro-editor/editor.cpp:209
+#: keymap-editor/editor.cpp:204 keymap-editor/editor.cpp:306
+#: macro-editor/editor.cpp:250 macro-editor/editor.cpp:317
 msgid "Tab-separated (*.tsv *.txt);;All files (*)"
 msgstr ""
 
-#: keymap-editor/editor.cpp:203 keymap-editor/editor.cpp:305
-#: macro-editor/editor.cpp:150 macro-editor/editor.cpp:217
+#: keymap-editor/editor.cpp:212 keymap-editor/editor.cpp:314
+#: macro-editor/editor.cpp:258 macro-editor/editor.cpp:325
 msgid "Error"
 msgstr ""
 
-#: keymap-editor/editor.cpp:203 macro-editor/editor.cpp:150
+#: keymap-editor/editor.cpp:212 macro-editor/editor.cpp:258
 msgid "Cannot open file for reading."
 msgstr ""
 
-#: keymap-editor/editor.cpp:237 macro-editor/editor.cpp:184
+#: keymap-editor/editor.cpp:246 macro-editor/editor.cpp:292
 msgid "Confirm Import"
 msgstr ""
 
-#: keymap-editor/editor.cpp:238
+#: keymap-editor/editor.cpp:247
 msgid ""
 "The current keymap list is not empty. Imported entries will be merged "
 "(existing keys will be updated). Continue?"
 msgstr ""
 
-#: keymap-editor/editor.cpp:288 macro-editor/editor.cpp:200
+#: keymap-editor/editor.cpp:297 macro-editor/editor.cpp:308
 msgid "Import Complete"
 msgstr ""
 
-#: keymap-editor/editor.cpp:288 macro-editor/editor.cpp:200
+#: keymap-editor/editor.cpp:297 macro-editor/editor.cpp:308
 msgid "Imported %1 entries, skipped %2 invalid lines."
 msgstr ""
 
-#: keymap-editor/editor.cpp:293 macro-editor/editor.cpp:205
-msgid "Export"
-msgstr ""
-
-#: keymap-editor/editor.cpp:293
+#: keymap-editor/editor.cpp:302
 msgid "The keymap list is empty, nothing to export."
 msgstr ""
 
-#: keymap-editor/editor.cpp:297
+#: keymap-editor/editor.cpp:306
 msgid "Export Keymap"
 msgstr ""
 
-#: keymap-editor/editor.cpp:305 macro-editor/editor.cpp:217
+#: keymap-editor/editor.cpp:314 macro-editor/editor.cpp:325
 msgid "Cannot open file for writing."
 msgstr ""
 
-#: keymap-editor/editor.cpp:331 macro-editor/editor.cpp:236
+#: keymap-editor/editor.cpp:340 macro-editor/editor.cpp:344
 msgid "Export Complete"
 msgstr ""
 
-#: keymap-editor/editor.cpp:331 macro-editor/editor.cpp:236
+#: keymap-editor/editor.cpp:340 macro-editor/editor.cpp:344
 msgid ""
 "Exported %1 entries to:\n"
 "%2"
 msgstr ""
 
-#: macro-editor/editor.cpp:34
+#: macro-editor/editor.cpp:41
 msgid "Abbreviation (e.g. kg)"
 msgstr ""
 
-#: macro-editor/editor.cpp:35
+#: macro-editor/editor.cpp:42
 msgid "Full text (e.g. khô gà)"
 msgstr ""
 
-#: macro-editor/editor.cpp:42
+#: macro-editor/editor.cpp:44
 msgid "Key:"
 msgstr ""
 
-#: macro-editor/editor.cpp:44
+#: macro-editor/editor.cpp:46
 msgid "Value:"
 msgstr ""
 
@@ -278,25 +275,41 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: macro-editor/editor.cpp:82
+#: macro-editor/editor.cpp:65
+msgid "Add"
+msgstr ""
+
+#: macro-editor/editor.cpp:66
+msgid "Remove"
+msgstr ""
+
+#: macro-editor/editor.cpp:67
+msgid "Up"
+msgstr ""
+
+#: macro-editor/editor.cpp:68
+msgid "Down"
+msgstr ""
+
+#: macro-editor/editor.cpp:115
 msgid "Lotus Macro"
 msgstr ""
 
-#: macro-editor/editor.cpp:142
+#: macro-editor/editor.cpp:250
 msgid "Import Macros"
 msgstr ""
 
-#: macro-editor/editor.cpp:185
+#: macro-editor/editor.cpp:293
 msgid ""
 "The current macro list is not empty. Imported entries will be merged "
 "(existing keys will be updated). Continue?"
 msgstr ""
 
-#: macro-editor/editor.cpp:205
+#: macro-editor/editor.cpp:313
 msgid "The macro list is empty, nothing to export."
 msgstr ""
 
-#: macro-editor/editor.cpp:209
+#: macro-editor/editor.cpp:317
 msgid "Export Macros"
 msgstr ""
 
@@ -315,4 +328,29 @@ msgid ""
 msgstr ""
 
 msgid "Lotus Wrapper For Fcitx"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:94
+msgid "Failed to load configuration."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:138
+msgid "Options"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:301
+#: settings-gui/ui/pages/macro_editor.py:84
+msgid "Save to File"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:33
+msgid "Fcitx5 Lotus Settings"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:84
+msgid "General"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:90
+msgid "Keymap"
 msgstr ""

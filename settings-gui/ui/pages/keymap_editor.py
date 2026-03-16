@@ -335,7 +335,7 @@ class KeymapEditorPage(QWidget):
             data.append({"Key": key, "Value": val})
 
         self.handler.write_array_config(self.handler.keymap_file, "CustomKeymap", data)
-        QMessageBox.information(self, "Success", "Keymap saved successfully.")
+        QMessageBox.information(self, _("Success"), _("Keymap saved successfully."))
 
     def on_add(self):
         """Adds a new keymap entry."""
