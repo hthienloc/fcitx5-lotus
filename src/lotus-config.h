@@ -16,6 +16,8 @@
 #define _FCITX5_LOTUS_CONFIG_H_
 
 #include <cstdint>
+#include <algorithm>
+#include <unordered_map>
 #include <fcitx-config/configuration.h>
 #include <fcitx-utils/i18n.h>
 #include <fcitx-utils/stringutils.h>
@@ -221,7 +223,8 @@ namespace fcitx {
         ExternalOption customKeymapUI{this, "CustomKeymapUI", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
 #else
         SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
-#endif);
+#endif
+    );
 
 } // namespace fcitx
 
