@@ -263,6 +263,11 @@ cd fcitx5-lotus
 cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib . # Tùy vào distro mà LIBDIR sẽ khác nhau
 make
 
+# Tùy chọn build UI Qt (mặc định: bật)
+# -DENABLE_QT=OFF: tắt toàn bộ custom UI/editor của Lotus,
+#   Fcitx5 sẽ fallback sang menu cấu hình mặc định (không có UI mới)
+# -DREQUIRE_QT_FOR_RELEASE=ON (mặc định): ép bản phát hành chính thức phải có dependency Qt
+
 # Cài đặt (cần quyền root)
 sudo make install
 

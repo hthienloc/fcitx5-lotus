@@ -7,5 +7,6 @@ Library=liblotus
 Type=SharedLibrary
 OnDemand=True
 Configurable=True
+ConfigUI=lotus
 [Dependencies]
 0=core:@REQUIRED_FCITX_VERSION@
