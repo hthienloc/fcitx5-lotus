@@ -11,6 +11,7 @@
 #include <fcitxqtconfiguiwidget.h>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPushButton>
@@ -39,7 +40,11 @@ namespace fcitx::lotus {
         QWidget* createTypingPage();
         QWidget* createFeaturesPage();
         QWidget* createIntegrationPage();
+        QWidget* createProfilesPage();
         void     setupConnections();
+        void     setupChoiceSources();
+        void     syncProfilePreview();
+        bool     openSubConfig(const QString& path) const;
 
         QListWidget*   sidebar_;
         QStackedWidget* stacked_;
@@ -60,6 +65,9 @@ namespace fcitx::lotus {
 
         QPushButton* macroEditor_;
         QPushButton* customKeymap_;
+        QComboBox*   profilePreset_;
+        QLabel*      profileDescription_;
+        QPushButton* applyProfile_;
 
         QLineEdit* modeMenuKey_;
     };

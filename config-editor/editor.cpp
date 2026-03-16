@@ -14,6 +14,7 @@
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
+#include <QMessageBox>
 #include <QStringList>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -21,6 +22,9 @@
 namespace fcitx::lotus {
 
     namespace {
+
+        constexpr auto* MacroSubConfigPath  = "lotus-macro";
+        constexpr auto* KeymapSubConfigPath = "custom_keymap";
 
         QString keyListToText(const std::vector<fcitx::Key>& keyList) {
             QStringList keyLabels;
@@ -46,6 +50,21 @@ namespace fcitx::lotus {
             return keyList;
         }
 
+        void syncComboItems(QComboBox* combo, const std::vector<std::string>& values) {
+            combo->clear();
+            for (const auto& value : values) {
+                combo->addItem(QString::fromStdString(value));
+            }
+        }
+
+        const std::vector<std::string>& modeSchemaOptions() {
+            static const fcitx::ModeListAnnotation annotation;
+            return annotation.list();
+        }
+
+        const std::vector<std::string> kFallbackInputMethods = {"Telex", "VNI", "VIQR", "Custom"};
+        const std::vector<std::string> kFallbackCharsets     = {"Unicode", "Unicode Compound", "TCVN3", "VNI", "VIQR"};
+
     } // namespace
 
     LotusConfigEditor::LotusConfigEditor(QWidget* parent) :
@@ -66,6 +85,9 @@ namespace fcitx::lotus {
         useLotusIcons_(new QCheckBox(_("Use Lotus Status Icons"), this)),
         macroEditor_(new QPushButton(_("Macro"), this)),
         customKeymap_(new QPushButton(_("Custom Keymap"), this)),
+        profilePreset_(new QComboBox(this)),
+        profileDescription_(new QLabel(this)),
+        applyProfile_(new QPushButton(_("Apply Profile"), this)),
         modeMenuKey_(new QLineEdit(this)) {
         setMinimumSize(760, 520);
 
@@ -82,11 +104,15 @@ namespace fcitx::lotus {
         sidebar_->addItem(new QListWidgetItem(QIcon::fromTheme("preferences-system"), _("General")));
         sidebar_->addItem(new QListWidgetItem(QIcon::fromTheme("input-keyboard"), _("Typing")));
         sidebar_->addItem(new QListWidgetItem(QIcon::fromTheme("preferences-plugin"), _("Features")));
+        sidebar_->addItem(new QListWidgetItem(QIcon::fromTheme("emblem-favorite"), _("Profiles")));
         sidebar_->addItem(new QListWidgetItem(QIcon::fromTheme("settings-configure"), _("Integration")));
+
+        setupChoiceSources();
 
         stacked_->addWidget(createGeneralPage());
         stacked_->addWidget(createTypingPage());
         stacked_->addWidget(createFeaturesPage());
+        stacked_->addWidget(createProfilesPage());
         stacked_->addWidget(createIntegrationPage());
 
         mainLayout->addWidget(sidebar_);
@@ -104,13 +130,21 @@ namespace fcitx::lotus {
         return "fcitx-lotus";
     }
 
+    void LotusConfigEditor::setupChoiceSources() {
+        mode_->setEditable(false);
+        syncComboItems(mode_, modeSchemaOptions());
+
+        inputMethod_->setEditable(true);
+        outputCharset_->setEditable(true);
+
+        syncComboItems(inputMethod_, kFallbackInputMethods);
+        syncComboItems(outputCharset_, kFallbackCharsets);
+    }
+
     QWidget* LotusConfigEditor::createGeneralPage() {
         auto* page   = new QWidget(this);
         auto* layout = new QVBoxLayout(page);
         auto* form   = new QFormLayout();
-
-        mode_->addItems({"Uinput (Smooth)", "Uinput (Slow)", "Uinput (Hardcore)", "Surrounding Text", "Preedit", "Emoji Picker", "OFF"});
-        inputMethod_->addItems({"Telex", "VNI", "VIQR", "Custom"});
 
         form->addRow(_("Mode"), mode_);
         form->addRow(_("Input Method"), inputMethod_);
@@ -139,9 +173,6 @@ namespace fcitx::lotus {
         auto* layout = new QVBoxLayout(page);
         auto* form   = new QFormLayout();
 
-        outputCharset_->setEditable(true);
-        outputCharset_->addItems({"Unicode", "Unicode Compound", "TCVN3", "VNI", "VIQR"});
-
         form->addRow(_("Output Charset"), outputCharset_);
         layout->addLayout(form);
 
@@ -149,6 +180,29 @@ namespace fcitx::lotus {
         layout->addWidget(enableMacro_);
         layout->addWidget(capitalizeMacro_);
         layout->addStretch();
+        return page;
+    }
+
+    QWidget* LotusConfigEditor::createProfilesPage() {
+        auto* page   = new QWidget(this);
+        auto* layout = new QVBoxLayout(page);
+
+        profilePreset_->addItem(_("Balanced (Default)"), "balanced");
+        profilePreset_->addItem(_("Compatibility (Stable apps)"), "compatibility");
+        profilePreset_->addItem(_("Performance (Fast input)"), "performance");
+
+        profileDescription_->setWordWrap(true);
+        profileDescription_->setStyleSheet("QLabel { color: palette(mid); }");
+
+        auto* form = new QFormLayout();
+        form->addRow(_("Profile"), profilePreset_);
+
+        layout->addLayout(form);
+        layout->addWidget(profileDescription_);
+        layout->addWidget(applyProfile_);
+        layout->addStretch();
+
+        syncProfilePreview();
         return page;
     }
 
@@ -177,6 +231,31 @@ namespace fcitx::lotus {
         return page;
     }
 
+    void LotusConfigEditor::syncProfilePreview() {
+        const auto preset = profilePreset_->currentData().toString();
+        if (preset == "compatibility") {
+            profileDescription_->setText(_("Recommended for apps with strict input behavior. Uses Uinput (Slow), enables restore/fix options, and keeps macro disabled."));
+            return;
+        }
+        if (preset == "performance") {
+            profileDescription_->setText(_("Optimized for speed. Uses Uinput (Smooth), enables macro workflow, and keeps correction options lightweight."));
+            return;
+        }
+        profileDescription_->setText(_("Balanced defaults for common Linux workflows."));
+    }
+
+    bool LotusConfigEditor::openSubConfig(const QString& path) const {
+        const QUrl url(QStringLiteral("fcitx://config/addon/lotus/") + path);
+        if (QDesktopServices::openUrl(url)) {
+            return true;
+        }
+
+        QMessageBox::warning(
+            const_cast<LotusConfigEditor*>(this), _("Unable to open sub-configuration"),
+            _("Could not open Lotus sub-configuration. Ensure fcitx5-configtool is available."));
+        return false;
+    }
+
     void LotusConfigEditor::setupConnections() {
         connect(sidebar_, &QListWidget::currentRowChanged, this, &LotusConfigEditor::onSidebarRowChanged);
 
@@ -195,8 +274,30 @@ namespace fcitx::lotus {
         connect(fixUinputWithAck_, &QCheckBox::toggled, this, [this]() { emit changed(true); });
         connect(useLotusIcons_, &QCheckBox::toggled, this, [this]() { emit changed(true); });
 
-        connect(macroEditor_, &QPushButton::clicked, this, []() { QDesktopServices::openUrl(QUrl("fcitx://config/addon/lotus/lotus-macro")); });
-        connect(customKeymap_, &QPushButton::clicked, this, []() { QDesktopServices::openUrl(QUrl("fcitx://config/addon/lotus/custom_keymap")); });
+        connect(profilePreset_, &QComboBox::currentIndexChanged, this, [this]() { syncProfilePreview(); });
+        connect(applyProfile_, &QPushButton::clicked, this, [this]() {
+            const auto preset = profilePreset_->currentData().toString();
+            if (preset == "compatibility") {
+                mode_->setCurrentText("Uinput (Slow)");
+                enableMacro_->setChecked(false);
+                autoNonVnRestore_->setChecked(true);
+                fixUinputWithAck_->setChecked(true);
+            } else if (preset == "performance") {
+                mode_->setCurrentText("Uinput (Smooth)");
+                enableMacro_->setChecked(true);
+                autoNonVnRestore_->setChecked(false);
+                fixUinputWithAck_->setChecked(false);
+            } else {
+                mode_->setCurrentText("Uinput (Smooth)");
+                enableMacro_->setChecked(true);
+                autoNonVnRestore_->setChecked(true);
+                fixUinputWithAck_->setChecked(false);
+            }
+            emit changed(true);
+        });
+
+        connect(macroEditor_, &QPushButton::clicked, this, [this]() { openSubConfig(MacroSubConfigPath); });
+        connect(customKeymap_, &QPushButton::clicked, this, [this]() { openSubConfig(KeymapSubConfigPath); });
     }
 
     void LotusConfigEditor::onSidebarRowChanged(int row) {
@@ -208,6 +309,18 @@ namespace fcitx::lotus {
     void LotusConfigEditor::load() {
         fcitx::lotusConfig config;
         fcitx::readAsIni(config, "conf/lotus.conf");
+
+        auto inputMethods = config.inputMethod.annotation().list();
+        if (inputMethods.empty()) {
+            inputMethods = kFallbackInputMethods;
+        }
+        syncComboItems(inputMethod_, inputMethods);
+
+        auto charsets = config.outputCharset.annotation().list();
+        if (charsets.empty()) {
+            charsets = kFallbackCharsets;
+        }
+        syncComboItems(outputCharset_, charsets);
 
         mode_->setCurrentText(QString::fromStdString(config.mode.value()));
         inputMethod_->setCurrentText(QString::fromStdString(config.inputMethod.value()));
