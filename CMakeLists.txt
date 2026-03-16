@@ -54,6 +54,7 @@ if(ENABLE_QT)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
     add_subdirectory(keymap-editor)
     add_subdirectory(macro-editor)
+    add_subdirectory(lotus-editor)
 endif(ENABLE_QT)
 
 configure_file(
