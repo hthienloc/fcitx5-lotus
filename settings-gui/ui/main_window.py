@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
-Main window assembling all configuration tabs.
+Main window assembling all configuration tabs with a modern layout.
 """
 
 from PySide6.QtWidgets import (
@@ -13,8 +13,9 @@ from PySide6.QtWidgets import (
     QStackedWidget,
     QListWidgetItem,
     QApplication,
+    QFrame,
 )
-from PySide6.QtGui import QScreen
+from PySide6.QtGui import QIcon
 from i18n import _
 from core.dbus_handler import LotusDBusHandler
 from core.file_handler import Fcitx5ConfigHandler
@@ -30,9 +31,7 @@ class LotusSettingsWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(_("Fcitx5 Lotus Settings"))
-        self.resize(850, 600)
 
-        # Initialize core handlers
         self.dbus_handler = LotusDBusHandler()
         self.file_handler = Fcitx5ConfigHandler()
 
@@ -44,39 +43,67 @@ class LotusSettingsWindow(QMainWindow):
         self.setCentralWidget(central_widget)
 
         main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(10, 10, 10, 10)
+        main_layout.setSpacing(0)
 
-        # Sidebar navigation
         self.sidebar = QListWidget()
-        self.sidebar.setFixedWidth(200)
+        self.sidebar.setFixedWidth(220)
+        self.sidebar.setStyleSheet(
+            """
+            QListWidget {
+                border: none;
+                background: transparent;
+                outline: none;
+            }
+            QListWidget::item {
+                padding: 10px 15px;
+                border-radius: 8px;
+                margin: 2px 10px;
+            }
+            QListWidget::item:selected {
+                background: palette(highlight);
+                color: palette(highlighted-text);
+            }
+            QListWidget::item:hover:!selected {
+                background: palette(alternate-base);
+            }
+        """
+        )
 
-        # Content stack
         self.content_stack = QStackedWidget()
 
+        separator = QFrame()
+        separator.setFrameShape(QFrame.VLine)
+        separator.setStyleSheet("color: palette(alternate-base);")
+
         main_layout.addWidget(self.sidebar)
+        main_layout.addWidget(separator)
         main_layout.addWidget(self.content_stack, 1)
 
-        # Build pages
-        self._add_page(_("General Settings"), DynamicSettingsPage(self.dbus_handler))
-        self._add_page(_("Macro Editor"), MacroEditorPage(self.file_handler))
-        self._add_page(_("Custom Keymap"), KeymapEditorPage(self.file_handler))
+        self._add_page(
+            _("General"), "preferences-system", DynamicSettingsPage(self.dbus_handler)
+        )
+        self._add_page(
+            _("Macro"), "accessories-text-editor", MacroEditorPage(self.file_handler)
+        )
+        self._add_page(
+            _("Keymap"),
+            "preferences-desktop-keyboard",
+            KeymapEditorPage(self.file_handler),
+        )
 
-        # Connect sidebar to stack
         self.sidebar.currentRowChanged.connect(self.content_stack.setCurrentIndex)
         self.sidebar.setCurrentRow(0)
 
     def _setup_window_size(self):
-        """Auto resize window to fit the screen."""
         screen = QApplication.primaryScreen().availableGeometry()
-        w = int(screen.width() * 0.7)
+        w = int(screen.width() * 0.55)
         h = int(screen.height() * 0.65)
-
-        self.setMinimumSize(700, 500)
+        self.setMinimumSize(750, 500)
         self.resize(w, h)
-        x = (screen.width() - w) // 2
-        y = (screen.height() - h) // 2
-        self.move(x, y)
+        self.move((screen.width() - w) // 2, (screen.height() - h) // 2)
 
-    def _add_page(self, title: str, widget: QWidget):
-        """Helper to add a page to the stack and sidebar."""
-        self.sidebar.addItem(QListWidgetItem(title))
+    def _add_page(self, title: str, icon_name: str, widget: QWidget):
+        item = QListWidgetItem(QIcon.fromTheme(icon_name), title)
+        self.sidebar.addItem(item)
         self.content_stack.addWidget(widget)
