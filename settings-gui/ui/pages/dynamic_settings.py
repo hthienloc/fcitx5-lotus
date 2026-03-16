@@ -64,10 +64,8 @@ class DynamicSettingsPage(QWidget):
                 config_type = item[1]
                 config_label = item[2]
 
-                # Giá trị hiện tại (fallback về default của Fcitx5 nếu không có)
                 current_val = self.current_values.get(config_key, item[3])
 
-                # Bản thân nó giờ là 1 Python Dict sạch sẽ
                 annotations = item[4]
 
                 self._render_widget(
@@ -75,11 +73,9 @@ class DynamicSettingsPage(QWidget):
                 )
 
     def _render_widget(self, key, type_str, label, value, annotations):
-        # Bỏ qua External config (như Macro, Keymap đã có tab riêng)
         if type_str == "External":
             return
 
-        # Checkbox (Booleans)
         if type_str == "Boolean":
             cb = QCheckBox()
             is_checked = str(value).lower() == "true"
@@ -91,12 +87,10 @@ class DynamicSettingsPage(QWidget):
             )
             self.form_layout.addRow(_(label), cb)
 
-        # Dropdown (Enums)
         elif "IsEnum" in annotations and str(annotations["IsEnum"]).lower() == "true":
             combo = QComboBox()
             enum_dict = annotations.get("Enum", {})
 
-            # Sort enum_dict keys (0, 1, 2...) để giữ đúng thứ tự Fcitx5
             sorted_keys = sorted(
                 enum_dict.keys(), key=lambda x: int(x) if str(x).isdigit() else x
             )
@@ -109,20 +103,17 @@ class DynamicSettingsPage(QWidget):
             )
             self.form_layout.addRow(_(label), combo)
 
-        # Hotkey Capture
         elif type_str == "List|Key":
             hotkey_str = ""
             if isinstance(value, dict) and "0" in value:
                 hotkey_str = value["0"]
 
             hotkey_btn = HotkeyCaptureWidget(hotkey_str)
-            # Fcitx5 yêu cầu List|Key phải gửi dạng dict {"0": "Tên_Phím"}
             hotkey_btn.textChanged.connect(
                 lambda text, k=key: self.update_config(k, {"0": text})
             )
             self.form_layout.addRow(_(label), hotkey_btn)
 
-        # String thuần
         elif type_str == "String":
             from PySide6.QtWidgets import QLineEdit
 

@@ -28,7 +28,6 @@ from PySide6.QtGui import QIcon
 from i18n import _
 from core.file_handler import Fcitx5ConfigHandler
 
-# Constants ported from C++
 BAMBOO_ACTIONS = [
     ("XoaDauThanh", "Xóa dấu thanh"),
     ("DauSac", "Dấu sắc"),

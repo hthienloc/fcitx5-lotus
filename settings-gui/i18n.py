@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
 Internationalization setup for the application.
-Binds to the system's locale directory for gettext translations.
 """
 
 import gettext

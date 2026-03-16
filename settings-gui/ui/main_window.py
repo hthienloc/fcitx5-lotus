@@ -12,7 +12,9 @@ from PySide6.QtWidgets import (
     QListWidget,
     QStackedWidget,
     QListWidgetItem,
+    QApplication,
 )
+from PySide6.QtGui import QScreen
 from i18n import _
 from core.dbus_handler import LotusDBusHandler
 from core.file_handler import Fcitx5ConfigHandler
@@ -35,6 +37,7 @@ class LotusSettingsWindow(QMainWindow):
         self.file_handler = Fcitx5ConfigHandler()
 
         self._setup_ui()
+        self._setup_window_size()
 
     def _setup_ui(self):
         central_widget = QWidget()
@@ -60,6 +63,18 @@ class LotusSettingsWindow(QMainWindow):
         # Connect sidebar to stack
         self.sidebar.currentRowChanged.connect(self.content_stack.setCurrentIndex)
         self.sidebar.setCurrentRow(0)
+
+    def _setup_window_size(self):
+        """Auto resize window to fit the screen."""
+        screen = QApplication.primaryScreen().availableGeometry()
+        w = int(screen.width() * 0.7)
+        h = int(screen.height() * 0.65)
+
+        self.setMinimumSize(700, 500)
+        self.resize(w, h)
+        x = (screen.width() - w) // 2
+        y = (screen.height() - h) // 2
+        self.move(x, y)
 
     def _add_page(self, title: str, widget: QWidget):
         """Helper to add a page to the stack and sidebar."""

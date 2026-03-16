@@ -14,7 +14,6 @@ class Fcitx5ConfigHandler:
     """Parses and writes Fcitx5 specific INI formats (e.g., [Macro/0])."""
 
     def __init__(self):
-        # Resolve standard path for Fcitx5 config (~/.config/fcitx5/conf)
         self.config_dir = Path.home() / ".config" / "fcitx5" / "conf"
         self.config_dir.mkdir(parents=True, exist_ok=True)
 
@@ -24,7 +23,6 @@ class Fcitx5ConfigHandler:
     def read_array_config(self, filepath: Path, prefix: str) -> list:
         """
         Reads an array config from Fcitx5 INI manually.
-        Example: [Macro/0] Key=a Value=b -> [{'Key': 'a', 'Value': 'b'}]
         """
         if not filepath.exists():
             return []
@@ -78,7 +76,6 @@ class Fcitx5ConfigHandler:
         content = ""
 
         if not data:
-            # Fcitx5 represents an empty list with just the property name
             content = f"{prefix}=\n"
         else:
             for i, item in enumerate(data):

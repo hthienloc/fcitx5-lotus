@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """
 D-Bus handler to communicate with Fcitx5 Controller.
-Sử dụng python-dbus chuẩn mực thay vì QtDBus để xử lý triệt để nested structs.
 """
 
 import dbus
@@ -21,7 +20,7 @@ class LotusDBusHandler:
             self.iface = None
 
     def get_config(self) -> dict:
-        """Lấy cấu hình từ Fcitx5 và chuyển đổi 100% về Python dict/list."""
+        """Get config from Fcitx5 and convert to Python dict/list."""
         if not self.iface:
             return {}
         try:
@@ -35,33 +34,31 @@ class LotusDBusHandler:
             return {}
 
     def set_config(self, values_dict: dict):
-        """Đóng gói dữ liệu và gửi lại cho Fcitx5."""
+        """Set config and send to Fcitx5."""
         if not self.iface:
             return
         try:
-            # Ép kiểu dữ liệu chuẩn trước khi gửi
             dbus_dict = self._prepare_dbus_data(values_dict)
             self.iface.SetConfig(self.addon_name, dbus_dict)
         except Exception as e:
             print(f"Failed to set config: {e}")
 
     def _prepare_dbus_data(self, data):
-        """Đệ quy ép kiểu dữ liệu Python sang dbus types với signature chuẩn xác của Fcitx5"""
+        """Prepare data to be sent to Fcitx5 in dbus types with signatures."""
         if isinstance(data, dict):
-            # Fcitx5 LUÔN mong đợi dict lồng nhau là a{sv} (String to Variant)
+            # Fcitx5 expects dicts to be a{sv} (String to Variant)
             formatted = {str(k): self._prepare_dbus_data(v) for k, v in data.items()}
             return dbus.Dictionary(formatted, signature="sv")
         elif isinstance(data, list):
-            # Array cũng phải là Array of Variants (av)
+            # Arrays must be Array of Variants (av)
             formatted = [self._prepare_dbus_data(v) for v in data]
             return dbus.Array(formatted, signature="v")
         elif isinstance(data, bool):
             return dbus.Boolean(data)
-        # Các kiểu int, float, str tự nó đã mapping chuẩn
         return data
 
     def _clean_dbus(self, data):
-        """Đệ quy làm sạch các kiểu dữ liệu của dbus thành Python nguyên bản."""
+        """Convert dbus types to Python types."""
         if isinstance(data, dbus.Dictionary):
             return {str(k): self._clean_dbus(v) for k, v in data.items()}
         elif isinstance(data, (dbus.Array, dbus.Struct, list, tuple)):
