@@ -1,4 +1,4 @@
 {
     "addon": "lotus",
-    "files": ["lotus"]
+    "files": ["lotus", "main", "config"]
 }
