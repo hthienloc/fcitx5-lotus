@@ -94,7 +94,7 @@ msgstr ""
 msgid "Lotus - Off"
 msgstr ""
 
-#: src/lotus-config.h:177 keymap-editor/editor.cpp:70
+#: src/lotus-config.h:177
 msgid "Key"
 msgstr ""
 
@@ -150,169 +150,6 @@ msgstr ""
 msgid "Page "
 msgstr ""
 
-#: keymap-editor/editor.cpp:35
-msgid "Import From Existing Keymap"
-msgstr ""
-
-#: keymap-editor/editor.cpp:37
-msgid "Original Input Method"
-msgstr ""
-
-#: keymap-editor/editor.cpp:50
-msgid "Key (Example: s)"
-msgstr ""
-
-#: keymap-editor/editor.cpp:70
-msgid "Action"
-msgstr ""
-
-#: keymap-editor/editor.cpp:80 macro-editor/editor.cpp:69
-msgid "Import"
-msgstr ""
-
-#: keymap-editor/editor.cpp:81 keymap-editor/editor.cpp:302
-#: macro-editor/editor.cpp:70 macro-editor/editor.cpp:313
-msgid "Export"
-msgstr ""
-
-#: keymap-editor/editor.cpp:104
-msgid "Lotus Custom Keymap"
-msgstr ""
-
-#: keymap-editor/editor.cpp:155
-msgid "Confirm"
-msgstr ""
-
-#: keymap-editor/editor.cpp:155
-msgid ""
-"This operation will delete all existing keys on the current keymap and "
-"replace them with the input method "
-msgstr ""
-
-#: keymap-editor/editor.cpp:155
-msgid ". Are you sure?"
-msgstr ""
-
-#: keymap-editor/editor.cpp:204
-msgid "Import Keymap"
-msgstr ""
-
-#: keymap-editor/editor.cpp:204 keymap-editor/editor.cpp:306
-#: macro-editor/editor.cpp:250 macro-editor/editor.cpp:317
-msgid "Tab-separated (*.tsv *.txt);;All files (*)"
-msgstr ""
-
-#: keymap-editor/editor.cpp:212 keymap-editor/editor.cpp:314
-#: macro-editor/editor.cpp:258 macro-editor/editor.cpp:325
-msgid "Error"
-msgstr ""
-
-#: keymap-editor/editor.cpp:212 macro-editor/editor.cpp:258
-msgid "Cannot open file for reading."
-msgstr ""
-
-#: keymap-editor/editor.cpp:246 macro-editor/editor.cpp:292
-msgid "Confirm Import"
-msgstr ""
-
-#: keymap-editor/editor.cpp:247
-msgid ""
-"The current keymap list is not empty. Imported entries will be merged "
-"(existing keys will be updated). Continue?"
-msgstr ""
-
-#: keymap-editor/editor.cpp:297 macro-editor/editor.cpp:308
-msgid "Import Complete"
-msgstr ""
-
-#: keymap-editor/editor.cpp:297 macro-editor/editor.cpp:308
-msgid "Imported %1 entries, skipped %2 invalid lines."
-msgstr ""
-
-#: keymap-editor/editor.cpp:302
-msgid "The keymap list is empty, nothing to export."
-msgstr ""
-
-#: keymap-editor/editor.cpp:306
-msgid "Export Keymap"
-msgstr ""
-
-#: keymap-editor/editor.cpp:314 macro-editor/editor.cpp:325
-msgid "Cannot open file for writing."
-msgstr ""
-
-#: keymap-editor/editor.cpp:340 macro-editor/editor.cpp:344
-msgid "Export Complete"
-msgstr ""
-
-#: keymap-editor/editor.cpp:340 macro-editor/editor.cpp:344
-msgid ""
-"Exported %1 entries to:\n"
-"%2"
-msgstr ""
-
-#: macro-editor/editor.cpp:41
-msgid "Abbreviation (e.g. kg)"
-msgstr ""
-
-#: macro-editor/editor.cpp:42
-msgid "Full text (e.g. khô gà)"
-msgstr ""
-
-#: macro-editor/editor.cpp:44
-msgid "Key:"
-msgstr ""
-
-#: macro-editor/editor.cpp:46
-msgid "Value:"
-msgstr ""
-
-#: macro-editor/editor.cpp:52
-msgid "Abbr."
-msgstr ""
-
-#: macro-editor/editor.cpp:52
-msgid "Text"
-msgstr ""
-
-#: macro-editor/editor.cpp:65
-msgid "Add"
-msgstr ""
-
-#: macro-editor/editor.cpp:66
-msgid "Remove"
-msgstr ""
-
-#: macro-editor/editor.cpp:67
-msgid "Up"
-msgstr ""
-
-#: macro-editor/editor.cpp:68
-msgid "Down"
-msgstr ""
-
-#: macro-editor/editor.cpp:115
-msgid "Lotus Macro"
-msgstr ""
-
-#: macro-editor/editor.cpp:250
-msgid "Import Macros"
-msgstr ""
-
-#: macro-editor/editor.cpp:293
-msgid ""
-"The current macro list is not empty. Imported entries will be merged "
-"(existing keys will be updated). Continue?"
-msgstr ""
-
-#: macro-editor/editor.cpp:313
-msgid "The macro list is empty, nothing to export."
-msgstr ""
-
-#: macro-editor/editor.cpp:317
-msgid "Export Macros"
-msgstr ""
-
 #: org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml.in.in:7
 msgid "Lotus"
 msgstr ""
@@ -338,9 +175,157 @@ msgstr ""
 msgid "Options"
 msgstr ""
 
+#: settings-gui/ui/pages/keymap_editor.py:238
+msgid "Original Input Method"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:245
+msgid "Import From Existing Keymap"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:261
+msgid "Key (Example: s)"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:284
+msgid "Action"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:299
+#: settings-gui/ui/pages/macro_editor.py:82
+msgid "Import"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:300
+#: settings-gui/ui/pages/keymap_editor.py:494
+#: settings-gui/ui/pages/macro_editor.py:83
+#: settings-gui/ui/pages/macro_editor.py:292
+msgid "Export"
+msgstr ""
+
 #: settings-gui/ui/pages/keymap_editor.py:301
 #: settings-gui/ui/pages/macro_editor.py:84
 msgid "Save to File"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:338
+msgid "Success"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:338
+msgid "Keymap saved successfully."
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:367
+msgid "Confirm"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:369
+msgid ""
+"This operation will delete all existing keys on the current keymap and "
+"replace them with the input method "
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:372
+msgid ". Are you sure?"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:415
+msgid "Import Keymap"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:417
+#: settings-gui/ui/pages/keymap_editor.py:502
+#: settings-gui/ui/pages/macro_editor.py:230
+#: settings-gui/ui/pages/macro_editor.py:300
+msgid "Tab-separated (*.tsv *.txt);;All files (*)"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:455
+#: settings-gui/ui/pages/macro_editor.py:268
+msgid "Confirm Import"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:457
+msgid ""
+"The current keymap list is not empty. Imported entries will be merged "
+"(existing keys will be updated). Continue?"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:486
+#: settings-gui/ui/pages/macro_editor.py:285
+msgid "Import Complete"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:494
+msgid "The keymap list is empty, nothing to export."
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:500
+msgid "Export Keymap"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:524
+#: settings-gui/ui/pages/macro_editor.py:318
+msgid "Export Complete"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:47
+msgid "Abbreviation (e.g. kg)"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:49
+msgid "Full text (e.g. khô gà)"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:52
+msgid "Key:"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:54
+msgid "Value:"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:60
+msgid "Abbr."
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:60
+msgid "Text"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:78
+msgid "Add"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:79
+msgid "Remove"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:80
+msgid "Up"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:81
+msgid "Down"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:228
+msgid "Import Macros"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:270
+msgid ""
+"The current macro list is not empty. Imported entries will be merged "
+"(existing keys will be updated). Continue?"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:292
+msgid "The macro list is empty, nothing to export."
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:298
+msgid "Export Macros"
 msgstr ""
 
 #: settings-gui/ui/main_window.py:33
@@ -353,4 +338,8 @@ msgstr ""
 
 #: settings-gui/ui/main_window.py:90
 msgid "Keymap"
+msgstr ""
+
+#: settings-gui/org.fcitx.Fcitx5.Addon.Lotus.Settings.desktop.in:3
+msgid "Configure Fcitx5 Lotus Input Method"
 msgstr ""

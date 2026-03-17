@@ -30,3 +30,12 @@ install(CODE "
         COMMAND \"${Python3_EXECUTABLE}\" -m compileall -q \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${SETTINGS_GUI_INSTALL_DIR}\"
     )
 ")
+
+fcitx5_translate_desktop_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/org.fcitx.Fcitx5.Addon.Lotus.Settings.desktop.in"
+    org.fcitx.Fcitx5.Addon.Lotus.Settings.desktop
+    DESKTOP
+)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/org.fcitx.Fcitx5.Addon.Lotus.Settings.desktop"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")

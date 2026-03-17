@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: fcitx5-lotus\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-16 09:02+0700\n"
-"PO-Revision-Date: 2026-03-17 00:32+0700\n"
+"PO-Revision-Date: 2026-03-17 09:08+0700\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: vi\n"
@@ -95,7 +95,7 @@ msgstr "Gõ"
 msgid "Lotus - Off"
 msgstr "Lotus - Tắt"
 
-#: src/lotus-config.h:177 keymap-editor/editor.cpp:70
+#: src/lotus-config.h:177
 msgid "Key"
 msgstr "Phím"
 
@@ -152,177 +152,6 @@ msgstr "Phím Tắt Menu Chế Độ Gõ"
 msgid "Page "
 msgstr "Trang "
 
-#: keymap-editor/editor.cpp:35
-msgid "Import From Existing Keymap"
-msgstr "Nhập Từ Keymap Có Sẵn"
-
-#: keymap-editor/editor.cpp:37
-msgid "Original Input Method"
-msgstr "Kiểu Gõ Gốc"
-
-#: keymap-editor/editor.cpp:50
-msgid "Key (Example: s)"
-msgstr "Phím (Ví Dụ: s)"
-
-#: keymap-editor/editor.cpp:70
-msgid "Action"
-msgstr "Hành Động"
-
-#: keymap-editor/editor.cpp:80 macro-editor/editor.cpp:69
-msgid "Import"
-msgstr "Nhập"
-
-#: keymap-editor/editor.cpp:81 keymap-editor/editor.cpp:302
-#: macro-editor/editor.cpp:70 macro-editor/editor.cpp:313
-msgid "Export"
-msgstr "Xuất"
-
-#: keymap-editor/editor.cpp:104
-msgid "Lotus Custom Keymap"
-msgstr "Keymap Tuỳ Chỉnh Lotus"
-
-#: keymap-editor/editor.cpp:155
-msgid "Confirm"
-msgstr "Xác nhận"
-
-#: keymap-editor/editor.cpp:155
-msgid ""
-"This operation will delete all existing keys on the current keymap and "
-"replace them with the input method "
-msgstr ""
-"Hành động này sẽ xoá tất cả phím của keymap hiện tại và thế nó với keymap "
-"của kiểu gõ "
-
-#: keymap-editor/editor.cpp:155
-msgid ". Are you sure?"
-msgstr ". Bạn có chắc chắn xoá?"
-
-#: keymap-editor/editor.cpp:204
-msgid "Import Keymap"
-msgstr "Nhập Keymap"
-
-#: keymap-editor/editor.cpp:204 keymap-editor/editor.cpp:306
-#: macro-editor/editor.cpp:250 macro-editor/editor.cpp:317
-msgid "Tab-separated (*.tsv *.txt);;All files (*)"
-msgstr "Phân cách tab (*.tsv *.txt);; Tất cả tệp (*)"
-
-#: keymap-editor/editor.cpp:212 keymap-editor/editor.cpp:314
-#: macro-editor/editor.cpp:258 macro-editor/editor.cpp:325
-msgid "Error"
-msgstr "Lỗi"
-
-#: keymap-editor/editor.cpp:212 macro-editor/editor.cpp:258
-msgid "Cannot open file for reading."
-msgstr "Không thể mở tệp để đọc."
-
-#: keymap-editor/editor.cpp:246 macro-editor/editor.cpp:292
-msgid "Confirm Import"
-msgstr "Xác Nhận Nhập"
-
-#: keymap-editor/editor.cpp:247
-msgid ""
-"The current keymap list is not empty. Imported entries will be merged "
-"(existing keys will be updated). Continue?"
-msgstr ""
-"Keymap hiện tại không rỗng. Các mục nhập sẽ được gộp (mục hiện có sẽ được "
-"cập nhật). Tiếp tục?"
-
-#: keymap-editor/editor.cpp:297 macro-editor/editor.cpp:308
-msgid "Import Complete"
-msgstr "Nhập Thành Công"
-
-#: keymap-editor/editor.cpp:297 macro-editor/editor.cpp:308
-msgid "Imported %1 entries, skipped %2 invalid lines."
-msgstr "Nhập %1 mục, bỏ qua %2 dòng lỗi."
-
-#: keymap-editor/editor.cpp:302
-msgid "The keymap list is empty, nothing to export."
-msgstr "Danh sách keymap trống, không có gì để xuất."
-
-#: keymap-editor/editor.cpp:306
-msgid "Export Keymap"
-msgstr "Xuất Keymap"
-
-#: keymap-editor/editor.cpp:314 macro-editor/editor.cpp:325
-msgid "Cannot open file for writing."
-msgstr "Không thể mở file để ghi."
-
-#: keymap-editor/editor.cpp:340 macro-editor/editor.cpp:344
-msgid "Export Complete"
-msgstr "Xuất Hoàn Tất"
-
-#: keymap-editor/editor.cpp:340 macro-editor/editor.cpp:344
-msgid ""
-"Exported %1 entries to:\n"
-"%2"
-msgstr ""
-"Đã xuất %1 mục vào:\n"
-"%2"
-
-#: macro-editor/editor.cpp:41
-msgid "Abbreviation (e.g. kg)"
-msgstr "Từ viết tắt (ví dụ: kg)"
-
-#: macro-editor/editor.cpp:42
-msgid "Full text (e.g. khô gà)"
-msgstr "Từ đầy đủ (ví dụ: khô gà)"
-
-#: macro-editor/editor.cpp:44
-msgid "Key:"
-msgstr "Khoá:"
-
-#: macro-editor/editor.cpp:46
-msgid "Value:"
-msgstr "Giá Trị:"
-
-#: macro-editor/editor.cpp:52
-msgid "Abbr."
-msgstr "Từ viết tắt."
-
-#: macro-editor/editor.cpp:52
-msgid "Text"
-msgstr "Văn bản"
-
-#: macro-editor/editor.cpp:65
-msgid "Add"
-msgstr "Thêm"
-
-#: macro-editor/editor.cpp:66
-msgid "Remove"
-msgstr "Xoá"
-
-#: macro-editor/editor.cpp:67
-msgid "Up"
-msgstr "Lên"
-
-#: macro-editor/editor.cpp:68
-msgid "Down"
-msgstr "Xuống"
-
-#: macro-editor/editor.cpp:115
-msgid "Lotus Macro"
-msgstr "Gõ Tắt Lotus"
-
-#: macro-editor/editor.cpp:250
-msgid "Import Macros"
-msgstr "Nhập bảng gõ tắt"
-
-#: macro-editor/editor.cpp:293
-msgid ""
-"The current macro list is not empty. Imported entries will be merged "
-"(existing keys will be updated). Continue?"
-msgstr ""
-"Danh sách gõ tắt hiện tại không rỗng. Các mục nhập sẽ được gộp (các mục hiện "
-"có sẽ được cập nhật). Tiếp tục?"
-
-#: macro-editor/editor.cpp:313
-msgid "The macro list is empty, nothing to export."
-msgstr "Danh sách gõ tắt đang rỗng, không có gì để xuất."
-
-#: macro-editor/editor.cpp:317
-msgid "Export Macros"
-msgstr "Xuất bảng gõ tắt"
-
 #: org.fcitx.Fcitx5.Addon.Lotus.metainfo.xml.in.in:7
 msgid "Lotus"
 msgstr "Lotus"
@@ -348,10 +177,164 @@ msgstr "Tải cấu hình thất bại."
 msgid "Options"
 msgstr "Tuỳ chọn"
 
+#: settings-gui/ui/pages/keymap_editor.py:238
+msgid "Original Input Method"
+msgstr "Kiểu Gõ Gốc"
+
+#: settings-gui/ui/pages/keymap_editor.py:245
+msgid "Import From Existing Keymap"
+msgstr "Nhập Từ Keymap Có Sẵn"
+
+#: settings-gui/ui/pages/keymap_editor.py:261
+msgid "Key (Example: s)"
+msgstr "Phím (Ví Dụ: s)"
+
+#: settings-gui/ui/pages/keymap_editor.py:284
+msgid "Action"
+msgstr "Hành Động"
+
+#: settings-gui/ui/pages/keymap_editor.py:299
+#: settings-gui/ui/pages/macro_editor.py:82
+msgid "Import"
+msgstr "Nhập"
+
+#: settings-gui/ui/pages/keymap_editor.py:300
+#: settings-gui/ui/pages/keymap_editor.py:494
+#: settings-gui/ui/pages/macro_editor.py:83
+#: settings-gui/ui/pages/macro_editor.py:292
+msgid "Export"
+msgstr "Xuất"
+
 #: settings-gui/ui/pages/keymap_editor.py:301
 #: settings-gui/ui/pages/macro_editor.py:84
 msgid "Save to File"
 msgstr "Lưu vào File"
+
+#: settings-gui/ui/pages/keymap_editor.py:338
+msgid "Success"
+msgstr "Thành Công"
+
+#: settings-gui/ui/pages/keymap_editor.py:338
+msgid "Keymap saved successfully."
+msgstr "Keymap đã được lưu thành công."
+
+#: settings-gui/ui/pages/keymap_editor.py:367
+msgid "Confirm"
+msgstr "Xác nhận"
+
+#: settings-gui/ui/pages/keymap_editor.py:369
+msgid ""
+"This operation will delete all existing keys on the current keymap and "
+"replace them with the input method "
+msgstr ""
+"Hành động này sẽ xoá tất cả phím của keymap hiện tại và thế nó với keymap "
+"của kiểu gõ "
+
+#: settings-gui/ui/pages/keymap_editor.py:372
+msgid ". Are you sure?"
+msgstr ". Bạn có chắc chắn xoá?"
+
+#: settings-gui/ui/pages/keymap_editor.py:415
+msgid "Import Keymap"
+msgstr "Nhập Keymap"
+
+#: settings-gui/ui/pages/keymap_editor.py:417
+#: settings-gui/ui/pages/keymap_editor.py:502
+#: settings-gui/ui/pages/macro_editor.py:230
+#: settings-gui/ui/pages/macro_editor.py:300
+msgid "Tab-separated (*.tsv *.txt);;All files (*)"
+msgstr "Phân cách tab (*.tsv *.txt);; Tất cả tệp (*)"
+
+#: settings-gui/ui/pages/keymap_editor.py:455
+#: settings-gui/ui/pages/macro_editor.py:268
+msgid "Confirm Import"
+msgstr "Xác Nhận Nhập"
+
+#: settings-gui/ui/pages/keymap_editor.py:457
+msgid ""
+"The current keymap list is not empty. Imported entries will be merged "
+"(existing keys will be updated). Continue?"
+msgstr ""
+"Keymap hiện tại không rỗng. Các mục nhập sẽ được gộp (mục hiện có sẽ được "
+"cập nhật). Tiếp tục?"
+
+#: settings-gui/ui/pages/keymap_editor.py:486
+#: settings-gui/ui/pages/macro_editor.py:285
+msgid "Import Complete"
+msgstr "Nhập Thành Công"
+
+#: settings-gui/ui/pages/keymap_editor.py:494
+msgid "The keymap list is empty, nothing to export."
+msgstr "Danh sách keymap trống, không có gì để xuất."
+
+#: settings-gui/ui/pages/keymap_editor.py:500
+msgid "Export Keymap"
+msgstr "Xuất Keymap"
+
+#: settings-gui/ui/pages/keymap_editor.py:524
+#: settings-gui/ui/pages/macro_editor.py:318
+msgid "Export Complete"
+msgstr "Xuất Hoàn Tất"
+
+#: settings-gui/ui/pages/macro_editor.py:47
+msgid "Abbreviation (e.g. kg)"
+msgstr "Từ viết tắt (ví dụ: kg)"
+
+#: settings-gui/ui/pages/macro_editor.py:49
+msgid "Full text (e.g. khô gà)"
+msgstr "Từ đầy đủ (ví dụ: khô gà)"
+
+#: settings-gui/ui/pages/macro_editor.py:52
+msgid "Key:"
+msgstr "Khoá:"
+
+#: settings-gui/ui/pages/macro_editor.py:54
+msgid "Value:"
+msgstr "Giá Trị:"
+
+#: settings-gui/ui/pages/macro_editor.py:60
+msgid "Abbr."
+msgstr "Từ viết tắt."
+
+#: settings-gui/ui/pages/macro_editor.py:60
+msgid "Text"
+msgstr "Văn bản"
+
+#: settings-gui/ui/pages/macro_editor.py:78
+msgid "Add"
+msgstr "Thêm"
+
+#: settings-gui/ui/pages/macro_editor.py:79
+msgid "Remove"
+msgstr "Xoá"
+
+#: settings-gui/ui/pages/macro_editor.py:80
+msgid "Up"
+msgstr "Lên"
+
+#: settings-gui/ui/pages/macro_editor.py:81
+msgid "Down"
+msgstr "Xuống"
+
+#: settings-gui/ui/pages/macro_editor.py:228
+msgid "Import Macros"
+msgstr "Nhập bảng gõ tắt"
+
+#: settings-gui/ui/pages/macro_editor.py:270
+msgid ""
+"The current macro list is not empty. Imported entries will be merged "
+"(existing keys will be updated). Continue?"
+msgstr ""
+"Danh sách gõ tắt hiện tại không rỗng. Các mục nhập sẽ được gộp (các mục hiện "
+"có sẽ được cập nhật). Tiếp tục?"
+
+#: settings-gui/ui/pages/macro_editor.py:292
+msgid "The macro list is empty, nothing to export."
+msgstr "Danh sách gõ tắt đang rỗng, không có gì để xuất."
+
+#: settings-gui/ui/pages/macro_editor.py:298
+msgid "Export Macros"
+msgstr "Xuất bảng gõ tắt"
 
 #: settings-gui/ui/main_window.py:33
 msgid "Fcitx5 Lotus Settings"
@@ -364,3 +347,32 @@ msgstr "Chung"
 #: settings-gui/ui/main_window.py:90
 msgid "Keymap"
 msgstr "Keymap"
+
+#: settings-gui/org.fcitx.Fcitx5.Addon.Lotus.Settings.desktop.in:3
+msgid "Configure Fcitx5 Lotus Input Method"
+msgstr "Tuỳ Biến Bộ Gõ Fcitx5 Lotus"
+
+#~ msgid "Lotus Custom Keymap"
+#~ msgstr "Keymap Tuỳ Chỉnh Lotus"
+
+#~ msgid "Error"
+#~ msgstr "Lỗi"
+
+#~ msgid "Cannot open file for reading."
+#~ msgstr "Không thể mở tệp để đọc."
+
+#~ msgid "Imported %1 entries, skipped %2 invalid lines."
+#~ msgstr "Nhập %1 mục, bỏ qua %2 dòng lỗi."
+
+#~ msgid "Cannot open file for writing."
+#~ msgstr "Không thể mở file để ghi."
+
+#~ msgid ""
+#~ "Exported %1 entries to:\n"
+#~ "%2"
+#~ msgstr ""
+#~ "Đã xuất %1 mục vào:\n"
+#~ "%2"
+
+#~ msgid "Lotus Macro"
+#~ msgstr "Gõ Tắt Lotus"
