@@ -11,7 +11,10 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon, QDesktopServices
 from i18n import _
 
-__version__ = "1.4.2"
+try:
+    from version import __version__
+except ImportError:
+    __version__ = "1.4.2" # Fallback for local development
 
 class AboutPage(QWidget):
     def __init__(self, parent=None):
@@ -35,7 +38,7 @@ class AboutPage(QWidget):
         
         layout = QVBoxLayout(content_widget)
         layout.setContentsMargins(40, 30, 40, 40)
-        layout.setSpacing(25)
+        layout.setSpacing(20)
         layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
         # Logo/Icon 
@@ -59,6 +62,8 @@ class AboutPage(QWidget):
         layout.addWidget(title, alignment=Qt.AlignCenter)
 
         version = QLabel(_(f"Version {__version__} (Stable)"))
+        version.setObjectName("VersionTag")
+        version.setAlignment(Qt.AlignCenter)
         layout.addWidget(version, alignment=Qt.AlignCenter)
 
         desc = QLabel(_("A state-of-the-art Vietnamese input method engine for Linux, designed for speed, stability, and a premium user experience."))
@@ -78,12 +83,12 @@ class AboutPage(QWidget):
         support_layout.setAlignment(Qt.AlignCenter)
         
         btn_bug = QPushButton(_("Report Bug"))
-        btn_bug.setObjectName("Primary")
+        btn_bug.setObjectName("BugReport")
         btn_bug.setFixedWidth(200)
         btn_bug.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://github.com/LotusInputMethod/fcitx5-lotus/issues/new?template=bug_report.yml")))
         
         btn_feature = QPushButton(_("Request Feature"))
-        btn_feature.setObjectName("Primary")
+        btn_feature.setObjectName("FeatureRequest")
         btn_feature.setFixedWidth(200)
         btn_feature.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://github.com/LotusInputMethod/fcitx5-lotus/issues/new?template=feature_request.yml")))
 
@@ -93,7 +98,7 @@ class AboutPage(QWidget):
 
         # Export Log Button
         self.btn_export_log = QPushButton(_("Export Debug Logs"))
-        self.btn_export_log.setObjectName("Primary")
+        self.btn_export_log.setObjectName("ExportLogs")
         self.btn_export_log.setFixedWidth(415) # 200 + 200 + 15 spacing
         self.btn_export_log.clicked.connect(self._on_export_logs)
         layout.addWidget(self.btn_export_log, alignment=Qt.AlignCenter)
@@ -108,7 +113,7 @@ class AboutPage(QWidget):
         credits_title.setObjectName("CreditsTitle")
         layout.addWidget(credits_title, alignment=Qt.AlignCenter)
 
-        # Authors List - Single Column
+        # Authors List - Single Column with wrap-round support
         authors_layout = QVBoxLayout()
         authors_layout.setSpacing(12)
         
@@ -125,7 +130,9 @@ class AboutPage(QWidget):
             author_link.setOpenExternalLinks(True)
             author_link.setCursor(Qt.PointingHandCursor)
             author_link.setObjectName("AuthorLink")
-            authors_layout.addWidget(author_link, alignment=Qt.AlignCenter)
+            author_link.setAlignment(Qt.AlignCenter)
+            author_link.setMinimumHeight(24)
+            authors_layout.addWidget(author_link)
 
         layout.addLayout(authors_layout)
         layout.addStretch()

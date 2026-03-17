@@ -166,10 +166,10 @@ class DynamicSettingsPage(QWidget):
 
         row_layout = QHBoxLayout()
         row_layout.addWidget(QLabel(_(label)))
+        row_layout.addStretch()
 
         hk_btn = HotkeyCaptureWidget(hotkey_str)
-        hk_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        hk_btn.setMinimumWidth(150)
+        hk_btn.setFixedWidth(200)
         hk_btn.textChanged.connect(
             lambda text, k=key: self.update_config(k, {"0": text})
         )
@@ -189,6 +189,7 @@ class DynamicSettingsPage(QWidget):
         row_layout.addStretch()
 
         combo = QComboBox()
+        combo.setFixedWidth(200)
         enum_dict = annotations.get("Enum", {})
         sorted_keys = sorted(
             enum_dict.keys(), key=lambda x: int(x) if str(x).isdigit() else x

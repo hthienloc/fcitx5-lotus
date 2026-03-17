@@ -95,7 +95,8 @@ class LotusSettingsWindow(QMainWindow):
         bar_layout.addStretch()
 
         self.btn_cancel = QPushButton(_("Cancel"))
-        self.btn_cancel.clicked.connect(self.close)
+        self.btn_cancel.setEnabled(False)
+        self.btn_cancel.clicked.connect(self.on_cancel)
         bar_layout.addWidget(self.btn_cancel)
 
         self.btn_apply = QPushButton(_("Apply"))
@@ -142,8 +143,9 @@ class LotusSettingsWindow(QMainWindow):
             self.on_changed()
 
     def on_changed(self):
-        """Enables the apply button when changes are detected."""
+        """Enables the apply and cancel buttons when changes are detected."""
         self.btn_apply.setEnabled(True)
+        self.btn_cancel.setEnabled(True)
 
     def on_save_all(self, quiet=False):
         """Triggers save on all pages that support it."""
@@ -153,6 +155,7 @@ class LotusSettingsWindow(QMainWindow):
                 page.save_data(quiet=True)
         
         self.btn_apply.setEnabled(False)
+        self.btn_cancel.setEnabled(False)
         if not quiet:
              from PySide6.QtWidgets import QMessageBox
              QMessageBox.information(self, _("Success"), _("All settings applied successfully."))
@@ -160,6 +163,16 @@ class LotusSettingsWindow(QMainWindow):
     def on_ok(self):
         self.on_save_all(quiet=True)
         self.close()
+
+    def on_cancel(self):
+        """Discards all unsaved changes by reloading data on all pages."""
+        for i in range(self.content_stack.count()):
+            page = self.content_stack.widget(i)
+            if hasattr(page, "restore_defaults"):
+                page.restore_defaults()
+        
+        self.btn_apply.setEnabled(False)
+        self.btn_cancel.setEnabled(False)
 
     def _on_sidebar_changed(self, index):
         item = self.sidebar.item(index)

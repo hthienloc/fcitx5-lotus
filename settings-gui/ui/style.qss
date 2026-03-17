@@ -40,7 +40,8 @@ QListWidget#Sidebar::item {
     padding: 10px 20px;
     margin: 2px 10px;
     border-radius: 6px;
-    color: #a0a0a0;
+    color: #d0d0d0;
+    font-weight: 500;
 }
 
 QListWidget#Sidebar::item:hover {
@@ -128,7 +129,6 @@ QComboBox {
     border-radius: 6px;
     padding: 5px 10px;
     color: #ffffff;
-    min-width: 140px;
 }
 
 QComboBox:hover {
@@ -254,6 +254,16 @@ QLabel#AboutTitle {
     font-weight: 800;
     color: #ffffff;
     margin-top: -5px;
+}
+
+QLabel#VersionTag {
+    background-color: #35a2e1;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 3px 14px;
+    font-weight: 800;
+    font-size: 11px;
 }
 
 QLabel#AboutDescription {

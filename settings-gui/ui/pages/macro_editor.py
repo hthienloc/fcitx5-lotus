@@ -81,6 +81,7 @@ class MacroEditorPage(BaseEditorPage):
         self.input_val.setPlaceholderText(_("Full text (e.g. khô gà)"))
         self.input_val.returnPressed.connect(self.on_add)
 
+        self.input_key.textChanged.connect(self._update_add_button_icon)
         input_layout.addWidget(QLabel(_("Key:")))
         input_layout.addWidget(self.input_key, 1)
         input_layout.addWidget(QLabel(_("Value:")))
@@ -212,7 +213,24 @@ class MacroEditorPage(BaseEditorPage):
         self.upsert_row(key, val)
         self.input_key.clear()
         self.input_val.clear()
+        self._update_add_button_icon()
         self.input_key.setFocus()
+
+    def _update_add_button_icon(self):
+        """Changes the Add button icon to Update if key exists."""
+        key = self.input_key.text().strip()
+        found = False
+        for row in range(self.table.rowCount()):
+            if self.table.item(row, 0) and self.table.item(row, 0).text() == key:
+                found = True
+                break
+        
+        if found:
+            self.btn_add.setIcon(QIcon.fromTheme("document-save"))
+            self.btn_add.setToolTip(_("Update"))
+        else:
+            self.btn_add.setIcon(QIcon.fromTheme("list-add"))
+            self.btn_add.setToolTip(_("Add"))
 
     def on_row_selected(self, row, column):
         key_item = self.table.item(row, 0)
