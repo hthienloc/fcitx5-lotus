@@ -136,24 +136,16 @@ class LotusSettingsWindow(QMainWindow):
                 background-color: #2d2d2d;
                 border: 1px solid #3d3d3d;
                 border-radius: 6px;
-                padding: 6px 12px;
+                padding: 5px 10px;
                 color: #ffffff;
                 min-width: 140px;
             }
             QComboBox:hover {
                 border-color: #35a2e1;
-                background-color: #333333;
             }
             QComboBox::drop-down {
                 border: none;
-                width: 30px;
-            }
-            QComboBox::down-arrow {
-                image: none;
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                border-top: 5px solid #a0a0a0;
-                margin-right: 10px;
+                width: 24px;
             }
             QComboBox QAbstractItemView {
                 background-color: #212121;
@@ -165,13 +157,13 @@ class LotusSettingsWindow(QMainWindow):
                 padding: 4px;
             }
             QComboBox QAbstractItemView::item {
-                min-height: 32px;
-                padding-left: 10px;
+                min-height: 28px;
+                padding-left: 8px;
                 border-radius: 4px;
-                margin: 2px 4px;
             }
             QComboBox QAbstractItemView::item:hover {
                 background-color: #2d2d2d;
+                color: #ffffff;
             }
             QComboBox QAbstractItemView::item:selected {
                 background-color: #35a2e1;

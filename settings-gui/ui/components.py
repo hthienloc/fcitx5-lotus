@@ -9,7 +9,7 @@ convert keysyms to Unicode, and mathematically handle Shift modifiers.
 
 import ctypes
 import ctypes.util
-from PySide6.QtWidgets import QPushButton, QTableWidget
+from PySide6.QtWidgets import QPushButton
 from PySide6.QtCore import Qt, Signal
 
 libxkb = None
@@ -119,15 +119,3 @@ class HotkeyCaptureWidget(QPushButton):
         self.setText(self.current_key)
         self.setChecked(False)
         self.textChanged.emit(self.current_key)
-
-
-class DeleteTableWidget(QTableWidget):
-    """A TableWidget that emits a signal when the Delete key is pressed."""
-    
-    deleteRequested = Signal()
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Delete:
-            self.deleteRequested.emit()
-        else:
-            super().keyPressEvent(event)
