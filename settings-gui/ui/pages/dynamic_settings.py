@@ -32,6 +32,25 @@ class SettingsCategory(Enum):
     INTERFACE = "interface"
 
 
+# Mapping of settings keys to categories and groups
+SETTINGS_MAP = {
+    SettingsCategory.GENERAL: {
+        "HOTKEYS": ["ModeMenuKey"],
+        "INPUT METHOD": ["InputMethod", "Mode", "OutputCharset"],
+    },
+    SettingsCategory.APPEARANCE: {
+        "THEME & ICONS": ["UseLotusIcons"],
+    },
+    SettingsCategory.TYPING: {
+        "SPELLING & CORRECTIONS": ["SpellCheck", "AutoNonVnRestore", "DdFreeStyle"],
+        "TYPING OPTIONS": ["ModernStyle", "FreeMarking", "FixUinputWithAck"],
+    },
+    SettingsCategory.SHORTCUTS: {
+        "SHORTCUTS": ["ModeMenuKey"],
+    }
+}
+
+
 class CardWidget(QFrame):
     """A visual container (Card) for grouping related settings."""
 
@@ -97,109 +116,44 @@ class DynamicSettingsPage(QWidget):
         if not metadata_list:
             return
 
-        hotkey_items = []
-        im_items = []
-        charset_items = []
-        option_items = []
-
+        # Flat map all items for easy lookup
+        all_metadata = {}
         for group in metadata_list:
             for item in group[1]:
-                k = item[0]
-                if k == "ModeMenuKey":
-                    hotkey_items.append(item)
-                elif k == "InputMethod" or k == "Mode":
-                    im_items.append(item)
-                elif k == "OutputCharset":
-                    charset_items.append(item)
-                elif item[1] == "Boolean":
-                    option_items.append(item)
+                all_metadata[item[0]] = item
 
-        if self.category == SettingsCategory.GENERAL:
-            title = QLabel(_("General"))
-            title.setObjectName("CategoryTitle")
-            self.container_layout.addWidget(title)
+        # Render based on SETTINGS_MAP
+        title_text = self.category.name.capitalize()
+        title = QLabel(_(title_text))
+        title.setObjectName("CategoryTitle")
+        self.container_layout.addWidget(title)
 
-            # Group: HOTKEYS
-            header_hk = QLabel(_("HOTKEYS"))
-            header_hk.setObjectName("GroupHeader")
-            self.container_layout.addWidget(header_hk)
-            card_hk = CardWidget("")
-            if hotkey_items:
-                for item in hotkey_items:
-                    self._render_hotkey(item, card_hk.content_layout)
-            self.container_layout.addWidget(card_hk)
-
-            # Group: INPUT METHOD
-            header_im = QLabel(_("INPUT METHOD"))
-            header_im.setObjectName("GroupHeader")
-            self.container_layout.addWidget(header_im)
-            card_im = CardWidget("")
-            if im_items:
-                for item in im_items:
-                    self._render_combobox(item, card_im.content_layout)
-            if charset_items:
-                for item in charset_items:
-                    self._render_combobox(item, card_im.content_layout)
-            self.container_layout.addWidget(card_im)
-
-        elif self.category == SettingsCategory.APPEARANCE:
-            title = QLabel(_("Appearance"))
-            title.setObjectName("CategoryTitle")
-            self.container_layout.addWidget(title)
-
-            # Group: THEME & ICONS
-            header_app = QLabel(_("THEME & ICONS"))
-            header_app.setObjectName("GroupHeader")
-            self.container_layout.addWidget(header_app)
-            card_app = CardWidget("")
-            for item in option_items:
-                if item[0] == "UseLotusIcons":
-                    self._render_checkbox(item, card_app.content_layout)
-            self.container_layout.addWidget(card_app)
-
-        elif self.category == SettingsCategory.TYPING:
-            title = QLabel(_("Typing"))
-            title.setObjectName("CategoryTitle")
-            self.container_layout.addWidget(title)
-
-            # Group: SPELLING & CORRECTIONS
-            header1 = QLabel(_("SPELLING & CORRECTIONS"))
-            header1.setObjectName("GroupHeader")
-            self.container_layout.addWidget(header1)
+        category_groups = SETTINGS_MAP.get(self.category, {})
+        for group_name, keys in category_groups.items():
+            header = QLabel(_(group_name))
+            header.setObjectName("GroupHeader")
+            self.container_layout.addWidget(header)
             
-            card1 = CardWidget("")
-            for item in option_items:
-                if item[0] in ["SpellCheck", "AutoNonVnRestore", "DdFreeStyle"]:
-                    self._render_checkbox(item, card1.content_layout)
-            self.container_layout.addWidget(card1)
-
-            # Group: TYPING OPTIONS
-            header2 = QLabel(_("TYPING OPTIONS"))
-            header2.setObjectName("GroupHeader")
-            self.container_layout.addWidget(header2)
-            
-            card2 = CardWidget("")
-            for item in option_items:
-                if item[0] in ["ModernStyle", "FreeMarking", "FixUinputWithAck"]:
-                    self._render_checkbox(item, card2.content_layout)
-            self.container_layout.addWidget(card2)
-
-        elif self.category == SettingsCategory.SHORTCUTS:
-            title = QLabel(_("Shortcuts"))
-            title.setObjectName("CategoryTitle")
-            self.container_layout.addWidget(title)
-
             card = CardWidget("")
-            if hotkey_items:
-                for item in hotkey_items:
+            found_any = False
+            for k in keys:
+                item = all_metadata.get(k)
+                if not item:
+                    continue
+                
+                found_any = True
+                type_str = item[1]
+                if k == "ModeMenuKey" or type_str == "Hotkey":
                     self._render_hotkey(item, card.content_layout)
-            self.container_layout.addWidget(card)
+                elif "Enum" in item[4]:
+                    self._render_combobox(item, card.content_layout)
+                elif type_str == "Boolean":
+                    self._render_checkbox(item, card.content_layout)
+            
+            if found_any:
+                self.container_layout.addWidget(card)
 
-        elif self.category == SettingsCategory.INTERFACE:
-             title = QLabel(_("Interface"))
-             title.setObjectName("CategoryTitle")
-             self.container_layout.addWidget(title)
-             # Future interface settings or empty for now
+        if self.category == SettingsCategory.INTERFACE and not category_groups:
              self.container_layout.addWidget(QLabel(_("No interface settings available yet.")))
 
         self.container_layout.addStretch()

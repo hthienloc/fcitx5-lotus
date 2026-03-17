@@ -26,11 +26,11 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon
 from i18n import _
 from core.file_handler import Fcitx5ConfigHandler
-from core.dbus_handler import LotusDBusHandler
+from ui.pages.base_editor import BaseEditorPage
 from ui.pages.dynamic_settings import CardWidget
 
 
-class MacroEditorPage(QWidget):
+class MacroEditorPage(BaseEditorPage):
     """UI for editing Lotus macros."""
 
     def __init__(self, config_handler: Fcitx5ConfigHandler, dbus_handler: LotusDBusHandler, parent=None):
@@ -153,11 +153,6 @@ class MacroEditorPage(QWidget):
         for item in data:
             self.upsert_row(item.get("Key", ""), item.get("Value", ""))
 
-    def _on_item_changed(self):
-        """Notifies parent window of change."""
-        main_win = self.window()
-        if hasattr(main_win, "on_changed"):
-            main_win.on_changed()
 
     def restore_defaults(self):
         """Reloads data from file, discarding temporary changes."""
@@ -218,54 +213,6 @@ class MacroEditorPage(QWidget):
         self.input_key.clear()
         self.input_val.clear()
         self.input_key.setFocus()
-
-    def on_remove(self):
-        selected_ranges = self.table.selectedRanges()
-        if not selected_ranges:
-            return
-
-        rows_to_delete = set()
-        for r in selected_ranges:
-            for i in range(r.topRow(), r.bottomRow() + 1):
-                rows_to_delete.add(i)
-
-        # Delete from bottom to top to preserve indices
-        for row in sorted(list(rows_to_delete), reverse=True):
-            self.table.removeRow(row)
-
-        self.update_button_states()
-        self._on_item_changed()
-
-    def on_move_up(self):
-        row = self.table.currentRow()
-        if row <= 0:
-            return
-
-        self._swap_rows(row, row - 1)
-        self.table.selectRow(row - 1)
-        self.update_button_states()
-        self._on_item_changed()
-
-    def on_move_down(self):
-        row = self.table.currentRow()
-        if row < 0 or row >= self.table.rowCount() - 1:
-            return
-
-        self._swap_rows(row, row + 1)
-        self.table.selectRow(row + 1)
-        self.update_button_states()
-        self._on_item_changed()
-
-    def _swap_rows(self, row1, row2):
-        key1 = self.table.takeItem(row1, 0)
-        val1 = self.table.takeItem(row1, 1)
-        key2 = self.table.takeItem(row2, 0)
-        val2 = self.table.takeItem(row2, 1)
-
-        self.table.setItem(row1, 0, key2)
-        self.table.setItem(row1, 1, val2)
-        self.table.setItem(row2, 0, key1)
-        self.table.setItem(row2, 1, val1)
 
     def on_row_selected(self, row, column):
         key_item = self.table.item(row, 0)

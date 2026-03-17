@@ -27,6 +27,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from i18n import _
 from core.file_handler import Fcitx5ConfigHandler
+from ui.pages.base_editor import BaseEditorPage
 from ui.pages.dynamic_settings import CardWidget
 
 BAMBOO_ACTIONS = [
@@ -222,7 +223,7 @@ PRESETS = {
 }
 
 
-class KeymapEditorPage(QWidget):
+class KeymapEditorPage(BaseEditorPage):
     """UI for editing Lotus custom keymap."""
 
     def __init__(self, config_handler: Fcitx5ConfigHandler, parent=None):
@@ -310,12 +311,6 @@ class KeymapEditorPage(QWidget):
 
         editor_layout.addLayout(io_layout)
 
-    def _on_item_changed(self):
-        """Notifies parent window of change."""
-        main_win = self.window()
-        if hasattr(main_win, "on_changed"):
-            main_win.on_changed()
-
     def load_data(self):
         """Loads data from the INI file."""
         self.table.setRowCount(0)
@@ -361,13 +356,6 @@ class KeymapEditorPage(QWidget):
 
         self._add_row(key, self.combo_action.currentData())
         self._on_item_changed()
-
-    def on_remove(self):
-        """Removes the selected row."""
-        row = self.table.currentRow()
-        if row >= 0:
-            self.table.removeRow(row)
-            self._on_item_changed()
 
     def on_load_preset(self):
         """Loads a predefined set of keymaps."""

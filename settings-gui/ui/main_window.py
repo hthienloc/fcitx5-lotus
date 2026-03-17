@@ -163,16 +163,18 @@ class LotusSettingsWindow(QMainWindow):
 
     def _on_sidebar_changed(self, index):
         item = self.sidebar.item(index)
-        if item and item.data(Qt.UserRole) == "header":
+        if not item:
+            return
+
+        role = item.data(Qt.UserRole)
+        if role == "page":
+            widget = item.data(Qt.UserRole + 1)
+            if widget:
+                self.content_stack.setCurrentWidget(widget)
+        elif role == "header":
             # Don't allow selecting headers, move to next item
             if index + 1 < self.sidebar.count():
                 self.sidebar.setCurrentRow(index + 1)
-        else:
-            # Map index to stack (skipping headers is tricky, better use a mapping)
-            # For simplicity, we can use item.data(Qt.UserRole + 1) to store widget index
-            stack_idx = item.data(Qt.UserRole + 1)
-            if stack_idx is not None:
-                self.content_stack.setCurrentIndex(stack_idx)
 
     def _setup_window_size(self):
         screen = QApplication.primaryScreen().availableGeometry()
@@ -200,8 +202,8 @@ class LotusSettingsWindow(QMainWindow):
         item = QListWidgetItem(QIcon.fromTheme(icon_name), title)
         item.setData(Qt.UserRole, "page")
         
-        stack_idx = self.content_stack.addWidget(widget)
-        item.setData(Qt.UserRole + 1, stack_idx)
+        self.content_stack.addWidget(widget)
+        item.setData(Qt.UserRole + 1, widget)
         
         self.sidebar.addItem(item)
 
