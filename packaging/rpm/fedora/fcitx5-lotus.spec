@@ -66,6 +66,7 @@ Vietnamese input method for fcitx5
 %{_datadir}/fcitx5/lotus/vietnamese.cm.dict
 
 %{_datadir}/fcitx5-lotus/settings-gui/
+%{_datadir}/applications/org.fcitx.Fcitx5.Addon.Lotus.Settings.desktop
 
 %{_datadir}/icons/hicolor/scalable/apps/fcitx-lotus.svg
 %{_datadir}/icons/hicolor/scalable/apps/org.fcitx.Fcitx5.fcitx-lotus.svg
