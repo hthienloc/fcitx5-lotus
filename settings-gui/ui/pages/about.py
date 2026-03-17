@@ -11,6 +11,8 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon, QDesktopServices
 from i18n import _
 
+__version__ = "1.4.2"
+
 class AboutPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)

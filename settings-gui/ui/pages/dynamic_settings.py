@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 from ui.components import HotkeyCaptureWidget
 from enum import Enum
+from i18n import _
 
 
 class SettingsCategory(Enum):
