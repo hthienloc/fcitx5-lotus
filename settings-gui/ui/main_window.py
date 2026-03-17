@@ -20,15 +20,16 @@ from PySide6.QtWidgets import (
     QSizePolicy,
 )
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QFile
 from i18n import _
 from core.dbus_handler import LotusDBusHandler
 from core.file_handler import Fcitx5ConfigHandler
 
-from ui.pages.dynamic_settings import DynamicSettingsPage
+from ui.pages.dynamic_settings import DynamicSettingsPage, SettingsCategory
 from ui.pages.macro_editor import MacroEditorPage
 from ui.pages.keymap_editor import KeymapEditorPage
 from ui.pages.about import AboutPage
+import os
 
 
 class LotusSettingsWindow(QMainWindow):
@@ -52,176 +53,8 @@ class LotusSettingsWindow(QMainWindow):
         main_v_layout.setContentsMargins(0, 0, 0, 0)
         main_v_layout.setSpacing(0)
 
-        # Apply Global Styling
-        self.setStyleSheet("""
-            QMainWindow, QWidget {
-                background-color: #1a1a1a;
-                color: #e0e0e0;
-                font-family: 'Segoe UI', 'Inter', 'Roboto', sans-serif;
-                font-size: 13px;
-            }
-            QLabel, QCheckBox, QRadioButton {
-                background-color: transparent;
-            }
-            QLabel#CategoryTitle {
-                font-size: 24px;
-                font-weight: 700;
-                color: #ffffff;
-                margin-bottom: 5px;
-            }
-            QLabel#GroupHeader {
-                font-size: 11px;
-                font-weight: 800;
-                color: #666666;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                margin-top: 15px;
-                margin-bottom: 5px;
-            }
-            QListWidget#Sidebar {
-                background-color: #212121;
-                border: none;
-                border-right: 1px solid #2d2d2d;
-                outline: none;
-                padding: 10px 0;
-            }
-            QListWidget#Sidebar::item {
-                padding: 10px 20px;
-                margin: 2px 10px;
-                border-radius: 6px;
-                color: #a0a0a0;
-            }
-            QListWidget#Sidebar::item:hover {
-                background-color: #2d2d2d;
-                color: #ffffff;
-            }
-            QListWidget#Sidebar::item:selected {
-                background-color: #35a2e1;
-                color: #ffffff;
-            }
-            QStackedWidget {
-                background-color: #1a1a1a;
-            }
-            QPushButton {
-                background-color: #2d2d2d;
-                border: none;
-                border-radius: 6px;
-                padding: 8px 16px;
-                color: #ffffff;
-                font-weight: 500;
-            }
-            QPushButton:hover {
-                background-color: #3d3d3d;
-            }
-            QPushButton:pressed {
-                background-color: #252525;
-            }
-            QPushButton#Primary {
-                background-color: #35a2e1;
-            }
-            QPushButton#Primary:hover {
-                background-color: #4db1e4;
-            }
-            QLineEdit {
-                background-color: #2d2d2d;
-                border: 1px solid #3d3d3d;
-                border-radius: 6px;
-                padding: 8px 12px;
-                color: #e0e0e0;
-            }
-            QLineEdit:focus {
-                border-color: #35a2e1;
-            }
-            QComboBox {
-                background-color: #2d2d2d;
-                border: 1px solid #3d3d3d;
-                border-radius: 6px;
-                padding: 5px 10px;
-                color: #ffffff;
-                min-width: 140px;
-            }
-            QComboBox:hover {
-                border-color: #35a2e1;
-            }
-            QComboBox::drop-down {
-                border: none;
-                width: 24px;
-            }
-            QComboBox QAbstractItemView {
-                background-color: #212121;
-                border: 1px solid #2d2d2d;
-                selection-background-color: #35a2e1;
-                selection-color: #ffffff;
-                color: #e0e0e0;
-                outline: none;
-                padding: 4px;
-            }
-            QComboBox QAbstractItemView::item {
-                min-height: 28px;
-                padding-left: 8px;
-                border-radius: 4px;
-            }
-            QComboBox QAbstractItemView::item:hover {
-                background-color: #2d2d2d;
-                color: #ffffff;
-            }
-            QComboBox QAbstractItemView::item:selected {
-                background-color: #35a2e1;
-                color: #ffffff;
-            }
-            QPushButton:disabled {
-                background-color: #252525;
-                color: #555555;
-            }
-            QTableWidget {
-                background-color: #212121;
-                alternate-background-color: #282828;
-                border: 1px solid #2d2d2d;
-                border-radius: 6px;
-                gridline-color: transparent;
-                outline: none;
-            }
-            QHeaderView::section {
-                background-color: #212121;
-                padding: 10px;
-                border: none;
-                font-weight: bold;
-                color: #a0a0a0;
-            }
-            QTableWidget::item {
-                padding: 10px;
-                border-bottom: 1px solid #2d2d2d;
-            }
-            QTableWidget::item:selected {
-                background-color: #35a2e1;
-                color: #ffffff;
-            }
-            QCheckBox, QRadioButton {
-                spacing: 8px;
-            }
-            QCheckBox::indicator, QRadioButton::indicator {
-                width: 18px;
-                height: 18px;
-                border-radius: 4px;
-                border: 1px solid #3d3d3d;
-                background-color: #2d2d2d;
-            }
-            QRadioButton::indicator {
-                border-radius: 9px;
-            }
-            QCheckBox::indicator:hover, QRadioButton::indicator:hover {
-                border-color: #4db1e4;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #35a2e1;
-                border-color: #35a2e1;
-                image: none; /* Clear default checkmark if needed or use custom */
-            }
-            QRadioButton::indicator:checked {
-                background-color: #35a2e1;
-                border-color: #35a2e1;
-            }
-        """)
+        # Apply Global Styling from QSS
+        self._load_stylesheet()
 
         main_h_layout = QHBoxLayout()
         main_h_layout.setContentsMargins(0, 0, 0, 0)
@@ -251,12 +84,6 @@ class LotusSettingsWindow(QMainWindow):
     def _setup_bottom_bar(self, layout):
         container = QFrame()
         container.setObjectName("BottomBar")
-        container.setStyleSheet("""
-            QFrame#BottomBar {
-                background-color: #212121;
-                border-top: 1px solid #2d2d2d;
-            }
-        """)
         bar_layout = QHBoxLayout(container)
         bar_layout.setContentsMargins(20, 12, 20, 12)
         bar_layout.setSpacing(10)
@@ -285,11 +112,11 @@ class LotusSettingsWindow(QMainWindow):
 
     def _setup_pages(self):
         # Top-level Settings Pages
-        self._add_page(_("General"), "preferences-system", DynamicSettingsPage(self.dbus_handler, category="general"))
-        self._add_page(_("Typing"), "input-keyboard", DynamicSettingsPage(self.dbus_handler, category="typing"))
+        self._add_page(_("General"), "preferences-system", DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.GENERAL))
+        self._add_page(_("Typing"), "input-keyboard", DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.TYPING))
         self._add_page(_("Macros"), "accessories-text-editor", MacroEditorPage(self.file_handler, self.dbus_handler))
         self._add_page(_("Keymap"), "preferences-desktop-keyboard", KeymapEditorPage(self.file_handler))
-        self._add_page(_("Appearance"), "preferences-desktop-theme", DynamicSettingsPage(self.dbus_handler, category="appearance"))
+        self._add_page(_("Appearance"), "preferences-desktop-theme", DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.APPEARANCE))
         
         # Bottom section
         spacer = QListWidgetItem()
@@ -377,3 +204,15 @@ class LotusSettingsWindow(QMainWindow):
         item.setData(Qt.UserRole + 1, stack_idx)
         
         self.sidebar.addItem(item)
+
+    def _load_stylesheet(self):
+        """Loads central stylesheet from file."""
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        qss_file = os.path.join(curr_dir, "style.qss")
+        if os.path.exists(qss_file):
+            file = QFile(qss_file)
+            if file.open(QFile.ReadOnly | QFile.Text):
+                stream = file.readAll()
+                self.setStyleSheet(str(stream, encoding="utf-8"))
+        else:
+            print(f"Warning: Stylesheet not found at {qss_file}")

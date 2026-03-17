@@ -19,10 +19,16 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QSizePolicy,
 )
-from PySide6.QtCore import Qt
-from i18n import _
-from core.dbus_handler import LotusDBusHandler
 from ui.components import HotkeyCaptureWidget
+from enum import Enum
+
+
+class SettingsCategory(Enum):
+    GENERAL = "general"
+    APPEARANCE = "appearance"
+    TYPING = "typing"
+    SHORTCUTS = "shortcuts"
+    INTERFACE = "interface"
 
 
 class CardWidget(QFrame):
@@ -31,13 +37,6 @@ class CardWidget(QFrame):
     def __init__(self, title: str, parent=None):
         super().__init__(parent)
         self.setObjectName("SettingCard")
-        self.setStyleSheet("""
-            QFrame#SettingCard {
-                background-color: #212121;
-                border: 1px solid #2d2d2d;
-                border-radius: 8px;
-            }
-        """)
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(16, 16, 16, 16)
@@ -45,12 +44,7 @@ class CardWidget(QFrame):
 
         if title:
             title_label = QLabel(title)
-            title_label.setStyleSheet("""
-                font-size: 14px;
-                font-weight: 600;
-                color: #ffffff;
-                margin-bottom: 4px;
-            """)
+            title_label.setObjectName("CardTitle")
             self.main_layout.addWidget(title_label)
 
         self.content_layout = QVBoxLayout()
@@ -59,7 +53,7 @@ class CardWidget(QFrame):
 
 
 class DynamicSettingsPage(QWidget):
-    def __init__(self, dbus_handler: LotusDBusHandler, category: str = "general", parent=None):
+    def __init__(self, dbus_handler: LotusDBusHandler, category: SettingsCategory = SettingsCategory.GENERAL, parent=None):
         super().__init__(parent)
         self.dbus = dbus_handler
         self.category = category
@@ -76,7 +70,6 @@ class DynamicSettingsPage(QWidget):
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QFrame.NoFrame)
-        self.scroll.setStyleSheet("background-color: transparent;")
 
         self.container = QWidget()
         self.container_layout = QVBoxLayout(self.container)
@@ -120,7 +113,7 @@ class DynamicSettingsPage(QWidget):
                 elif item[1] == "Boolean":
                     option_items.append(item)
 
-        if self.category == "general":
+        if self.category == SettingsCategory.GENERAL:
             title = QLabel(_("General"))
             title.setObjectName("CategoryTitle")
             self.container_layout.addWidget(title)
@@ -148,7 +141,7 @@ class DynamicSettingsPage(QWidget):
                     self._render_combobox(item, card_im.content_layout)
             self.container_layout.addWidget(card_im)
 
-        elif self.category == "appearance":
+        elif self.category == SettingsCategory.APPEARANCE:
             title = QLabel(_("Appearance"))
             title.setObjectName("CategoryTitle")
             self.container_layout.addWidget(title)
@@ -163,7 +156,7 @@ class DynamicSettingsPage(QWidget):
                     self._render_checkbox(item, card_app.content_layout)
             self.container_layout.addWidget(card_app)
 
-        elif self.category == "typing":
+        elif self.category == SettingsCategory.TYPING:
             title = QLabel(_("Typing"))
             title.setObjectName("CategoryTitle")
             self.container_layout.addWidget(title)
@@ -190,7 +183,7 @@ class DynamicSettingsPage(QWidget):
                     self._render_checkbox(item, card2.content_layout)
             self.container_layout.addWidget(card2)
 
-        elif self.category == "shortcuts":
+        elif self.category == SettingsCategory.SHORTCUTS:
             title = QLabel(_("Shortcuts"))
             title.setObjectName("CategoryTitle")
             self.container_layout.addWidget(title)
@@ -201,7 +194,7 @@ class DynamicSettingsPage(QWidget):
                     self._render_hotkey(item, card.content_layout)
             self.container_layout.addWidget(card)
 
-        elif self.category == "interface":
+        elif self.category == SettingsCategory.INTERFACE:
              title = QLabel(_("Interface"))
              title.setObjectName("CategoryTitle")
              self.container_layout.addWidget(title)

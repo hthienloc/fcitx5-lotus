@@ -45,24 +45,7 @@ class HotkeyCaptureWidget(QPushButton):
         self.setText(current_key if current_key else "None")
         self.setCheckable(True)
         self.current_key = current_key
-        self.setStyleSheet("""
-            QPushButton {
-                background-color: #2d2d2d;
-                border: 1px solid #3d3d3d;
-                border-radius: 6px;
-                padding: 6px 12px;
-                color: #e0e0e0;
-                font-weight: 500;
-            }
-            QPushButton:hover {
-                background-color: #3d3d3d;
-            }
-            QPushButton:checked {
-                background-color: #35a2e1;
-                border: 1px solid #4db1e4;
-                color: #ffffff;
-            }
-        """)
+        self.setObjectName("HotkeyButton")
 
     def keyPressEvent(self, event):
         """Captures the key press when button is checked."""

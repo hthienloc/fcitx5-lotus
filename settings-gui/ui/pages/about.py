@@ -4,6 +4,7 @@
 import os
 import subprocess
 import getpass
+import tempfile
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout, QFrame, 
                              QPushButton, QFileDialog, QMessageBox, QGridLayout, QScrollArea)
 from PySide6.QtCore import Qt, QUrl
@@ -29,22 +30,6 @@ class AboutPage(QWidget):
         
         content_widget = QWidget()
         content_widget.setObjectName("AboutContent")
-        # Use ID selector and explicitly include button styles to ensure they are applied
-        content_widget.setStyleSheet("""
-            #AboutContent { background-color: #1a1a1a; }
-            QPushButton#Primary {
-                background-color: #35a2e1;
-                color: #ffffff;
-                font-weight: 600;
-                border-radius: 6px;
-            }
-            QPushButton#Primary:hover {
-                background-color: #4db1e4;
-            }
-            QPushButton#Primary:pressed {
-                background-color: #252525;
-            }
-        """)
         
         layout = QVBoxLayout(content_widget)
         layout.setContentsMargins(40, 30, 40, 40)
@@ -68,7 +53,7 @@ class AboutPage(QWidget):
         layout.addWidget(logo, alignment=Qt.AlignCenter)
 
         title = QLabel("Fcitx5 Lotus")
-        title.setStyleSheet("font-size: 26px; font-weight: 800; color: #ffffff; margin-top: -5px;")
+        title.setObjectName("AboutTitle")
         layout.addWidget(title, alignment=Qt.AlignCenter)
 
         version = QLabel(_(f"Version {__version__} (Stable)"))
@@ -77,13 +62,12 @@ class AboutPage(QWidget):
         desc = QLabel(_("A state-of-the-art Vietnamese input method engine for Linux, designed for speed, stability, and a premium user experience."))
         desc.setWordWrap(True)
         desc.setAlignment(Qt.AlignCenter)
-        desc.setStyleSheet("max-width: 900px; color: #b0b0b0; font-size: 15px; line-height: 1.6;")
+        desc.setObjectName("AboutDescription")
         layout.addWidget(desc, alignment=Qt.AlignCenter)
 
         # GitHub Project Link
         github_link = QLabel('<a href="https://github.com/LotusInputMethod/fcitx5-lotus" style="color: #35a2e1; text-decoration: none;">github.com/LotusInputMethod/fcitx5-lotus</a>')
         github_link.setOpenExternalLinks(True)
-        github_link.setStyleSheet("font-size: 13px;")
         layout.addWidget(github_link, alignment=Qt.AlignCenter)
 
         # Support Buttons Row
@@ -114,12 +98,12 @@ class AboutPage(QWidget):
 
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
-        line.setStyleSheet("background-color: #2d2d2d; margin: 10px 0;")
+        line.setObjectName("AboutLine")
         layout.addWidget(line)
 
         # Credits Section
         credits_title = QLabel(_("DEVELOPED BY"))
-        credits_title.setStyleSheet("color: #666666; font-size: 10px; font-weight: 800; letter-spacing: 2px; margin-bottom: 5px;")
+        credits_title.setObjectName("CreditsTitle")
         layout.addWidget(credits_title, alignment=Qt.AlignCenter)
 
         # Authors List - Single Column
@@ -138,16 +122,7 @@ class AboutPage(QWidget):
             author_link = QLabel(f'<a href="{profile_url}" style="color: #ffffff; text-decoration: none;">{name}</a>')
             author_link.setOpenExternalLinks(True)
             author_link.setCursor(Qt.PointingHandCursor)
-            author_link.setStyleSheet("""
-                QLabel { 
-                    font-size: 14px; 
-                    font-weight: 600; 
-                    padding: 4px 0;
-                }
-                QLabel:hover {
-                    color: #35a2e1;
-                }
-            """)
+            author_link.setObjectName("AuthorLink")
             authors_layout.addWidget(author_link, alignment=Qt.AlignCenter)
 
         layout.addLayout(authors_layout)
@@ -156,11 +131,11 @@ class AboutPage(QWidget):
         # Footer
         footer_line = QFrame()
         footer_line.setFrameShape(QFrame.HLine)
-        footer_line.setStyleSheet("background-color: #2d2d2d;")
+        footer_line.setObjectName("AboutLine")
         layout.addWidget(footer_line)
 
         license_info = QLabel(_("Licensed under the GNU General Public License v3.0"))
-        license_info.setStyleSheet("color: #555555; font-size: 11px;")
+        license_info.setObjectName("LicenseInfo")
         layout.addWidget(license_info, alignment=Qt.AlignCenter)
 
         scroll.setWidget(content_widget)
@@ -186,7 +161,7 @@ class AboutPage(QWidget):
                 log_output_file.write(f"User: {getpass.getuser()}\n")
                 log_output_file.write("--------------------------------------\n\n")
 
-                system_log_path = "/tmp/fcitx5-lotus-server.log"
+                system_log_path = os.path.join(tempfile.gettempdir(), "fcitx5-lotus-server.log")
                 log_output_file.write(f"--- Server Log ({system_log_path}) ---\n")
                 if os.path.exists(system_log_path):
                     with open(system_log_path, 'r') as src_log:
