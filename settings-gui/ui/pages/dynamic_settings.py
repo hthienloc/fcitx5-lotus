@@ -170,7 +170,8 @@ class DynamicSettingsPage(QWidget):
 
         subtitle = QLabel(f"<b>{_(label)}</b>")
         subtitle.setStyleSheet("color: palette(text); padding-top: 5px;")
-        layout.addWidget(subtitle)
+        if label != "Output Charset":
+            layout.addWidget(subtitle)
 
         enum_dict = annotations.get("Enum", {})
         sorted_keys = sorted(
