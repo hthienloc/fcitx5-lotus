@@ -15,8 +15,7 @@ Build-Depends: debhelper (>= 13),
                libudev-dev,
                pkg-config,
                libx11-dev,
-               python3-pyside6.qtwidgets <!noqut>,
-
+               python3-pyside6.qtwidgets <!noqut>
 Standards-Version: 4.6.0
 
 Package: fcitx5-lotus
