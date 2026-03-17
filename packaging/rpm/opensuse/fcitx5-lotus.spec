@@ -21,12 +21,14 @@ BuildRequires:  systemd-devel
 BuildRequires:  libX11-devel
 
 BuildRequires:  go
+BuildRequires:  python-rpm-macros
 Requires(post): udev
 BuildRequires:  sysuser-tools
 
 %{?systemd_requires}
 Requires:       fcitx5
-Requires:       python313-pyside6
+Requires:       python3-pyside6
+Requires:       python3-dbus-python
 Requires:       hicolor-icon-theme
 
 %description

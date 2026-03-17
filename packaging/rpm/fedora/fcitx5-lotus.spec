@@ -21,12 +21,14 @@ BuildRequires:  pkgconfig(libudev)
 BuildRequires:  libX11-devel
 
 BuildRequires:  golang
+BuildRequires:  python3
 BuildRequires:  libgudev-devel
 
 %{?systemd_requires}
 Requires:       fcitx5-data
 Requires:       fcitx5
 Requires:       python3-pyside6
+Requires:       python3-dbus
 Requires:       hicolor-icon-theme
 
 %description
