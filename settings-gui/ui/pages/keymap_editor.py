@@ -27,6 +27,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from i18n import _
 from core.file_handler import Fcitx5ConfigHandler
+from ui.pages.dynamic_settings import CardWidget
 
 BAMBOO_ACTIONS = [
     ("XoaDauThanh", "Xóa dấu thanh"),
@@ -230,10 +231,18 @@ class KeymapEditorPage(QWidget):
         self._setup_ui()
         self.load_data()
 
+
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(30, 20, 30, 20)
+        main_layout.setSpacing(15)
 
-        # Preset layout
+        title = QLabel(_("Keymap"))
+        title.setObjectName("CategoryTitle")
+        main_layout.addWidget(title)
+
+        # Preset card
+        preset_card = CardWidget("")
         preset_layout = QHBoxLayout()
         preset_layout.addWidget(QLabel(_("Original Input Method")))
 
@@ -241,19 +250,18 @@ class KeymapEditorPage(QWidget):
         self.combo_preset.addItems(PRESETS.keys())
         preset_layout.addWidget(self.combo_preset)
 
-        btn_load_preset = QPushButton(
-            QIcon.fromTheme("document-import"), _("Import From Existing Keymap")
-        )
+        btn_load_preset = QPushButton(QIcon.fromTheme("document-import"), _("Import From Existing Keymap"))
         btn_load_preset.clicked.connect(self.on_load_preset)
         preset_layout.addWidget(btn_load_preset)
         preset_layout.addStretch()
-        main_layout.addLayout(preset_layout)
+        preset_card.content_layout.addLayout(preset_layout)
+        main_layout.addWidget(preset_card)
 
-        # Separator
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setFrameShadow(QFrame.Sunken)
-        main_layout.addWidget(line)
+        # Editor card
+        editor_card = CardWidget("")
+        editor_layout = QVBoxLayout()
+        editor_card.content_layout.addLayout(editor_layout)
+        main_layout.addWidget(editor_card)
 
         # Input Area
         input_layout = QHBoxLayout()
@@ -266,52 +274,47 @@ class KeymapEditorPage(QWidget):
             self.combo_action.addItem(action_name, action_code)
 
         btn_add = QPushButton(QIcon.fromTheme("list-add"), "")
-        btn_add.setFixedSize(30, 30)
         btn_add.clicked.connect(self.on_add)
 
         btn_remove = QPushButton(QIcon.fromTheme("list-remove"), "")
-        btn_remove.setFixedSize(30, 30)
         btn_remove.clicked.connect(self.on_remove)
 
         input_layout.addWidget(self.input_key)
         input_layout.addWidget(self.combo_action)
         input_layout.addWidget(btn_add)
         input_layout.addWidget(btn_remove)
-        main_layout.addLayout(input_layout)
+        editor_layout.addLayout(input_layout)
 
         # Table
         self.table = QTableWidget(0, 2)
         self.table.setHorizontalHeaderLabels([_("Key"), _("Action")])
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeToContents
-        )
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.setAlternatingRowColors(
-            true if hasattr(Qt, "AlternatingRowColors") else True
-        )  # fallback for style
+        self.table.setAlternatingRowColors(True)
         self.table.cellClicked.connect(self.on_row_selected)
-        main_layout.addWidget(self.table)
+        editor_layout.addWidget(self.table)
 
         # IO Layout
         io_layout = QHBoxLayout()
         btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
         btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
-        btn_save = QPushButton(_("Save to File"))
-
-        btn_import.setStyleSheet("text-align: left; padding: 6px 12px;")
-        btn_export.setStyleSheet("text-align: left; padding: 6px 12px;")
 
         btn_import.clicked.connect(self.on_import)
         btn_export.clicked.connect(self.on_export)
-        btn_save.clicked.connect(self.save_data)
 
         io_layout.addWidget(btn_import)
         io_layout.addWidget(btn_export)
         io_layout.addStretch()
-        io_layout.addWidget(btn_save)
-        main_layout.addLayout(io_layout)
+
+        editor_layout.addLayout(io_layout)
+
+    def _on_item_changed(self):
+        """Notifies parent window of change."""
+        main_win = self.window()
+        if hasattr(main_win, "on_changed"):
+            main_win.on_changed()
 
     def load_data(self):
         """Loads data from the INI file."""
@@ -320,7 +323,11 @@ class KeymapEditorPage(QWidget):
         for item in data:
             self._add_row(item.get("Key", ""), item.get("Value", ""))
 
-    def save_data(self):
+    def restore_defaults(self):
+        """Reloads data from file, discarding temporary changes."""
+        self.load_data()
+
+    def save_data(self, quiet=False):
         """Saves current table to the INI file."""
         data = []
         for row in range(self.table.rowCount()):
@@ -335,7 +342,8 @@ class KeymapEditorPage(QWidget):
             data.append({"Key": key, "Value": val})
 
         self.handler.write_array_config(self.handler.keymap_file, "CustomKeymap", data)
-        QMessageBox.information(self, _("Success"), _("Keymap saved successfully."))
+        if not quiet:
+            QMessageBox.information(self, _("Success"), _("Keymap saved successfully."))
 
     def on_add(self):
         """Adds a new keymap entry."""
@@ -352,12 +360,14 @@ class KeymapEditorPage(QWidget):
                 return
 
         self._add_row(key, self.combo_action.currentData())
+        self._on_item_changed()
 
     def on_remove(self):
         """Removes the selected row."""
         row = self.table.currentRow()
         if row >= 0:
             self.table.removeRow(row)
+            self._on_item_changed()
 
     def on_load_preset(self):
         """Loads a predefined set of keymaps."""
@@ -379,6 +389,7 @@ class KeymapEditorPage(QWidget):
         preset_data = PRESETS.get(preset_name, [])
         for key, action_code in preset_data:
             self._add_row(key, action_code)
+        self._on_item_changed()
 
     def _add_row(self, key: str, action_code: str):
         """Helper to insert a row and properly set the combobox."""
@@ -396,6 +407,7 @@ class KeymapEditorPage(QWidget):
         if idx >= 0:
             cell_combo.setCurrentIndex(idx)
 
+        cell_combo.currentIndexChanged.connect(self._on_item_changed)
         self.table.setCellWidget(row, 1, cell_combo)
 
     def on_row_selected(self, row, column):

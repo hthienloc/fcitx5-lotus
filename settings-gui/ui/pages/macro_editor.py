@@ -20,31 +20,63 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QAbstractItemView,
     QFileDialog,
+    QCheckBox,
+    QFrame,
 )
 from PySide6.QtGui import QIcon
 from i18n import _
 from core.file_handler import Fcitx5ConfigHandler
+from core.dbus_handler import LotusDBusHandler
+from ui.pages.dynamic_settings import CardWidget
 
 
 class MacroEditorPage(QWidget):
     """UI for editing Lotus macros."""
 
-    def __init__(self, config_handler: Fcitx5ConfigHandler, parent=None):
+    def __init__(self, config_handler: Fcitx5ConfigHandler, dbus_handler: LotusDBusHandler, parent=None):
         super().__init__(parent)
         self.handler = config_handler
+        self.dbus = dbus_handler
         self._setup_ui()
         self.load_data()
 
-    def _setup_ui(self):
-        main_layout = QHBoxLayout(self)
 
-        # Left Column
+    def _setup_ui(self):
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(30, 20, 30, 20)
+        main_layout.setSpacing(15)
+
+        title = QLabel(_("Macros"))
+        title.setObjectName("CategoryTitle")
+        main_layout.addWidget(title)
+
+        # Macro behavior toggles
+        toggles_card = CardWidget("")
+        toggles_layout = QHBoxLayout()
+        self.cb_enable = QCheckBox(_("Enable Macro"))
+        self.cb_capitalize = QCheckBox(_("Capitalize Macro"))
+        self.cb_enable.toggled.connect(self._on_item_changed)
+        self.cb_capitalize.toggled.connect(self._on_item_changed)
+        toggles_layout.addWidget(self.cb_enable)
+        toggles_layout.addWidget(self.cb_capitalize)
+        toggles_layout.addStretch()
+        toggles_card.content_layout.addLayout(toggles_layout)
+        main_layout.addWidget(toggles_card)
+
+        # Main content area
+        editor_card = CardWidget("")
+        content_layout = QHBoxLayout()
+        editor_card.content_layout.addLayout(content_layout)
+        main_layout.addWidget(editor_card)
+
+        # Left Column: Inputs and Table
         left_column = QVBoxLayout()
 
         # Input row
         input_layout = QHBoxLayout()
         self.input_key = QLineEdit()
         self.input_key.setPlaceholderText(_("Abbreviation (e.g. kg)"))
+        
         self.input_val = QLineEdit()
         self.input_val.setPlaceholderText(_("Full text (e.g. khô gà)"))
         self.input_val.returnPressed.connect(self.on_add)
@@ -58,9 +90,7 @@ class MacroEditorPage(QWidget):
         # Table
         self.table = QTableWidget(0, 2)
         self.table.setHorizontalHeaderLabels([_("Abbr."), _("Text")])
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeToContents
-        )
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -68,30 +98,27 @@ class MacroEditorPage(QWidget):
         self.table.cellClicked.connect(self.on_row_selected)
         left_column.addWidget(self.table)
 
-        main_layout.addLayout(left_column)
+        content_layout.addLayout(left_column, 1)
 
-        # Sidebar Buttons
+        # Right Column: Sidebar Buttons
         sidebar_layout = QVBoxLayout()
+        sidebar_layout.setContentsMargins(10, 0, 0, 0)
+        sidebar_layout.setSpacing(10)
 
-        btn_style = "text-align: left; padding: 6px 12px;"
+        self.btn_add = QPushButton(QIcon.fromTheme("list-add"), "")
+        self.btn_add.setToolTip(_("Add"))
+        self.btn_remove = QPushButton(QIcon.fromTheme("list-remove"), "")
+        self.btn_remove.setToolTip(_("Remove"))
+        self.btn_up = QPushButton(QIcon.fromTheme("go-up"), "")
+        self.btn_up.setToolTip(_("Up"))
+        self.btn_down = QPushButton(QIcon.fromTheme("go-down"), "")
+        self.btn_down.setToolTip(_("Down"))
+        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), "")
+        self.btn_import.setToolTip(_("Import"))
+        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), "")
+        self.btn_export.setToolTip(_("Export"))
 
-        self.btn_add = QPushButton(QIcon.fromTheme("list-add"), _("Add"))
-        self.btn_remove = QPushButton(QIcon.fromTheme("list-remove"), _("Remove"))
-        self.btn_up = QPushButton(QIcon.fromTheme("go-up"), _("Up"))
-        self.btn_down = QPushButton(QIcon.fromTheme("go-down"), _("Down"))
-        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
-        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
-        self.btn_save = QPushButton(_("Save to File"))
-
-        for btn in [
-            self.btn_add,
-            self.btn_remove,
-            self.btn_up,
-            self.btn_down,
-            self.btn_import,
-            self.btn_export,
-        ]:
-            btn.setStyleSheet(btn_style)
+        for btn in [self.btn_add, self.btn_remove, self.btn_up, self.btn_down, self.btn_import, self.btn_export]:
             btn.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         self.btn_add.clicked.connect(self.on_add)
@@ -100,7 +127,6 @@ class MacroEditorPage(QWidget):
         self.btn_down.clicked.connect(self.on_move_down)
         self.btn_import.clicked.connect(self.on_import)
         self.btn_export.clicked.connect(self.on_export)
-        self.btn_save.clicked.connect(self.save_data)
 
         sidebar_layout.addWidget(self.btn_add)
         sidebar_layout.addWidget(self.btn_remove)
@@ -110,19 +136,42 @@ class MacroEditorPage(QWidget):
         sidebar_layout.addStretch()
         sidebar_layout.addWidget(self.btn_import)
         sidebar_layout.addWidget(self.btn_export)
-        sidebar_layout.addSpacing(10)
-        sidebar_layout.addWidget(self.btn_save)
 
-        main_layout.addLayout(sidebar_layout)
+        content_layout.addLayout(sidebar_layout)
         self.update_button_states()
 
     def load_data(self):
+        # Load global macro settings via DBus
+        config_data = self.dbus.get_config()
+        if config_data:
+            values = config_data.get("values", {})
+            self.cb_enable.setChecked(str(values.get("EnableMacro", "True")).lower() == "true")
+            self.cb_capitalize.setChecked(str(values.get("CapitalizeMacro", "True")).lower() == "true")
+
         self.table.setRowCount(0)
         data = self.handler.read_array_config(self.handler.macro_file, "Macro")
         for item in data:
             self.upsert_row(item.get("Key", ""), item.get("Value", ""))
 
-    def save_data(self):
+    def _on_item_changed(self):
+        """Notifies parent window of change."""
+        main_win = self.window()
+        if hasattr(main_win, "on_changed"):
+            main_win.on_changed()
+
+    def restore_defaults(self):
+        """Reloads data from file, discarding temporary changes."""
+        self.load_data()
+
+    def save_data(self, quiet=False):
+        # Save global macro settings via DBus
+        config_data = self.dbus.get_config()
+        if config_data:
+            values = config_data.get("values", {})
+            values["EnableMacro"] = "True" if self.cb_enable.isChecked() else "False"
+            values["CapitalizeMacro"] = "True" if self.cb_capitalize.isChecked() else "False"
+            self.dbus.set_config(values)
+
         data = []
         for row in range(self.table.rowCount()):
             key_item = self.table.item(row, 0)
@@ -134,7 +183,8 @@ class MacroEditorPage(QWidget):
             )
 
         self.handler.write_array_config(self.handler.macro_file, "Macro", data)
-        QMessageBox.information(self, "Success", "Macros saved successfully.")
+        if not quiet:
+            QMessageBox.information(self, _("Success"), _("Macros saved successfully."))
 
     def upsert_row(self, key: str, value: str):
         # Update existing
@@ -150,6 +200,7 @@ class MacroEditorPage(QWidget):
         self.table.setItem(row, 0, QTableWidgetItem(key))
         self.table.setItem(row, 1, QTableWidgetItem(value))
         self.update_button_states()
+        self._on_item_changed()
 
     def update_button_states(self):
         row = self.table.currentRow()
@@ -183,6 +234,7 @@ class MacroEditorPage(QWidget):
             self.table.removeRow(row)
 
         self.update_button_states()
+        self._on_item_changed()
 
     def on_move_up(self):
         row = self.table.currentRow()
@@ -192,6 +244,7 @@ class MacroEditorPage(QWidget):
         self._swap_rows(row, row - 1)
         self.table.selectRow(row - 1)
         self.update_button_states()
+        self._on_item_changed()
 
     def on_move_down(self):
         row = self.table.currentRow()
@@ -201,6 +254,7 @@ class MacroEditorPage(QWidget):
         self._swap_rows(row, row + 1)
         self.table.selectRow(row + 1)
         self.update_button_states()
+        self._on_item_changed()
 
     def _swap_rows(self, row1, row2):
         key1 = self.table.takeItem(row1, 0)
