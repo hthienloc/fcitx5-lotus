@@ -191,7 +191,7 @@ class DynamicSettingsPage(QWidget):
             self.container_layout.addWidget(card2)
 
         elif self.category == "shortcuts":
-            title = QLabel(_("Phím tắt"))
+            title = QLabel(_("Shortcuts"))
             title.setObjectName("CategoryTitle")
             self.container_layout.addWidget(title)
 
@@ -202,7 +202,7 @@ class DynamicSettingsPage(QWidget):
             self.container_layout.addWidget(card)
 
         elif self.category == "interface":
-             title = QLabel(_("Giao diện"))
+             title = QLabel(_("Interface"))
              title.setObjectName("CategoryTitle")
              self.container_layout.addWidget(title)
              # Future interface settings or empty for now

@@ -71,8 +71,7 @@ class AboutPage(QWidget):
         title.setStyleSheet("font-size: 26px; font-weight: 800; color: #ffffff; margin-top: -5px;")
         layout.addWidget(title, alignment=Qt.AlignCenter)
 
-        version = QLabel(_("Version 1.4.2 (Stable)"))
-        version.setStyleSheet("color: #35a2e1; font-size: 13px; font-weight: 600; background-color: #1e3a4f; padding: 4px 12px; border-radius: 12px;")
+        version = QLabel(_(f"Version {__version__} (Stable)"))
         layout.addWidget(version, alignment=Qt.AlignCenter)
 
         desc = QLabel(_("A state-of-the-art Vietnamese input method engine for Linux, designed for speed, stability, and a premium user experience."))
@@ -183,7 +182,7 @@ class AboutPage(QWidget):
         try:
             with open(export_filename, 'w') as log_output_file:
                 log_output_file.write("=== Fcitx5 Lotus Debug Log Export ===\n")
-                log_output_file.write(f"Version: 1.4.2\n")
+                log_output_file.write(f"Version: {__version__}\n")
                 log_output_file.write(f"User: {getpass.getuser()}\n")
                 log_output_file.write("--------------------------------------\n\n")
 
