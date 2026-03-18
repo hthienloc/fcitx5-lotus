@@ -75,9 +75,19 @@ namespace fcitx {
     bool LotusState::connect_uinput_server() {
         if (uinput_client_fd_ >= 0)
             return true;
-        BASE_SOCKET_PATH               = buildSocketPath("kb_socket");
-        const std::string current_path = BASE_SOCKET_PATH;
-        int               current_fd   = socket(AF_UNIX, SOCK_STREAM, 0);
+
+        static int64_t last_connect_attempt = 0;
+        int64_t        now                  = now_ms();
+        if (now - last_connect_attempt < 2000) {
+            return false;
+        }
+        last_connect_attempt = now;
+
+        if (BASE_SOCKET_PATH.empty()) {
+            BASE_SOCKET_PATH = buildSocketPath("kb_socket");
+        }
+
+        int current_fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
         if (current_fd < 0) {
             LOTUS_ERROR("Failed to create socket: " + std::string(strerror(errno)));
             return false;
@@ -87,14 +97,13 @@ namespace fcitx {
         addr.sun_family = AF_UNIX;
 
         addr.sun_path[0] = '\0';
-        memcpy(&addr.sun_path[1], current_path.c_str(), current_path.length());
-        socklen_t len = offsetof(struct sockaddr_un, sun_path) + current_path.length() + 1;
+        memcpy(&addr.sun_path[1], BASE_SOCKET_PATH.c_str(), std::min(BASE_SOCKET_PATH.length(), UNIX_PATH_MAX - 1));
+        socklen_t len = offsetof(struct sockaddr_un, sun_path) + BASE_SOCKET_PATH.length() + 1;
 
         if (connect(current_fd, (struct sockaddr*)&addr, len) == 0) {
             uinput_client_fd_ = current_fd;
             return true;
         }
-        LOTUS_ERROR("Failed to connect to socket: " + std::string(strerror(errno)));
         close(current_fd);
         uinput_client_fd_ = -1;
         return false;
@@ -106,7 +115,6 @@ namespace fcitx {
 
     void LotusState::send_backspace_uinput(int count) const {
         if (uinput_client_fd_ < 0 && !connect_uinput_server()) {
-            LOTUS_ERROR("Cannot send backspace since cannot connect to uinput server");
             return;
         }
 
