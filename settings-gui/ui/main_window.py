@@ -48,14 +48,12 @@ class LotusSettingsWindow(QMainWindow):
         self.update_reset_button_state()
 
     def update_reset_button_state(self):
-        modified = False
-        # Check all pages to see if any are modified from default
-        for i in range(self.content_stack.count()):
-            page = self.content_stack.widget(i)
-            if hasattr(page, "is_modified_from_default") and page.is_modified_from_default():
-                modified = True
-                break
-        self.btn_reset.setEnabled(modified)
+        any_modified = any(
+            hasattr(self.content_stack.widget(i), "is_modified_from_default")
+            and self.content_stack.widget(i).is_modified_from_default()
+            for i in range(self.content_stack.count())
+        )
+        self.btn_reset.setEnabled(any_modified)
 
     def _apply_global_styles(self):
         self.setStyleSheet("""

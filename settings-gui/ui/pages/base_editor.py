@@ -87,7 +87,7 @@ class BaseEditorPage(QWidget):
         if hasattr(self, "btn_down"):
             self.btn_down.setEnabled(0 <= row < count - 1)
         if hasattr(self, "btn_remove"):
-            self.btn_remove.setEnabled(True)
+            self.btn_remove.setEnabled(selected)
 
     def _swap_rows(self, row1, row2):
         """Swaps two rows in the table, preserving widgets if any."""

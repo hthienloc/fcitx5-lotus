@@ -161,12 +161,24 @@ class MacroEditorPage(BaseEditorPage):
             self.blockSignals(False)
 
     def restore_defaults(self):
-        """Reloads data from file, discarding temporary changes."""
-        self.load_data()
+        """Resets macros to default (empty table, enabled checkboxes)."""
+        self.blockSignals(True)
+        try:
+            self.cb_enable.setChecked(True)
+            self.cb_capitalize.setChecked(True)
+            self.table.setRowCount(0)
+            self._on_item_changed()
+        finally:
+            self.blockSignals(False)
 
     def is_modified_from_default(self):
-        """Returns True if the macro table has any entries."""
-        return self.table.rowCount() > 0
+        """Returns True if the macro table has entries or checkboxes are changed from default."""
+        # Default state: table is empty, both checkboxes are True.
+        return (
+            self.table.rowCount() > 0
+            or not self.cb_enable.isChecked()
+            or not self.cb_capitalize.isChecked()
+        )
 
     def save_data(self, quiet=False):
         # Save global macro settings via DBus

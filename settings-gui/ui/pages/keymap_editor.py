@@ -331,8 +331,9 @@ class KeymapEditorPage(BaseEditorPage):
             self.blockSignals(False)
 
     def restore_defaults(self):
-        """Reloads data from file, discarding temporary changes."""
-        self.load_data()
+        """Clears all custom keymap entries, restoring to default."""
+        self.table.setRowCount(0)
+        self._on_item_changed()
 
     def is_modified_from_default(self):
         """Returns True if the keymap table has any entries."""
