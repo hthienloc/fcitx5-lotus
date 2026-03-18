@@ -953,8 +953,12 @@ namespace fcitx {
                 switch (currentSym) {
                     case FcitxKey_period:
                     case FcitxKey_exclam:
-                    case FcitxKey_question:
-                    case FcitxKey_Return: isPrevPunctuation_ = true; break;
+                    case FcitxKey_question: isPrevPunctuation_ = true; break;
+                    case FcitxKey_Return:
+                    case FcitxKey_KP_Enter:
+                        shouldCapitalize_  = true;
+                        isPrevPunctuation_ = false;
+                        break;
                     case FcitxKey_space:
                         if (isPrevPunctuation_) {
                             shouldCapitalize_  = true;
