@@ -34,8 +34,6 @@ namespace fcitx {
 
     LotusState::LotusState(LotusEngine* engine, InputContext* ic) : engine_(engine), ic_(ic) {
         setEngine();
-        shouldCapitalize_  = false;
-        isPrevPunctuation_ = false;
     }
 
     void LotusState::setEngine() {
@@ -925,15 +923,21 @@ namespace fcitx {
                 }
             }
 
-            if (currentSym == FcitxKey_period || currentSym == FcitxKey_exclam || currentSym == FcitxKey_question) {
-                isPrevPunctuation_ = true;
-            } else if (currentSym == FcitxKey_space) {
-                if (isPrevPunctuation_) {
-                    shouldCapitalize_  = true;
+            switch (currentSym) {
+                case FcitxKey_period:
+                case FcitxKey_exclam:
+                case FcitxKey_question:
+                    isPrevPunctuation_ = true;
+                    break;
+                case FcitxKey_space:
+                    if (isPrevPunctuation_) {
+                        shouldCapitalize_  = true;
+                        isPrevPunctuation_ = false;
+                    }
+                    break;
+                default:
                     isPrevPunctuation_ = false;
-                }
-            } else {
-                isPrevPunctuation_ = false;
+                    break;
             }
         }
 
