@@ -195,7 +195,7 @@ namespace fcitx {
          * @param checkEmptyPreedit Whether to check for empty preedit.
          * @param sleepTime Delay in microseconds.
          */
-        void handleUinputMode(KeyEvent& keyEvent, KeySym currentSym, bool checkEmptyPreedit, int sleepTime);
+        void handleUinputMode(KeyEvent& keyEvent, KeySym currentSym, bool checkEmptyPreedit);
 
         /**
          * @brief Handles surrounding text mode.

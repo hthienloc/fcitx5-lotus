@@ -75,19 +75,9 @@ namespace fcitx {
     bool LotusState::connect_uinput_server() {
         if (uinput_client_fd_ >= 0)
             return true;
-
-        static int64_t last_connect_attempt = 0;
-        int64_t        now                  = now_ms();
-        if (now - last_connect_attempt < 2000) {
-            return false;
-        }
-        last_connect_attempt = now;
-
-        if (BASE_SOCKET_PATH.empty()) {
-            BASE_SOCKET_PATH = buildSocketPath("kb_socket");
-        }
-
-        int current_fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+        BASE_SOCKET_PATH               = buildSocketPath("kb_socket");
+        const std::string current_path = BASE_SOCKET_PATH;
+        int               current_fd   = socket(AF_UNIX, SOCK_STREAM, 0);
         if (current_fd < 0) {
             LOTUS_ERROR("Failed to create socket: " + std::string(strerror(errno)));
             return false;
@@ -97,8 +87,8 @@ namespace fcitx {
         addr.sun_family = AF_UNIX;
 
         addr.sun_path[0] = '\0';
-        memcpy(&addr.sun_path[1], BASE_SOCKET_PATH.c_str(), std::min(BASE_SOCKET_PATH.length(), UNIX_PATH_MAX - 1));
-        socklen_t len = offsetof(struct sockaddr_un, sun_path) + BASE_SOCKET_PATH.length() + 1;
+        memcpy(&addr.sun_path[1], current_path.c_str(), current_path.length());
+        socklen_t len = offsetof(struct sockaddr_un, sun_path) + current_path.length() + 1;
 
         if (connect(current_fd, (struct sockaddr*)&addr, len) == 0) {
             uinput_client_fd_ = current_fd;
@@ -548,25 +538,8 @@ namespace fcitx {
         }
     }
 
-    void LotusState::handleUinputMode(KeyEvent& keyEvent, KeySym currentSym, bool checkEmptyPreedit, int sleepTime) {
+    void LotusState::handleUinputMode(KeyEvent& keyEvent, KeySym currentSym, bool checkEmptyPreedit) {
         checkForwardSpecialKey(keyEvent, currentSym);
-        if (is_deleting_.load(std::memory_order_acquire)) {
-            if (isBackspace(currentSym)) {
-                if (realtextLen > 0)
-                    realtextLen -= 1;
-                if (handleUInputKeyPress(keyEvent, currentSym, sleepTime)) {
-                    return;
-                }
-            } else {
-                std::string keyUtf8Check = Key::keySymToUTF8(currentSym);
-                if (!keyUtf8Check.empty() && buffered_keys_.size() < MAX_BUFFERED_KEYS) {
-                    LOTUS_WARN("Typing so fast, add key to queue");
-                    buffered_keys_.push_back({currentSym, keyEvent.rawKey().states()});
-                }
-                keyEvent.filterAndAccept();
-            }
-            return;
-        }
 
         if (uinput_client_fd_ < 0) {
             setup_uinput();
@@ -861,15 +834,14 @@ namespace fcitx {
 
     void LotusState::handleDoubleSpaceReplacement() {
         switch (realMode) {
-            case LotusMode::SurroundingText:
-            case LotusMode::Preedit: {
+            case LotusMode::SurroundingText: {
                 ic_->deleteSurroundingText(-1, 1);
                 ic_->commitString(". ");
                 LOTUS_INFO("Commit: . ");
 
                 break;
             }
-            default: { // Uinput, Smooth, etc.
+            default: { // Uinput, Smooth, Preedit, etc.
                 performReplacement(" ", ". ");
                 LOTUS_INFO("Commit: . ");
                 break;
@@ -920,20 +892,6 @@ namespace fcitx {
             replayBufferedKeys();
         }
         KeySym currentSym = keyEvent.rawKey().sym();
-        if (*engine_->config().doubleSpaceToPeriod && realMode != LotusMode::Off) {
-            if (currentSym == FcitxKey_space) {
-                if (isPrevSpace_) {
-                    keyEvent.filterAndAccept();
-                    handleDoubleSpaceReplacement();
-                    isPrevSpace_ = false;
-                    return;
-                }
-                isPrevSpace_ = true;
-            } else {
-                isPrevSpace_ = false;
-            }
-        }
-
         if (*engine_->config().autoCapitalizeAfterPunctuation && realMode != LotusMode::Off) {
             // Ignore auto-capitalize side-effects if we're processing automated replacement backspaces
             bool isAutomatedBackspace = is_deleting_.load(std::memory_order_acquire) && isBackspace(currentSym);
@@ -974,13 +932,45 @@ namespace fcitx {
             }
         }
 
+        if (is_deleting_.load(std::memory_order_acquire)) {
+            if (isBackspace(currentSym)) {
+                if (realtextLen > 0)
+                    realtextLen -= 1;
+                if (handleUInputKeyPress(keyEvent, currentSym, (realMode == LotusMode::Smooth) ? 5 : 20)) {
+                    return;
+                }
+            } else {
+                std::string keyUtf8Check = Key::keySymToUTF8(currentSym);
+                if (!keyUtf8Check.empty() && buffered_keys_.size() < MAX_BUFFERED_KEYS) {
+                    LOTUS_WARN("Typing so fast, add key to queue");
+                    buffered_keys_.push_back({currentSym, keyEvent.rawKey().states()});
+                }
+                keyEvent.filterAndAccept();
+            }
+            return;
+        }
+
+        if (*engine_->config().doubleSpaceToPeriod && realMode != LotusMode::Off) {
+            if (currentSym == FcitxKey_space) {
+                if (isPrevSpace_) {
+                    keyEvent.filterAndAccept();
+                    handleDoubleSpaceReplacement();
+                    isPrevSpace_ = false;
+                    return;
+                }
+                isPrevSpace_ = true;
+            } else {
+                isPrevSpace_ = false;
+            }
+        }
+
         switch (realMode) {
             case LotusMode::Uinput: {
-                handleUinputMode(keyEvent, currentSym, true, 20);
+                handleUinputMode(keyEvent, currentSym, true);
                 break;
             }
             case LotusMode::UinputHC: {
-                handleUinputMode(keyEvent, currentSym, false, 20);
+                handleUinputMode(keyEvent, currentSym, false);
                 break;
             }
             case LotusMode::SurroundingText: {
@@ -996,7 +986,7 @@ namespace fcitx {
                 break;
             }
             case LotusMode::Smooth: {
-                handleUinputMode(keyEvent, currentSym, true, 5);
+                handleUinputMode(keyEvent, currentSym, true);
                 break;
             }
             default: {
