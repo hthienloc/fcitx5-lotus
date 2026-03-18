@@ -597,17 +597,23 @@ namespace fcitx {
                 performReplacement(deletedPart, addedPart);
                 keyEvent.filterAndAccept();
             } else {
-                if (!addedPart.empty() && keyUtf8 != addedPart) {
-                    // Stripping the trigger key (space) from addedPart
+                bool wasAutoCapitalized = (currentSym != keyEvent.rawKey().sym());
+                if (!addedPart.empty() && (keyUtf8 != addedPart || wasAutoCapitalized)) {
+                    // Prevent auto-capitalized character replacement from stripping out Vietnamese chars
+                    if (addedPart.size() > 1 && addedPart.back() == ' ') {
+                        // Stripping the trigger key (space) from addedPart
 #if __cplusplus >= 202002L
-                    addedPart.resize(addedPart.size() - 1);
+                        addedPart.resize(addedPart.size() - 1);
 #else
-                    addedPart = addedPart.substr(0, addedPart.size() - 1);
+                        addedPart = addedPart.substr(0, addedPart.size() - 1);
 #endif
+                    }
                     ic_->commitString(addedPart);
                     LOTUS_INFO("Commit: " + addedPart);
+                    keyEvent.filterAndAccept();
+                } else {
+                    keyEvent.forward();
                 }
-                keyEvent.forward();
             }
 
             history_.clear();
@@ -666,9 +672,10 @@ namespace fcitx {
         if (compareAndSplitStrings(oldPreBuffer_, preeditStr, commonPrefix, deletedPart, addedPart) != 0) {
             if (deletedPart.empty()) {
                 bool isCommit = false;
+                bool wasAutoCapitalized = (currentSym != keyEvent.rawKey().sym());
                 if (!addedPart.empty()) {
                     oldPreBuffer_ = preeditStr;
-                    if (addedPart != keyUtf8) {
+                    if (addedPart != keyUtf8 || wasAutoCapitalized) {
                         ic_->commitString(addedPart);
                         LOTUS_INFO("Commit: " + addedPart);
                         keyEvent.filterAndAccept();
@@ -843,9 +850,6 @@ namespace fcitx {
     }
 
     void LotusState::handleDoubleSpaceReplacement() {
-        if (*engine_->config().autoCapitalize) {
-            shouldCapitalize_ = true;
-        }
         switch (realMode) {
             case LotusMode::SurroundingText:
             case LotusMode::Preedit: {
@@ -860,6 +864,10 @@ namespace fcitx {
                 LOTUS_INFO("Commit: . ");
                 break;
             }
+        }
+        if (*engine_->config().autoCapitalize) {
+            isPrevPunctuation_ = true;
+            shouldCapitalize_ = true;
         }
     }
 
@@ -915,32 +923,39 @@ namespace fcitx {
         }
 
         if (*engine_->config().autoCapitalize && realMode != LotusMode::Off) {
-            if (shouldCapitalize_) {
-                if (currentSym >= FcitxKey_a && currentSym <= FcitxKey_z) {
-                    KeySym upperSym = static_cast<KeySym>(currentSym - (FcitxKey_a - FcitxKey_A));
-                    currentSym      = upperSym;
-                    keyEvent.setKey(Key(upperSym, keyEvent.rawKey().states() | KeyState::Shift));
-                    shouldCapitalize_ = false;
-                } else if (currentSym != FcitxKey_space) {
-                    shouldCapitalize_ = false;
-                }
-            }
-
-            switch (currentSym) {
-                case FcitxKey_period:
-                case FcitxKey_exclam:
-                case FcitxKey_question:
-                    isPrevPunctuation_ = true;
-                    break;
-                case FcitxKey_space:
-                    if (isPrevPunctuation_) {
-                        shouldCapitalize_  = true;
-                        isPrevPunctuation_ = false;
+            // Ignore auto-capitalize side-effects if we're processing automated replacement backspaces
+            bool isAutomatedBackspace = is_deleting_.load(std::memory_order_acquire) && isBackspace(currentSym);
+            
+            if (!isAutomatedBackspace) {
+                if (shouldCapitalize_) {
+                    if (currentSym >= FcitxKey_a && currentSym <= FcitxKey_z) {
+                        KeySym upperSym = static_cast<KeySym>(currentSym - (FcitxKey_a - FcitxKey_A));
+                        currentSym      = upperSym;
+                        keyEvent.setKey(Key(upperSym, keyEvent.rawKey().states()));
+                        shouldCapitalize_ = false;
+                    } else if (currentSym != FcitxKey_space) {
+                        shouldCapitalize_ = false;
                     }
-                    break;
-                default:
-                    isPrevPunctuation_ = false;
-                    break;
+                }
+
+                switch (currentSym) {
+                    case FcitxKey_period:
+                    case FcitxKey_exclam:
+                    case FcitxKey_question:
+                        isPrevPunctuation_ = true;
+                        break;
+                    case FcitxKey_space:
+                        if (isPrevPunctuation_) {
+                            shouldCapitalize_  = true;
+                            isPrevPunctuation_ = false;
+                        }
+                        break;
+                    default:
+                        if (currentSym != FcitxKey_space) {
+                             isPrevPunctuation_ = false;
+                        }
+                        break;
+                }
             }
         }
 
