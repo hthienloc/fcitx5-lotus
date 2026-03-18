@@ -891,6 +891,8 @@ namespace fcitx {
             is_deleting_.store(false);
             current_backspace_count_ = 0;
             isPrevSpace_             = false;
+            shouldCapitalize_        = false;
+            isPrevPunctuation_       = false;
             needEngineReset.store(false);
         }
 
