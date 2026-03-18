@@ -671,7 +671,7 @@ namespace fcitx {
         std::string      addedPart;
         if (compareAndSplitStrings(oldPreBuffer_, preeditStr, commonPrefix, deletedPart, addedPart) != 0) {
             if (deletedPart.empty()) {
-                bool isCommit = false;
+                bool isCommit           = false;
                 bool wasAutoCapitalized = (currentSym != keyEvent.rawKey().sym());
                 if (!addedPart.empty()) {
                     oldPreBuffer_ = preeditStr;
@@ -867,7 +867,7 @@ namespace fcitx {
         }
         if (*engine_->config().autoCapitalize) {
             isPrevPunctuation_ = true;
-            shouldCapitalize_ = true;
+            shouldCapitalize_  = true;
         }
     }
 
@@ -925,7 +925,7 @@ namespace fcitx {
         if (*engine_->config().autoCapitalize && realMode != LotusMode::Off) {
             // Ignore auto-capitalize side-effects if we're processing automated replacement backspaces
             bool isAutomatedBackspace = is_deleting_.load(std::memory_order_acquire) && isBackspace(currentSym);
-            
+
             if (!isAutomatedBackspace) {
                 if (shouldCapitalize_) {
                     if (currentSym >= FcitxKey_a && currentSym <= FcitxKey_z) {
@@ -941,9 +941,7 @@ namespace fcitx {
                 switch (currentSym) {
                     case FcitxKey_period:
                     case FcitxKey_exclam:
-                    case FcitxKey_question:
-                        isPrevPunctuation_ = true;
-                        break;
+                    case FcitxKey_question: isPrevPunctuation_ = true; break;
                     case FcitxKey_space:
                         if (isPrevPunctuation_) {
                             shouldCapitalize_  = true;
@@ -952,7 +950,7 @@ namespace fcitx {
                         break;
                     default:
                         if (currentSym != FcitxKey_space) {
-                             isPrevPunctuation_ = false;
+                            isPrevPunctuation_ = false;
                         }
                         break;
                 }
