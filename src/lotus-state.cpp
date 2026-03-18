@@ -34,6 +34,8 @@ namespace fcitx {
 
     LotusState::LotusState(LotusEngine* engine, InputContext* ic) : engine_(engine), ic_(ic) {
         setEngine();
+        shouldCapitalize_  = false;
+        isPrevPunctuation_ = false;
     }
 
     void LotusState::setEngine() {
@@ -853,6 +855,9 @@ namespace fcitx {
             }
             default: { // Uinput, Smooth, etc.
                 performReplacement(" ", ". ");
+                if (*engine_->config().autoCapitalize) {
+                    shouldCapitalize_ = true;
+                }
                 break;
             }
         }
@@ -909,6 +914,29 @@ namespace fcitx {
             }
         }
 
+        if (*engine_->config().autoCapitalize && realMode != LotusMode::Off) {
+            if (shouldCapitalize_) {
+                if (currentSym >= FcitxKey_a && currentSym <= FcitxKey_z) {
+                    KeySym upperSym = static_cast<KeySym>(currentSym - (FcitxKey_a - FcitxKey_A));
+                    keyEvent.setKey(Key(upperSym, keyEvent.rawKey().states()));
+                    shouldCapitalize_ = false;
+                } else if (currentSym != FcitxKey_space) {
+                    shouldCapitalize_ = false;
+                }
+            }
+
+            if (currentSym == FcitxKey_period || currentSym == FcitxKey_exclam || currentSym == FcitxKey_question) {
+                isPrevPunctuation_ = true;
+            } else if (currentSym == FcitxKey_space) {
+                if (isPrevPunctuation_) {
+                    shouldCapitalize_  = true;
+                    isPrevPunctuation_ = false;
+                }
+            } else {
+                isPrevPunctuation_ = false;
+            }
+        }
+
         switch (realMode) {
             case LotusMode::Uinput: {
                 handleUinputMode(keyEvent, currentSym, true, 20);
@@ -951,7 +979,9 @@ namespace fcitx {
         is_deleting_.store(false);
 
         if (lotusEngine_) {
-            isPrevSpace_ = false;
+            isPrevSpace_       = false;
+            shouldCapitalize_  = false;
+            isPrevPunctuation_ = false;
             if (realMode == LotusMode::Preedit) {
                 EngineCommitPreedit(lotusEngine_.handle());
                 UniqueCPtr<char> commit(EnginePullCommit(lotusEngine_.handle()));
@@ -1042,6 +1072,8 @@ namespace fcitx {
         emojiBuffer_.clear();
         emojiCandidates_.clear();
         buffered_keys_.clear();
+        shouldCapitalize_  = false;
+        isPrevPunctuation_ = false;
         if (lotusEngine_)
             ResetEngine(lotusEngine_.handle());
     }

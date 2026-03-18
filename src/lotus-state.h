@@ -102,6 +102,8 @@ namespace fcitx {
         bool                    waitAck_ = false;
         std::vector<KeyEntry>   buffered_keys_; ///< Keystrokes buffered during replacement
         bool                    isPrevSpace_ = false;
+        bool                    shouldCapitalize_ = false;
+        bool                    isPrevPunctuation_ = false;
 
         /**
          * @brief Connects to the uinput server.
