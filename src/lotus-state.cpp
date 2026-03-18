@@ -190,8 +190,8 @@ namespace fcitx {
         return false;
     }
 
-    void LotusState::handlePreeditMode(KeyEvent& keyEvent) {
-        if (EngineProcessKeyEvent(lotusEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states()) != 0U)
+    void LotusState::handlePreeditMode(KeyEvent& keyEvent, KeySym currentSym) {
+        if (EngineProcessKeyEvent(lotusEngine_.handle(), currentSym, keyEvent.rawKey().states()) != 0U)
             keyEvent.filterAndAccept();
         if (auto commit = UniqueCPtr<char>(EnginePullCommit(lotusEngine_.handle()))) {
             if (commit && (*commit.get() != 0)) {
@@ -731,7 +731,7 @@ namespace fcitx {
         size_t             textLen = utf8::lengthValidated(text);
 
         if (textLen == utf8::INVALID_LENGTH || cursor <= 0 || cursor > textLen) {
-            processNormalKey(keyEvent);
+            processNormalKey(keyEvent, currentSym);
             return;
         }
 
@@ -761,13 +761,13 @@ namespace fcitx {
             std::string oldWord(startIter, endIter);
 
             if (oldWord.empty()) {
-                processNormalKey(keyEvent);
+                processNormalKey(keyEvent, currentSym);
                 return;
             }
 
             EngineRebuildFromText(lotusEngine_.handle(), oldWord.c_str());
 
-            bool processed = EngineProcessKeyEvent(lotusEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states()) != 0U;
+            bool processed = EngineProcessKeyEvent(lotusEngine_.handle(), currentSym, keyEvent.rawKey().states()) != 0U;
 
             if (!processed) {
                 keyEvent.forward();
@@ -817,10 +817,10 @@ namespace fcitx {
         }
     }
 
-    void LotusState::processNormalKey(KeyEvent& keyEvent) {
+    void LotusState::processNormalKey(KeyEvent& keyEvent, KeySym currentSym) {
         auto* ic = keyEvent.inputContext();
         ResetEngine(lotusEngine_.handle());
-        bool processed = EngineProcessKeyEvent(lotusEngine_.handle(), keyEvent.rawKey().sym(), keyEvent.rawKey().states()) != 0U;
+        bool processed = EngineProcessKeyEvent(lotusEngine_.handle(), currentSym, keyEvent.rawKey().states()) != 0U;
         if (processed) {
             auto        commitPtr  = UniqueCPtr<char>(EnginePullCommit(lotusEngine_.handle()));
             auto        preeditPtr = UniqueCPtr<char>(EnginePullPreedit(lotusEngine_.handle()));
@@ -843,19 +843,21 @@ namespace fcitx {
     }
 
     void LotusState::handleDoubleSpaceReplacement() {
+        if (*engine_->config().autoCapitalize) {
+            shouldCapitalize_ = true;
+        }
         switch (realMode) {
             case LotusMode::SurroundingText:
             case LotusMode::Preedit: {
                 ic_->deleteSurroundingText(-1, 1);
                 ic_->commitString(". ");
                 LOTUS_INFO("Commit: . ");
+
                 break;
             }
             default: { // Uinput, Smooth, etc.
                 performReplacement(" ", ". ");
-                if (*engine_->config().autoCapitalize) {
-                    shouldCapitalize_ = true;
-                }
+                LOTUS_INFO("Commit: . ");
                 break;
             }
         }
@@ -897,7 +899,7 @@ namespace fcitx {
             replacement_start_ms_.store(0, std::memory_order_release);
             replayBufferedKeys();
         }
-        const KeySym currentSym = keyEvent.rawKey().sym();
+        KeySym currentSym = keyEvent.rawKey().sym();
         if (*engine_->config().doubleSpaceToPeriod && realMode != LotusMode::Off) {
             if (currentSym == FcitxKey_space) {
                 if (isPrevSpace_) {
@@ -916,7 +918,8 @@ namespace fcitx {
             if (shouldCapitalize_) {
                 if (currentSym >= FcitxKey_a && currentSym <= FcitxKey_z) {
                     KeySym upperSym = static_cast<KeySym>(currentSym - (FcitxKey_a - FcitxKey_A));
-                    keyEvent.setKey(Key(upperSym, keyEvent.rawKey().states()));
+                    currentSym      = upperSym;
+                    keyEvent.setKey(Key(upperSym, keyEvent.rawKey().states() | KeyState::Shift));
                     shouldCapitalize_ = false;
                 } else if (currentSym != FcitxKey_space) {
                     shouldCapitalize_ = false;
@@ -955,7 +958,7 @@ namespace fcitx {
                 break;
             }
             case LotusMode::Preedit: {
-                handlePreeditMode(keyEvent);
+                handlePreeditMode(keyEvent, currentSym);
                 break;
             }
             case LotusMode::Emoji: {
