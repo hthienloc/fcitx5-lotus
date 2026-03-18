@@ -104,6 +104,7 @@ namespace fcitx {
             uinput_client_fd_ = current_fd;
             return true;
         }
+        LOTUS_ERROR("Failed to connect to socket: " + std::string(strerror(errno)));
         close(current_fd);
         uinput_client_fd_ = -1;
         return false;
@@ -115,6 +116,7 @@ namespace fcitx {
 
     void LotusState::send_backspace_uinput(int count) const {
         if (uinput_client_fd_ < 0 && !connect_uinput_server()) {
+            LOTUS_ERROR("Cannot send backspace since cannot connect to uinput server");
             return;
         }
 
