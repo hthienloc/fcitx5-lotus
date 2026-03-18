@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QFileDialog,
 )
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from i18n import _
 
@@ -29,6 +30,40 @@ class BaseEditorPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.table = None
+
+    def apply_table_style(self):
+        """Applies modern styling to the table."""
+        if not self.table:
+            return
+
+        self.table.setFocusPolicy(Qt.NoFocus)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setShowGrid(False)
+
+        self.table.setStyleSheet(
+            """
+            QTableWidget {
+                border: 1px solid palette(midlight);
+                border-radius: 6px;
+                background-color: transparent;
+            }
+            QTableWidget::item {
+                padding: 4px;
+                border-bottom: 1px solid palette(midlight);
+            }
+            QTableWidget::item:selected {
+                background-color: palette(highlight);
+                color: palette(highlighted-text);
+            }
+            QHeaderView::section {
+                background-color: transparent;
+                border: none;
+                border-bottom: 2px solid palette(mid);
+                padding: 4px;
+                font-weight: bold;
+            }
+        """
+        )
 
     def _on_item_changed(self):
         """Notifies parent window of change."""

@@ -21,11 +21,12 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QFileDialog,
     QCheckBox,
-    QFrame,
 )
 from PySide6.QtGui import QIcon
+from PySide6.QtCore import Qt
 from i18n import _
 from core.file_handler import Fcitx5ConfigHandler
+from core.dbus_handler import LotusDBusHandler
 from ui.pages.base_editor import BaseEditorPage
 from ui.pages.dynamic_settings import CardWidget
 
@@ -33,13 +34,17 @@ from ui.pages.dynamic_settings import CardWidget
 class MacroEditorPage(BaseEditorPage):
     """UI for editing Lotus macros."""
 
-    def __init__(self, config_handler: Fcitx5ConfigHandler, dbus_handler: LotusDBusHandler, parent=None):
+    def __init__(
+        self,
+        config_handler: Fcitx5ConfigHandler,
+        dbus_handler: LotusDBusHandler,
+        parent=None,
+    ):
         super().__init__(parent)
         self.handler = config_handler
         self.dbus = dbus_handler
         self._setup_ui()
         self.load_data()
-
 
     def _setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -65,80 +70,73 @@ class MacroEditorPage(BaseEditorPage):
 
         # Main content area
         editor_card = CardWidget("")
-        content_layout = QHBoxLayout()
+        content_layout = QVBoxLayout()
         editor_card.content_layout.addLayout(content_layout)
         main_layout.addWidget(editor_card)
 
-        # Left Column: Inputs and Table
-        left_column = QVBoxLayout()
-
-        # Input row
+        # 1. Input Row (Top)
         input_layout = QHBoxLayout()
         self.input_key = QLineEdit()
         self.input_key.setPlaceholderText(_("Abbreviation (e.g. kg)"))
-        
+        self.input_key.setClearButtonEnabled(True)
+
         self.input_val = QLineEdit()
         self.input_val.setPlaceholderText(_("Full text (e.g. khô gà)"))
+        self.input_val.setClearButtonEnabled(True)
         self.input_val.returnPressed.connect(self.on_add)
 
+        self.btn_add = QPushButton(QIcon.fromTheme("list-add"), _("Add"))
+        self.btn_add.clicked.connect(self.on_add)
         self.input_key.textChanged.connect(self._update_add_button_icon)
+
         input_layout.addWidget(QLabel(_("Key:")))
         input_layout.addWidget(self.input_key, 1)
         input_layout.addWidget(QLabel(_("Value:")))
         input_layout.addWidget(self.input_val, 2)
-        left_column.addLayout(input_layout)
+        input_layout.addWidget(self.btn_add)
+        content_layout.addLayout(input_layout)
 
-        # Table
+        # 2. Table Area
         self.table = QTableWidget(0, 2)
-        self.table.setHorizontalHeaderLabels([_("Abbr."), _("Text")])
-        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.table.setHorizontalHeaderLabels([_("Abbreviation"), _("Expanded Text")])
+        self.table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeToContents
+        )
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setAlternatingRowColors(True)
+        self.apply_table_style()  # Bơm CSS xịn vào đây
         self.table.cellClicked.connect(self.on_row_selected)
-        left_column.addWidget(self.table)
+        content_layout.addWidget(self.table)
 
-        content_layout.addLayout(left_column, 1)
+        # 3. Bottom Toolbar
+        toolbar_layout = QHBoxLayout()
+        toolbar_layout.setContentsMargins(0, 5, 0, 0)
 
-        # Right Column: Sidebar Buttons
-        sidebar_layout = QVBoxLayout()
-        sidebar_layout.setContentsMargins(10, 0, 0, 0)
-        sidebar_layout.setSpacing(10)
-
-        self.btn_add = QPushButton(QIcon.fromTheme("list-add"), "")
-        self.btn_add.setToolTip(_("Add"))
-        self.btn_remove = QPushButton(QIcon.fromTheme("list-remove"), "")
-        self.btn_remove.setToolTip(_("Remove"))
+        self.btn_remove = QPushButton(QIcon.fromTheme("list-remove"), _("Remove"))
         self.btn_up = QPushButton(QIcon.fromTheme("go-up"), "")
-        self.btn_up.setToolTip(_("Up"))
+        self.btn_up.setToolTip(_("Move Up"))
         self.btn_down = QPushButton(QIcon.fromTheme("go-down"), "")
-        self.btn_down.setToolTip(_("Down"))
-        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), "")
-        self.btn_import.setToolTip(_("Import"))
-        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), "")
-        self.btn_export.setToolTip(_("Export"))
+        self.btn_down.setToolTip(_("Move Down"))
 
-        for btn in [self.btn_add, self.btn_remove, self.btn_up, self.btn_down, self.btn_import, self.btn_export]:
-            btn.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
+        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
 
-        self.btn_add.clicked.connect(self.on_add)
         self.btn_remove.clicked.connect(self.on_remove)
         self.btn_up.clicked.connect(self.on_move_up)
         self.btn_down.clicked.connect(self.on_move_down)
         self.btn_import.clicked.connect(self.on_import)
         self.btn_export.clicked.connect(self.on_export)
 
-        sidebar_layout.addWidget(self.btn_add)
-        sidebar_layout.addWidget(self.btn_remove)
-        sidebar_layout.addSpacing(10)
-        sidebar_layout.addWidget(self.btn_up)
-        sidebar_layout.addWidget(self.btn_down)
-        sidebar_layout.addStretch()
-        sidebar_layout.addWidget(self.btn_import)
-        sidebar_layout.addWidget(self.btn_export)
+        toolbar_layout.addWidget(self.btn_remove)
+        toolbar_layout.addWidget(self.btn_up)
+        toolbar_layout.addWidget(self.btn_down)
+        toolbar_layout.addStretch()
+        toolbar_layout.addWidget(self.btn_import)
+        toolbar_layout.addWidget(self.btn_export)
 
-        content_layout.addLayout(sidebar_layout)
+        content_layout.addLayout(toolbar_layout)
         self.update_button_states()
 
     def load_data(self):
@@ -146,14 +144,17 @@ class MacroEditorPage(BaseEditorPage):
         config_data = self.dbus.get_config()
         if config_data:
             values = config_data.get("values", {})
-            self.cb_enable.setChecked(str(values.get("EnableMacro", "True")).lower() == "true")
-            self.cb_capitalize.setChecked(str(values.get("CapitalizeMacro", "True")).lower() == "true")
+            self.cb_enable.setChecked(
+                str(values.get("EnableMacro", "True")).lower() == "true"
+            )
+            self.cb_capitalize.setChecked(
+                str(values.get("CapitalizeMacro", "True")).lower() == "true"
+            )
 
         self.table.setRowCount(0)
         data = self.handler.read_array_config(self.handler.macro_file, "Macro")
         for item in data:
             self.upsert_row(item.get("Key", ""), item.get("Value", ""))
-
 
     def restore_defaults(self):
         """Reloads data from file, discarding temporary changes."""
@@ -165,7 +166,9 @@ class MacroEditorPage(BaseEditorPage):
         if config_data:
             values = config_data.get("values", {})
             values["EnableMacro"] = "True" if self.cb_enable.isChecked() else "False"
-            values["CapitalizeMacro"] = "True" if self.cb_capitalize.isChecked() else "False"
+            values["CapitalizeMacro"] = (
+                "True" if self.cb_capitalize.isChecked() else "False"
+            )
             self.dbus.set_config(values)
 
         data = []
@@ -219,18 +222,16 @@ class MacroEditorPage(BaseEditorPage):
     def _update_add_button_icon(self):
         """Changes the Add button icon to Update if key exists."""
         key = self.input_key.text().strip()
-        found = False
-        for row in range(self.table.rowCount()):
-            if self.table.item(row, 0) and self.table.item(row, 0).text() == key:
-                found = True
-                break
-        
+        found = any(
+            self.table.item(r, 0) and self.table.item(r, 0).text() == key
+            for r in range(self.table.rowCount())
+        )
         if found:
             self.btn_add.setIcon(QIcon.fromTheme("document-save"))
-            self.btn_add.setToolTip(_("Update"))
+            self.btn_add.setText(_("Update"))
         else:
             self.btn_add.setIcon(QIcon.fromTheme("list-add"))
-            self.btn_add.setToolTip(_("Add"))
+            self.btn_add.setText(_("Add"))
 
     def on_row_selected(self, row, column):
         key_item = self.table.item(row, 0)
@@ -250,7 +251,6 @@ class MacroEditorPage(BaseEditorPage):
         )
         if not path:
             return
-
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -258,25 +258,17 @@ class MacroEditorPage(BaseEditorPage):
             QMessageBox.warning(self, "Error", f"Cannot open file for reading: {e}")
             return
 
-        imported = 0
-        skipped = 0
+        imported = skipped = 0
         confirmed = False
-
         for line in lines:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-
-            parts = line.split("\t")
-            if len(parts) < 2:
-                parts = line.split(",")
-
+            parts = line.split("\t") if "\t" in line else line.split(",")
             if len(parts) < 2:
                 skipped += 1
                 continue
-
-            key = parts[0].strip()
-            val = parts[1].strip()
+            key, val = parts[0].strip(), parts[1].strip()
             if not key or not val:
                 skipped += 1
                 continue
@@ -286,7 +278,7 @@ class MacroEditorPage(BaseEditorPage):
                     self,
                     _("Confirm Import"),
                     _(
-                        "The current macro list is not empty. Imported entries will be merged (existing keys will be updated). Continue?"
+                        "The current macro list is not empty. Imported entries will be merged. Continue?"
                     ),
                     QMessageBox.Yes | QMessageBox.No,
                 )
@@ -311,7 +303,6 @@ class MacroEditorPage(BaseEditorPage):
                 self, _("Export"), _("The macro list is empty, nothing to export.")
             )
             return
-
         path, _ = QFileDialog.getSaveFileName(
             self,
             _("Export Macros"),
@@ -320,18 +311,14 @@ class MacroEditorPage(BaseEditorPage):
         )
         if not path:
             return
-
         try:
             with open(path, "w", encoding="utf-8") as f:
-                f.write("# Lotus Macro Table\n")
-                f.write("# Format: shorthand<TAB>expanded text\n")
-
+                f.write("# Lotus Macro Table\n# Format: shorthand<TAB>expanded text\n")
                 for row in range(self.table.rowCount()):
                     key_item = self.table.item(row, 0)
                     val_item = self.table.item(row, 1)
                     if key_item and val_item and key_item.text():
                         f.write(f"{key_item.text()}\t{val_item.text()}\n")
-
             QMessageBox.information(
                 self,
                 _("Export Complete"),

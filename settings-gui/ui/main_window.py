@@ -53,15 +53,33 @@ class LotusSettingsWindow(QMainWindow):
         main_v_layout.setContentsMargins(0, 0, 0, 0)
         main_v_layout.setSpacing(0)
 
-        # Apply Global Styling from QSS
-        self._load_stylesheet()
-
         main_h_layout = QHBoxLayout()
         main_h_layout.setContentsMargins(0, 0, 0, 0)
         main_h_layout.setSpacing(0)
 
         self.sidebar = QListWidget()
         self.sidebar.setFixedWidth(200)
+        self.sidebar.setStyleSheet(
+            """
+            QListWidget {
+                border: none;
+                background: transparent;
+                outline: none;
+            }
+            QListWidget::item {
+                padding: 10px 15px;
+                border-radius: 8px;
+                margin: 2px 10px;
+            }
+            QListWidget::item:selected {
+                background: palette(highlight);
+                color: palette(highlighted-text);
+            }
+            QListWidget::item:hover:!selected {
+                background: palette(alternate-base);
+            }
+        """
+        )
         self.sidebar.setObjectName("Sidebar")
         self.sidebar.setFrameShape(QFrame.NoFrame)
 
@@ -113,12 +131,34 @@ class LotusSettingsWindow(QMainWindow):
 
     def _setup_pages(self):
         # Top-level Settings Pages
-        self._add_page(_("General"), "preferences-system", DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.GENERAL))
-        self._add_page(_("Typing"), "input-keyboard", DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.TYPING))
-        self._add_page(_("Macros"), "accessories-text-editor", MacroEditorPage(self.file_handler, self.dbus_handler))
-        self._add_page(_("Keymap"), "preferences-desktop-keyboard", KeymapEditorPage(self.file_handler))
-        self._add_page(_("Appearance"), "preferences-desktop-theme", DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.APPEARANCE))
-        
+        self._add_page(
+            _("General"),
+            "preferences-system",
+            DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.GENERAL),
+        )
+        self._add_page(
+            _("Typing"),
+            "input-keyboard",
+            DynamicSettingsPage(self.dbus_handler, category=SettingsCategory.TYPING),
+        )
+        self._add_page(
+            _("Macros"),
+            "accessories-text-editor",
+            MacroEditorPage(self.file_handler, self.dbus_handler),
+        )
+        self._add_page(
+            _("Keymap"),
+            "preferences-desktop-keyboard",
+            KeymapEditorPage(self.file_handler),
+        )
+        self._add_page(
+            _("Appearance"),
+            "preferences-desktop-theme",
+            DynamicSettingsPage(
+                self.dbus_handler, category=SettingsCategory.APPEARANCE
+            ),
+        )
+
         # Bottom section
         spacer = QListWidgetItem()
         spacer.setFlags(Qt.NoItemFlags)
@@ -129,11 +169,12 @@ class LotusSettingsWindow(QMainWindow):
     def on_restore_defaults(self):
         """Resets all settings to their default values."""
         from PySide6.QtWidgets import QMessageBox
+
         reply = QMessageBox.question(
             self,
             _("Confirm Reset"),
             _("Are you sure you want to restore all settings to their default values?"),
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.Yes | QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
             for i in range(self.content_stack.count()):
@@ -153,12 +194,15 @@ class LotusSettingsWindow(QMainWindow):
             page = self.content_stack.widget(i)
             if hasattr(page, "save_data"):
                 page.save_data(quiet=True)
-        
+
         self.btn_apply.setEnabled(False)
         self.btn_cancel.setEnabled(False)
         if not quiet:
-             from PySide6.QtWidgets import QMessageBox
-             QMessageBox.information(self, _("Success"), _("All settings applied successfully."))
+            from PySide6.QtWidgets import QMessageBox
+
+            QMessageBox.information(
+                self, _("Success"), _("All settings applied successfully.")
+            )
 
     def on_ok(self):
         self.on_save_all(quiet=True)
@@ -170,7 +214,7 @@ class LotusSettingsWindow(QMainWindow):
             page = self.content_stack.widget(i)
             if hasattr(page, "restore_defaults"):
                 page.restore_defaults()
-        
+
         self.btn_apply.setEnabled(False)
         self.btn_cancel.setEnabled(False)
 
@@ -201,33 +245,21 @@ class LotusSettingsWindow(QMainWindow):
         item = QListWidgetItem(title)
         item.setData(Qt.UserRole, "header")
         item.setFlags(item.flags() & ~Qt.ItemIsSelectable)
-        
+
         # Set styling directly since QListWidgetItem is not a QObject
         font = item.font()
         font.setBold(True)
         font.setPointSize(10)
         item.setFont(font)
         item.setForeground(Qt.gray)
-        
+
         self.sidebar.addItem(item)
 
     def _add_page(self, title: str, icon_name: str, widget: QWidget):
         item = QListWidgetItem(QIcon.fromTheme(icon_name), title)
         item.setData(Qt.UserRole, "page")
-        
+
         self.content_stack.addWidget(widget)
         item.setData(Qt.UserRole + 1, widget)
-        
-        self.sidebar.addItem(item)
 
-    def _load_stylesheet(self):
-        """Loads central stylesheet from file."""
-        curr_dir = os.path.dirname(os.path.abspath(__file__))
-        qss_file = os.path.join(curr_dir, "style.qss")
-        if os.path.exists(qss_file):
-            file = QFile(qss_file)
-            if file.open(QFile.ReadOnly | QFile.Text):
-                stream = file.readAll()
-                self.setStyleSheet(str(stream, encoding="utf-8"))
-        else:
-            print(f"Warning: Stylesheet not found at {qss_file}")
+        self.sidebar.addItem(item)
