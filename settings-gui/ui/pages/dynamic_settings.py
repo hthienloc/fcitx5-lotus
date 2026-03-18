@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
 )
 from ui.components import HotkeyCaptureWidget
+from core.dbus_handler import LotusDBusHandler
 from enum import Enum
 from i18n import _
 
