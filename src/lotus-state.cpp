@@ -875,7 +875,7 @@ namespace fcitx {
                 break;
             }
         }
-        if (*engine_->config().autoCapitalize) {
+        if (*engine_->config().autoCapitalizeAfterPunctuation) {
             isPrevPunctuation_ = true;
             shouldCapitalize_  = true;
         }
@@ -934,7 +934,7 @@ namespace fcitx {
             }
         }
 
-        if (*engine_->config().autoCapitalize && realMode != LotusMode::Off) {
+        if (*engine_->config().autoCapitalizeAfterPunctuation && realMode != LotusMode::Off) {
             // Ignore auto-capitalize side-effects if we're processing automated replacement backspaces
             bool isAutomatedBackspace = is_deleting_.load(std::memory_order_acquire) && isBackspace(currentSym);
 
