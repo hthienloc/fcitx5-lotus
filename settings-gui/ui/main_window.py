@@ -128,23 +128,23 @@ class LotusSettingsWindow(QMainWindow):
 
         bar_layout.addSpacing(180)
 
-        self.btn_reset = QPushButton(QIcon.fromTheme("edit-undo"), _("Reset"))
+        self.btn_reset = QPushButton(QIcon.fromTheme("edit-undo"), _("&Reset"))
         self.btn_reset.clicked.connect(self.on_restore_defaults)
         bar_layout.addWidget(self.btn_reset)
 
         bar_layout.addStretch()
 
-        self.btn_cancel = QPushButton(QIcon.fromTheme("dialog-cancel"), _("Cancel"))
+        self.btn_cancel = QPushButton(QIcon.fromTheme("dialog-cancel"), _("&Cancel"))
         self.btn_cancel.setEnabled(False)
         self.btn_cancel.clicked.connect(self.on_cancel)
         bar_layout.addWidget(self.btn_cancel)
 
-        self.btn_apply = QPushButton(QIcon.fromTheme("document-save"), _("Apply"))
+        self.btn_apply = QPushButton(QIcon.fromTheme("document-save"), _("&Apply"))
         self.btn_apply.setEnabled(False)
         self.btn_apply.clicked.connect(lambda: self.on_save_all(quiet=True))
         bar_layout.addWidget(self.btn_apply)
 
-        self.btn_ok = QPushButton(QIcon.fromTheme("dialog-ok"), _("OK"))
+        self.btn_ok = QPushButton(QIcon.fromTheme("dialog-ok"), _("&OK"))
         self.btn_ok.setObjectName("Primary")
         self.btn_ok.clicked.connect(self.on_ok)
         bar_layout.addWidget(self.btn_ok)
