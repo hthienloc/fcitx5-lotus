@@ -196,6 +196,7 @@ namespace fcitx {
 
         lotusMacroTable          macroTables_;
         CGoObject                macroTableObject_;
+        lotusAppRules            appRulesTables_;
 
         FactoryFor<LotusState>   factory_;
         std::vector<std::string> imNames_;
@@ -216,10 +217,8 @@ namespace fcitx {
         std::vector<ScopedConnection>              connections_;
         CGoObject                                  dictionary_;
         std::unordered_map<std::string, LotusMode> appRules_;
-        std::string                                appRulesPath_;
         bool                                       isSelectingAppMode_ = false;
         std::string                                currentConfigureApp_;
-        LotusMode                                  globalMode_;
         FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
         std::unique_ptr<EmojiLoader> emojiLoader_;
 

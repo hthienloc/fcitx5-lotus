@@ -52,7 +52,6 @@ MODE_INFO = {
     MODE_EMOJI: {"title": _("Emoji Picker"), "icon": "face-smile"},
 }
 
-APP_RULES_PATH = os.path.expanduser("~/.config/fcitx5/conf/lotus-app-rules.conf")
 
 
 class ModeCard(QFrame):
@@ -400,19 +399,15 @@ class ModeManagerPage(QWidget):
     def load_data(self):
         """Loads rules from config and global mode from DBus."""
         self.app_rules = {}
-        if os.path.exists(APP_RULES_PATH):
-            try:
-                with open(APP_RULES_PATH, "r") as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line or line.startswith("#") or "=" not in line:
-                            continue
-                        app, mode = line.split("=", 1)
-                        self.app_rules[app] = int(mode)
-            except FileNotFoundError:
-                pass
-            except Exception as e:
-                print(f"Error loading app rules: {e}")
+        try:
+            data = self.dbus.get_sub_config_list("app_rules", "Rules")
+            for item in data:
+                app = item.get("App", "")
+                mode = int(item.get("Mode", 0))
+                if app:
+                    self.app_rules[app] = mode
+        except Exception as e:
+            print(f"Error loading app rules via DBus: {e}")
 
         # Sync Global Mode
         config = self.dbus.get_config()
@@ -618,20 +613,19 @@ class ModeManagerPage(QWidget):
 
     def save_data(self, quiet=False):
         try:
-            os.makedirs(os.path.dirname(APP_RULES_PATH), exist_ok=True)
-            with open(APP_RULES_PATH, "w") as f:
-                f.write("# Lotus Per-App Configuration\n")
-                for app, mode in sorted(self.app_rules.items()):
-                    f.write(f"{app}={mode}\n")
+            data = []
+            for app, mode in sorted(self.app_rules.items()):
+                data.append({"App": app, "Mode": str(mode)})
+            
+            self.dbus.set_sub_config_list("app_rules", "Rules", data)
             self.original_app_rules = self.app_rules.copy()
 
-            # Refresh engine by doing a dummy config set
-            config_data = self.dbus.get_config()
-            if config_data:
-                latest_values = config_data.get("values", {})
-                self.dbus.set_config(latest_values)
+            if not quiet:
+                QMessageBox.information(self, _("Success"), _("Application rules saved successfully."))
         except Exception as e:
-            print(f"Error saving app rules: {e}")
+            print(f"Error saving app rules via DBus: {e}")
+            if not quiet:
+                QMessageBox.warning(self, _("Error"), f"{_('Failed to save app rules:')} {e}")
 
     def restore_defaults(self):
         self.load_data()

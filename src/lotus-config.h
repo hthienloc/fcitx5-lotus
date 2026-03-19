@@ -184,6 +184,11 @@ namespace fcitx {
                         OptionWithAnnotation<std::vector<lotusKeymap>, ListDisplayOptionAnnotation> customKeymap{
                             this, "CustomKeymap", _("Custom Keymap"), {}, {}, {}, ListDisplayOptionAnnotation("Key")};);
 
+    FCITX_CONFIGURATION(lotusAppRule, Option<std::string> app{this, "App", _("App"), ""}; Option<int> mode{this, "Mode", _("Mode"), 0};);
+    FCITX_CONFIGURATION(lotusAppRules,
+                        OptionWithAnnotation<std::vector<lotusAppRule>, ListDisplayOptionAnnotation> rules{
+                            this, "Rules", _("Rules"), {}, {}, {}, ListDisplayOptionAnnotation("App")};);
+
     /**
      * @brief Main configuration structure for Lotus input method.
      */
@@ -204,7 +209,8 @@ namespace fcitx {
         Option<bool>    fixUinputWithAck{this, "FixUinputWithAck", _("Fix Uinput Mode With Ack"), false};
         Option<bool>    useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
         SubConfigOption macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
-        SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"}; KeyListOption modeMenuKey{
+        SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
+        SubConfigOption appRules{this, "AppRules", _("App Rules"), "fcitx://config/addon/lotus/app_rules"}; KeyListOption modeMenuKey{
             this, "ModeMenuKey", _("Mode Menu Hotkey"), {Key("grave")}, KeyListConstrain({KeyConstrainFlag::AllowModifierLess, KeyConstrainFlag::AllowModifierOnly})};);
 
 } // namespace fcitx

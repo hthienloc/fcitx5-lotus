@@ -33,6 +33,7 @@ namespace fcitx {
     constexpr const char* CharsetActionPrefix = "lotus-charset-";
     const std::string     CustomKeymapFile    = "conf/lotus-custom-keymap.conf";
     const std::string     MacroTableFile      = "conf/lotus-macro-table.conf";
+    const std::string     AppRulesFile        = "conf/lotus-app-rules.conf";
 
     // Returns the KeySym that triggers the "Type hotkey char" action in the mode
     // menu.  If the hotkey itself conflicts with a reserved menu key, falls back
@@ -170,10 +171,6 @@ namespace fcitx {
         }));
         uiManager.registerAction("lotus-settings", settingsAction_.get());
 
-        reloadConfig();
-        globalMode_ = modeStringToEnum(config_.mode.value());
-        instance_->inputContextManager().registerProperty("LotusState", &factory_);
-
 #if LOTUS_USE_MODERN_FCITX_API
         std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
 #else
@@ -183,8 +180,8 @@ namespace fcitx {
         if (!std::filesystem::exists(configDir)) {
             std::filesystem::create_directories(configDir);
         }
-        appRulesPath_ = configDir + "/lotus-app-rules.conf";
-        loadAppRules();
+        reloadConfig();
+        instance_->inputContextManager().registerProperty("LotusState", &factory_);
         toggleActions_ = {
 #ifndef DISABLE_VERSION_ACTION
             versionAction_.get(),
@@ -228,6 +225,11 @@ namespace fcitx {
         readAsIni(customKeymap_, CustomKeymapFile);
         readAsIni(macroTables_, MacroTableFile);
         macroTableObject_.reset(newMacroTable(macroTables_));
+        readAsIni(appRulesTables_, AppRulesFile);
+        appRules_.clear();
+        for (const auto& rule : *appRulesTables_.rules) {
+            appRules_[*rule.app] = static_cast<LotusMode>(*rule.mode);
+        }
         populateConfig();
     }
 
@@ -236,6 +238,9 @@ namespace fcitx {
             return &customKeymap_;
         if (path == "lotus-macro") {
             return &macroTables_;
+        }
+        if (path == "app_rules") {
+            return &appRulesTables_;
         }
         return nullptr;
     }
@@ -266,6 +271,14 @@ namespace fcitx {
             safeSaveAsIni(macroTables_, MacroTableFile);
             macroTableObject_.reset(newMacroTable(macroTables_));
             refreshEngine();
+        } else if (path == "app_rules") {
+            appRulesTables_.load(config, true);
+            safeSaveAsIni(appRulesTables_, AppRulesFile);
+            appRules_.clear();
+            for (const auto& rule : *appRulesTables_.rules) {
+                appRules_[*rule.app] = static_cast<LotusMode>(*rule.mode);
+            }
+            refreshEngine();
         }
     }
 
@@ -288,7 +301,7 @@ namespace fcitx {
         LOTUS_INFO("App name: " + appName);
 
         auto            it         = appRules_.find(appName);
-        const LotusMode targetMode = (it != appRules_.end()) ? it->second : globalMode_;
+        const LotusMode targetMode = (it != appRules_.end()) ? it->second : modeStringToEnum(config_.mode.value());
         LOTUS_INFO("Target mode: " + modeEnumToString(targetMode));
         reloadConfig();
         updateCharsetAction(event.inputContext());
@@ -441,7 +454,7 @@ namespace fcitx {
                     if (appRules_.erase(currentConfigureApp_) > 0 && !isStartsWith(currentConfigureApp_, "ctx_")) {
                         saveAppRules();
                     }
-                    selectedMode  = globalMode_;
+                    selectedMode  = modeStringToEnum(config_.mode.value());
                     selectionMade = true;
                     break;
                 }
@@ -577,38 +590,20 @@ namespace fcitx {
     }
 
     void LotusEngine::loadAppRules() {
-        appRules_.clear();
-        std::ifstream file(appRulesPath_);
-        if (!file.is_open())
-            return;
-
-        std::string line;
-        while (std::getline(file, line)) {
-            if (line.empty() || line[0] == '#')
-                continue;
-            auto delimiterPos = line.find('=');
-            if (delimiterPos != std::string::npos) {
-                std::string app  = line.substr(0, delimiterPos);
-                std::string mode = line.substr(delimiterPos + 1);
-                appRules_[app]   = static_cast<LotusMode>(std::stoi(mode));
-            }
-        }
-        file.close();
     }
 
     void LotusEngine::saveAppRules() {
-        std::ofstream file(appRulesPath_, std::ios::trunc);
-        if (!file.is_open())
-            return;
-
-        file << "# Lotus Per-App Configuration\n";
-        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
+        std::vector<lotusAppRule> rules;
         for (const auto& pair : appRules_) {
             if (!isStartsWith(pair.first, "ctx_")) {
-                file << pair.first << "=" << static_cast<int>(pair.second) << "\n";
+                lotusAppRule rule;
+                rule.app.setValue(pair.first);
+                rule.mode.setValue(static_cast<int>(pair.second));
+                rules.push_back(std::move(rule));
             }
         }
-        file.close();
+        appRulesTables_.rules.setValue(std::move(rules));
+        safeSaveAsIni(appRulesTables_, AppRulesFile);
     }
 
     void LotusEngine::closeAppModeMenu() {
@@ -670,7 +665,7 @@ namespace fcitx {
             if (appRules_.erase(currentConfigureApp_) > 0 && !isStartsWith(currentConfigureApp_, "ctx_")) {
                 saveAppRules();
             }
-            setMode(globalMode_, ic);
+            setMode(modeStringToEnum(config_.mode.value()), ic);
             cleanup(ic);
         }));
 
