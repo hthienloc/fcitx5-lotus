@@ -203,15 +203,20 @@ class AddAppDialog(QDialog):
                     exe = ""
                     try:
                         exe = os.readlink(f"/proc/{pid}/exe")
-                    except Exception:
+                    except (PermissionError, FileNotFoundError):
                         pass
+                    except Exception as e:
+                        print(f"Error reading exe for PID {pid}: {e}")
                     
                     if name and exe:
                         apps.append({"name": name, "exe": exe, "pid": pid})
-                except Exception:
+                except (PermissionError, FileNotFoundError, ProcessLookupError):
                     continue
-        except Exception:
-            pass
+                except Exception as e:
+                    print(f"Error scanning PID {pid}: {e}")
+                    continue
+        except Exception as e:
+            print(f"Error listing /proc: {e}")
 
         unique_apps = {}
         for app in apps:
@@ -262,9 +267,9 @@ class ModeManagerPage(QWidget):
         super().__init__(parent)
         self.dbus = dbus_handler
         self.app_rules = {}
+        self.original_app_rules = {}
         self.selected_app = None
         self._icon_cache = {}
-        self._path_cache = {}
         self._setup_ui()
         self.load_data()
 
@@ -404,7 +409,10 @@ class ModeManagerPage(QWidget):
                             continue
                         app, mode = line.split("=", 1)
                         self.app_rules[app] = int(mode)
-            except Exception: pass
+            except FileNotFoundError:
+                pass
+            except Exception as e:
+                print(f"Error loading app rules: {e}")
 
         # Sync Global Mode
         config = self.dbus.get_config()
@@ -416,6 +424,7 @@ class ModeManagerPage(QWidget):
         self.combo_global_mode.blockSignals(False)
         
         self._populate_app_list()
+        self.original_app_rules = self.app_rules.copy()
 
     def _populate_app_list(self):
         self.app_list.clear()
@@ -478,7 +487,7 @@ class ModeManagerPage(QWidget):
                         exec_match = re.search(r"^Exec=([^\n]+)", content, re.MULTILINE)
                         if exec_match:
                             exec_line = exec_match.group(1).strip()
-                            # Handle quoted paths or args
+                            # Robustly extract binary name (handle quotes and arguments)
                             if exec_line.startswith('"'):
                                 binary_path = exec_line[1:].split('"')[0]
                             else:
@@ -487,12 +496,16 @@ class ModeManagerPage(QWidget):
                             binary_name = os.path.basename(binary_path).lower()
                             self._icon_cache[binary_name] = icon
                             
-                            # Handle Flatpak 'flatpak run ...'
                             if binary_name == "flatpak" and " --command=" in exec_line:
                                 cmd_match = re.search(r"--command=([^ ]+)", exec_line)
                                 if cmd_match:
                                     self._icon_cache[cmd_match.group(1).lower()] = icon
-                except Exception:
+                except (PermissionError, FileNotFoundError):
+                    continue
+                except Exception as e:
+                    # Only log truly unexpected errors
+                    if not isinstance(e, (UnicodeDecodeError, re.error)):
+                        print(f"Error parsing desktop file {f}: {e}")
                     continue
         
         # Manual Overrides for stubborn apps
@@ -599,17 +612,7 @@ class ModeManagerPage(QWidget):
             main_win.on_changed()
 
     def is_modified_from_default(self):
-        original_rules = {}
-        if os.path.exists(APP_RULES_PATH):
-            try:
-                with open(APP_RULES_PATH, "r") as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line or "=" not in line: continue
-                        app, mode = line.split("=", 1)
-                        original_rules[app] = int(mode)
-            except Exception: pass
-        return self.app_rules != original_rules
+        return self.app_rules != self.original_app_rules
 
     def save_data(self, quiet=False):
         try:
@@ -618,6 +621,7 @@ class ModeManagerPage(QWidget):
                 f.write("# Lotus Per-App Configuration\n")
                 for app, mode in sorted(self.app_rules.items()):
                     f.write(f"{app}={mode}\n")
+            self.original_app_rules = self.app_rules.copy()
         except Exception as e:
             print(f"Error saving app rules: {e}")
 
