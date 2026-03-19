@@ -113,12 +113,13 @@ class ModeCard(QFrame):
 class AddAppDialog(QDialog):
     """Dialog to add a new application to the rules list."""
 
-    def __init__(self, icon_cache=None, parent=None):
+    def __init__(self, icon_cache=None, existing_apps=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle(_("Add Application"))
         self.setMinimumSize(500, 450)
         self.selected_app = None
         self._icon_cache = icon_cache or {}
+        self.existing_apps = set(existing_apps or [])
         self._setup_ui()
         self._load_running_apps()
 
@@ -142,14 +143,24 @@ class AddAppDialog(QDialog):
         self.running_tab = QWidget()
         running_layout = QVBoxLayout(self.running_tab)
         
+        search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(_("Search process name..."))
         self.search_input.textChanged.connect(self._filter_running_apps)
-        running_layout.addWidget(self.search_input)
+        
+        self.btn_refresh = QPushButton(QIcon.fromTheme("view-refresh"), "")
+        self.btn_refresh.setToolTip(_("Refresh Process List"))
+        self.btn_refresh.setFlat(True)
+        self.btn_refresh.clicked.connect(self._load_running_apps)
+        
+        search_layout.addWidget(self.search_input, 1)
+        search_layout.addWidget(self.btn_refresh)
+        running_layout.addLayout(search_layout)
 
         self.running_list = QListWidget()
         self.running_list.setIconSize(QSize(32, 32))
         self.running_list.itemClicked.connect(self._on_app_selected)
+        self.running_list.itemDoubleClicked.connect(self._on_item_double_clicked)
         running_layout.addWidget(self.running_list)
         
         self.tabs.addTab(self.running_tab, _("Running"))
@@ -159,6 +170,7 @@ class AddAppDialog(QDialog):
         manual_layout = QVBoxLayout(self.manual_tab)
         self.manual_input = QLineEdit()
         self.manual_input.setPlaceholderText(_("Enter application name or path..."))
+        self.manual_input.returnPressed.connect(self._on_add_clicked)
         manual_layout.addWidget(self.manual_input)
         manual_layout.addStretch()
         self.tabs.addTab(self.manual_tab, _("Manual input"))
@@ -168,10 +180,10 @@ class AddAppDialog(QDialog):
         self.selection_label = QLabel(_("No application selected"))
         self.selection_label.setStyleSheet("opacity: 0.7;")
         
-        self.btn_cancel = QPushButton(_("Cancel"))
+        self.btn_cancel = QPushButton(QIcon.fromTheme("dialog-cancel"), _("&Cancel"))
         self.btn_cancel.clicked.connect(self.reject)
         
-        self.btn_add = QPushButton(_("Add"))
+        self.btn_add = QPushButton(QIcon.fromTheme("dialog-ok"), _("&Add"))
         self.btn_add.setObjectName("Primary")
         self.btn_add.setEnabled(False)
         self.btn_add.clicked.connect(self._on_add_clicked)
@@ -183,14 +195,23 @@ class AddAppDialog(QDialog):
         layout.addLayout(bottom_layout)
 
     def _load_running_apps(self):
-        """Loads running processes from /proc."""
+        """Loads running processes from /proc, filtered for user applications."""
         apps = []
         try:
+            current_uid = os.getuid()
             for pid_dir in os.listdir("/proc"):
                 if not pid_dir.isdigit():
                     continue
                 pid = int(pid_dir)
                 try:
+                    # Filter by UID (only show current user's processes)
+                    try:
+                        stat_info = os.stat(f"/proc/{pid}")
+                        if stat_info.st_uid != current_uid:
+                            continue
+                    except (PermissionError, FileNotFoundError):
+                        continue
+
                     with open(f"/proc/{pid}/comm", "r") as f:
                         name = f.read().strip()
                     with open(f"/proc/{pid}/cmdline", "r") as f:
@@ -203,16 +224,25 @@ class AddAppDialog(QDialog):
                     try:
                         exe = os.readlink(f"/proc/{pid}/exe")
                     except (PermissionError, FileNotFoundError):
-                        pass
-                    except Exception as e:
-                        print(f"Error reading exe for PID {pid}: {e}")
+                        continue # Probably a kernel thread
                     
+                    # Exclude common system/background paths
+                    exclude_paths = ["/usr/lib", "/usr/libexec", "/lib", "/systemd"]
+                    if any(exe.startswith(p) for p in exclude_paths):
+                        continue
+                    
+                    # Exclude the settings-gui itself and python interpreters with no script
+                    if "main.py" in cmdline and "python" in exe:
+                        continue
+                    
+                    if name in self.existing_apps:
+                        continue
+
                     if name and exe:
                         apps.append({"name": name, "exe": exe, "pid": pid})
                 except (PermissionError, FileNotFoundError, ProcessLookupError):
                     continue
-                except Exception as e:
-                    print(f"Error scanning PID {pid}: {e}")
+                except Exception:
                     continue
         except Exception as e:
             print(f"Error listing /proc: {e}")
@@ -250,6 +280,10 @@ class AddAppDialog(QDialog):
         self.selected_app = app["name"]
         self.selection_label.setText(f"{_('Selected:')} {self.selected_app}")
         self.btn_add.setEnabled(True)
+
+    def _on_item_double_clicked(self, item):
+        self._on_app_selected(item)
+        self._on_add_clicked()
 
     def _on_add_clicked(self):
         if self.tabs.currentIndex() == 1: # Manual
@@ -571,7 +605,7 @@ class ModeManagerPage(QWidget):
             card.update_style()
 
     def _on_add_app(self):
-        dialog = AddAppDialog(self._icon_cache, self)
+        dialog = AddAppDialog(self._icon_cache, list(self.app_rules.keys()), self)
         if dialog.exec():
             new_app = dialog.selected_app
             if new_app not in self.app_rules:
