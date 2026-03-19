@@ -79,6 +79,7 @@ class DynamicSettingsPage(QWidget):
         self.dbus = dbus_handler
         self.category = category
         self.current_values = {}
+        self.modified_values = {}
         self.button_groups = []
 
         self._setup_ui()
@@ -108,6 +109,7 @@ class DynamicSettingsPage(QWidget):
                 if item.widget():
                     item.widget().deleteLater()
             self.button_groups.clear()
+            self.modified_values.clear()
 
             config_data = self.dbus.get_config()
             if not config_data:
@@ -304,7 +306,7 @@ class DynamicSettingsPage(QWidget):
                 for item in group[1]:
                     key, type_str, label, default, annotations = item
                     new_values[key] = default
-            
+            self.modified_values = new_values.copy()
             self.current_values = new_values
             self.load_config()
         finally:
@@ -312,11 +314,19 @@ class DynamicSettingsPage(QWidget):
 
     def save_data(self, quiet=False):
         """Commits all staged changes to DBus."""
-        if self.current_values:
-            self.dbus.set_config(self.current_values)
+        if not self.modified_values:
+            return
+
+        config_data = self.dbus.get_config()
+        if config_data:
+            latest_values = config_data.get("values", {})
+            latest_values.update(self.modified_values)
+            self.dbus.set_config(latest_values)
+            self.modified_values.clear()
 
     def update_config(self, key: str, new_value):
         """Updates internal state and notifies parent window of change."""
+        self.modified_values[key] = new_value
         self.current_values[key] = new_value
         # Notify the parent window (LotusSettingsWindow) if it exists
         main_win = self.window()

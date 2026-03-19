@@ -90,8 +90,13 @@ class LotusDBusHandler:
             formatted = [self._prepare_dbus_data(v) for v in data]
             return dbus.Array(formatted, signature="v")
         elif isinstance(data, bool):
-            return dbus.Boolean(data)
-        return data
+            return dbus.String("True" if data else "False")
+        elif isinstance(data, (int, float)):
+            return dbus.String(str(data))
+        elif data is None:
+            return dbus.String("")
+        else:
+            return dbus.String(str(data))
 
     def _clean_dbus(self, data):
         """Convert dbus types to Python types."""
