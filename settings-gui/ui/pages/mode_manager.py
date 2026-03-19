@@ -227,15 +227,37 @@ class AddAppDialog(QDialog):
                         continue # Probably a kernel thread
                     
                     # Exclude common system/background paths
-                    exclude_paths = ["/usr/lib", "/usr/libexec", "/lib", "/systemd"]
+                    exclude_paths = ["/usr/lib", "/usr/libexec", "/lib", "/systemd", "/usr/sbin"]
                     if any(exe.startswith(p) for p in exclude_paths):
                         continue
                     
+                    # Heuristic: Exclude common background process patterns
+                    # These processes run as user but are typically not "apps" for rules
+                    bg_patterns = [
+                        "_agent", "_helper", "_daemon", "_resource", "_server",
+                        "-agent", "-helper", "-daemon", "-sandbox", "-proxy",
+                        "akonadi", "kactivitymanagerd", "kaccess", "krunner",
+                        "ksmserver", "kwin_", "kglobalaccel", "org.kde.",
+                        "gnome-shell", "dbus-", "at-spi", "pipewire", "pulseaudio",
+                        "xdg-", "gvfs", "tracker-", "evolution-", "mission-control",
+                        "telepathy", "dconf", "applet", "notify-osd", "indicator-",
+                        "plasmashell", "xwayland", "wireplumber", "xsettingsd",
+                        "xembedsniproxy", "gmenudbusmenuproxy", "kalendarac",
+                        "ksystemstats", "ksecretd", "kwalletd", "kded", "startplasma", "bwrap"
+                    ]
+                    basename = os.path.basename(exe).lower()
+                    if any(p in name.lower() or p in basename for p in bg_patterns):
+                        continue
+                    
                     # Exclude the settings-gui itself and python interpreters with no script
-                    if "main.py" in cmdline and "python" in exe:
+                    if ("main.py" in cmdline or "settings-gui" in cmdline) and "python" in exe:
                         continue
                     
                     if name in self.existing_apps:
+                        continue
+                    
+                    # If it's a python command but unknown script, ignore it
+                    if basename.startswith("python") and len(cmdline.split()) < 2:
                         continue
 
                     if name and exe:
