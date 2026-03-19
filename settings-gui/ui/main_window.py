@@ -28,6 +28,7 @@ from ui.pages.dynamic_settings import DynamicSettingsPage, SettingsCategory
 from ui.pages.macro_editor import MacroEditorPage
 from ui.pages.keymap_editor import KeymapEditorPage
 from ui.pages.about import AboutPage
+from ui.pages.mode_manager import ModeManagerPage
 import os
 
 
@@ -177,6 +178,11 @@ class LotusSettingsWindow(QMainWindow):
             DynamicSettingsPage(
                 self.dbus_handler, category=SettingsCategory.APPEARANCE
             ),
+        )
+        self._add_page(
+            _("Applications"),
+            "applications-other",
+            ModeManagerPage(self.dbus_handler),
         )
 
         # Bottom section
