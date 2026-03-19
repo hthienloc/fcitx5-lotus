@@ -589,8 +589,7 @@ namespace fcitx {
         }
     }
 
-    void LotusEngine::loadAppRules() {
-    }
+    void LotusEngine::loadAppRules() {}
 
     void LotusEngine::saveAppRules() {
         std::vector<lotusAppRule> rules;
