@@ -42,7 +42,7 @@ MODE_EMOJI = 6
 MODE_DEFAULT = -1  # UI special value for "Use Global Default"
 
 MODE_INFO = {
-    MODE_DEFAULT: {"title": _("System Default"), "icon": "preferences-system"},
+    MODE_DEFAULT: {"title": _("Default"), "icon": "preferences-system"},
     MODE_OFF: {"title": _("Off"), "icon": "input-keyboard"},
     MODE_SMOOTH: {"title": _("Uinput (Smooth)"), "icon": "input-keyboard"},
     MODE_SLOW: {"title": _("Uinput (Slow)"), "icon": "input-keyboard"},
@@ -350,8 +350,12 @@ class ModeManagerPage(QWidget):
         self.main_layout.setContentsMargins(30, 20, 30, 30)
         self.main_layout.setSpacing(20)
 
-        # 1. Global Mode Section (Dropdown)
-        self.global_card = CardWidget(_("Global Mode Settings"))
+        title = QLabel(_("Applications"))
+        title.setObjectName("CategoryTitle")
+        self.main_layout.addWidget(title)
+
+        # 1. Global Mode Section (Simplified Card)
+        self.global_card = CardWidget("")
         global_layout = QHBoxLayout()
         global_layout.addWidget(QLabel(_("Global Default Mode:")))
         self.combo_global_mode = QComboBox()
@@ -367,8 +371,8 @@ class ModeManagerPage(QWidget):
         self.global_card.content_layout.addLayout(global_layout)
         self.main_layout.addWidget(self.global_card)
 
-        # 2. Selected App Settings (Grid)
-        self.app_settings_card = CardWidget(_("Application Specific Mode"))
+        # 2. Selected App Card (Empty Title)
+        self.app_settings_card = CardWidget("")
         self.app_settings_layout = QVBoxLayout()
         
         # App Info Header
@@ -404,25 +408,6 @@ class ModeManagerPage(QWidget):
         self.app_settings_card.content_layout.addLayout(self.app_settings_layout)
         self.main_layout.addWidget(self.app_settings_card)
         self.main_layout.addStretch()
-
-        # Bottom Toolbar (Import/Export) in a card to match other editors
-        self.toolbar_card = CardWidget("")
-        # Reduce margins for toolbar card to be more compact
-        self.toolbar_card.main_layout.setContentsMargins(16, 4, 16, 4)
-        
-        toolbar_layout = QHBoxLayout()
-        toolbar_layout.setContentsMargins(0, 0, 0, 0)
-        
-        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
-        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
-        self.btn_import.clicked.connect(self._on_import)
-        self.btn_export.clicked.connect(self._on_export)
-        
-        toolbar_layout.addStretch()
-        toolbar_layout.addWidget(self.btn_import)
-        toolbar_layout.addWidget(self.btn_export)
-        self.toolbar_card.content_layout.addLayout(toolbar_layout)
-        self.main_layout.addWidget(self.toolbar_card)
 
         # Initial visibility
         self.app_settings_card.setVisible(False)
@@ -586,6 +571,7 @@ class ModeManagerPage(QWidget):
             self.dbus.set_config(latest_values)
         self._notify_changed()
 
+
     def _on_app_mode_changed(self, mode):
         self.current_app_mode = mode
         if mode == MODE_DEFAULT:
@@ -645,6 +631,107 @@ class ModeManagerPage(QWidget):
     def is_modified_from_default(self):
         return self.app_rules != self.original_app_rules
 
+    def on_import(self):
+        """Imports app rules from a TSV file."""
+        path, _filter = QFileDialog.getOpenFileName(
+            self,
+            _("Import Application Rules"),
+            "",
+            _("Tab-separated (*.tsv *.txt);;All files (*)"),
+        )
+        if not path:
+            return
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        except Exception as e:
+            QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for reading:')} {e}")
+            return
+
+        imported = skipped = 0
+        confirmed = False
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split("\t") if "\t" in line else line.split(",")
+            if len(parts) < 2:
+                skipped += 1
+                continue
+            app, mode_str = parts[0].strip(), parts[1].strip()
+            if not app or not mode_str:
+                skipped += 1
+                continue
+
+            try:
+                mode = int(mode_str)
+                if mode not in MODE_INFO and mode != MODE_DEFAULT:
+                    skipped += 1
+                    continue
+            except ValueError:
+                skipped += 1
+                continue
+
+            if not confirmed and self.app_rules:
+                reply = QMessageBox.question(
+                    self,
+                    _("Confirm Import"),
+                    _("Merge imported application rules?"),
+                    QMessageBox.Yes | QMessageBox.No,
+                )
+                if reply == QMessageBox.No:
+                    return
+                confirmed = True
+            else:
+                confirmed = True
+
+            self.app_rules[app] = mode
+            imported += 1
+
+        if imported > 0:
+            self.save_data(quiet=True)
+            self._populate_app_list()
+            self._notify_changed()
+
+        QMessageBox.information(
+            self,
+            _("Import Complete"),
+            _(f"Imported {imported} rules, skipped {skipped} invalid lines."),
+        )
+
+    def on_export(self):
+        """Exports current app rules to a TSV file."""
+        if not self.app_rules:
+            QMessageBox.information(
+                self, _("Export"), _("The application rules list is empty, nothing to export.")
+            )
+            return
+
+        path, _filter = QFileDialog.getSaveFileName(
+            self,
+            _("Export Application Rules"),
+            "lotus-app-rules.tsv",
+            _("Tab-separated (*.tsv *.txt);;All files (*)"),
+        )
+        if not path:
+            return
+
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write("# Lotus Application Rules Table\n")
+                f.write("# Format: application_name<TAB>mode_id\n")
+                f.write("# Modes: 0=Off, 1=Uinput(Smooth), 2=Uinput(Slow), 3=Uinput(Hardcore), 4=Surrounding, 5=Preedit, 6=Emoji\n")
+                for app, mode in sorted(self.app_rules.items()):
+                    f.write(f"{app}\t{mode}\n")
+            QMessageBox.information(
+                self,
+                _("Export Complete"),
+                _(f"Exported {len(self.app_rules)} rules to:\n{path}"),
+            )
+        except Exception as e:
+            QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for writing:')} {e}")
+
     def save_data(self, quiet=False):
         try:
             data = []
@@ -664,75 +751,3 @@ class ModeManagerPage(QWidget):
     def restore_defaults(self):
         self.load_data()
 
-    def _on_import(self):
-        path, _filter = QFileDialog.getOpenFileName(
-            self, _("Import App Rules"), "", _("Tab-separated (*.tsv *.txt);;All files (*)")
-        )
-        if not path:
-            return
-        
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-        except Exception as e:
-            QMessageBox.warning(self, _("Error"), f"Cannot open file for reading: {e}")
-            return
-
-        imported = 0
-        confirmed = False
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            
-            parts = line.split("\t") if "\t" in line else line.split(",")
-            if len(parts) < 2:
-                continue
-            
-            app_name = parts[0].strip()
-            try:
-                mode_id = int(parts[1].strip())
-            except ValueError:
-                continue
-            
-            if not confirmed and self.app_rules:
-                reply = QMessageBox.question(
-                    self, _("Confirm Import"),
-                    _("Merge imported rules with existing ones?"),
-                    QMessageBox.Yes | QMessageBox.No
-                )
-                if reply == QMessageBox.No:
-                    return
-                confirmed = True
-            else:
-                confirmed = True
-            
-            self.app_rules[app_name] = mode_id
-            imported += 1
-        
-        if imported > 0:
-            self.save_data(quiet=True)
-            self._populate_app_list()
-            self._notify_changed()
-            QMessageBox.information(self, _("Import Complete"), _(f"Imported {imported} app rules."))
-
-    def _on_export(self):
-        if not self.app_rules:
-            QMessageBox.information(self, _("Export"), _("No rules to export."))
-            return
-            
-        path, _filter = QFileDialog.getSaveFileName(
-            self, _("Export App Rules"), "lotus-app-rules.tsv",
-            _("Tab-separated (*.tsv *.txt);;All files (*)")
-        )
-        if not path:
-            return
-            
-        try:
-            with open(path, "w", encoding="utf-8") as f:
-                f.write("# Lotus App Rules Export\n# Format: app_name<TAB>mode_id\n")
-                for app, mode in sorted(self.app_rules.items()):
-                    f.write(f"{app}\t{mode}\n")
-            QMessageBox.information(self, _("Export Complete"), _(f"Exported {len(self.app_rules)} rules to:\n{path}"))
-        except Exception as e:
-            QMessageBox.warning(self, _("Error"), f"Cannot open file for writing: {e}")

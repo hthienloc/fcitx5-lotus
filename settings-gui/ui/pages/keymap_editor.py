@@ -314,8 +314,6 @@ class KeymapEditorPage(BaseEditorPage):
 
         toolbar_layout.addWidget(btn_remove)
         toolbar_layout.addStretch()
-        toolbar_layout.addWidget(btn_import)
-        toolbar_layout.addWidget(btn_export)
 
         editor_layout.addLayout(toolbar_layout)
 

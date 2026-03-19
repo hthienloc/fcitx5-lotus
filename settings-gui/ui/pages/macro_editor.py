@@ -130,8 +130,6 @@ class MacroEditorPage(BaseEditorPage):
         toolbar_layout.addWidget(self.btn_up)
         toolbar_layout.addWidget(self.btn_down)
         toolbar_layout.addStretch()
-        toolbar_layout.addWidget(self.btn_import)
-        toolbar_layout.addWidget(self.btn_export)
 
         content_layout.addLayout(toolbar_layout)
         self.update_button_states()
