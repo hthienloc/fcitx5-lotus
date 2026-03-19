@@ -88,7 +88,7 @@ class ModeCard(QFrame):
             self.setStyleSheet(
                 """
                 QFrame#ModeCard {
-                    border: 2px solid palette(highlight);
+                    border: 1.5px solid palette(highlight);
                     background: palette(highlight);
                     border-radius: 8px;
                 }
@@ -99,7 +99,7 @@ class ModeCard(QFrame):
             self.setStyleSheet(
                 """
                 QFrame#ModeCard {
-                    border: 1px solid palette(mid);
+                    border: 1.5px solid palette(mid);
                     background: palette(alternate-base);
                     border-radius: 8px;
                 }
