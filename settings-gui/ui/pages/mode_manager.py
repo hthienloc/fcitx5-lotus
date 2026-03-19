@@ -550,9 +550,11 @@ class ModeManagerPage(QWidget):
 
     def _on_global_mode_changed(self, index):
         mode_text = self.combo_global_mode.currentText()
-        config = self.dbus.get_config()
-        config["values"]["Mode"] = mode_text
-        self.dbus.set_config(config)
+        config_data = self.dbus.get_config()
+        if config_data:
+            latest_values = config_data.get("values", {})
+            latest_values["Mode"] = mode_text
+            self.dbus.set_config(latest_values)
         self._notify_changed()
 
     def _on_app_mode_changed(self, mode):
@@ -622,6 +624,12 @@ class ModeManagerPage(QWidget):
                 for app, mode in sorted(self.app_rules.items()):
                     f.write(f"{app}={mode}\n")
             self.original_app_rules = self.app_rules.copy()
+
+            # Refresh engine by doing a dummy config set
+            config_data = self.dbus.get_config()
+            if config_data:
+                latest_values = config_data.get("values", {})
+                self.dbus.set_config(latest_values)
         except Exception as e:
             print(f"Error saving app rules: {e}")
 
