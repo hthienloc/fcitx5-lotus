@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QComboBox,
     QGridLayout,
+    QMessageBox,
 )
 from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QIcon
@@ -113,11 +114,12 @@ class ModeCard(QFrame):
 class AddAppDialog(QDialog):
     """Dialog to add a new application to the rules list."""
 
-    def __init__(self, parent=None):
+    def __init__(self, icon_cache=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle(_("Add Application"))
         self.setMinimumSize(500, 450)
         self.selected_app = None
+        self._icon_cache = icon_cache or {}
         self._setup_ui()
         self._load_running_apps()
 
@@ -153,16 +155,7 @@ class AddAppDialog(QDialog):
         
         self.tabs.addTab(self.running_tab, _("Running"))
 
-        # Tab 2: Browse File
-        self.browse_tab = QWidget()
-        browse_layout = QVBoxLayout(self.browse_tab)
-        browse_layout.setAlignment(Qt.AlignCenter)
-        btn_browse = QPushButton(_("Browse Executable..."))
-        btn_browse.clicked.connect(self._on_browse_file)
-        browse_layout.addWidget(btn_browse)
-        self.tabs.addTab(self.browse_tab, _("Browse file"))
-
-        # Tab 3: Manual Input
+        # Tab 2: Manual Input
         self.manual_tab = QWidget()
         manual_layout = QVBoxLayout(self.manual_tab)
         self.manual_input = QLineEdit()
@@ -236,7 +229,12 @@ class AddAppDialog(QDialog):
             item = QListWidgetItem()
             item.setText(f"{app['name']}\n{app['exe']}")
             item.setData(Qt.UserRole, app)
-            item.setIcon(QIcon.fromTheme(app["name"].lower(), QIcon.fromTheme("application-x-executable")))
+            
+            icon_name = self._icon_cache.get(app["name"].lower())
+            if not icon_name:
+                icon_name = self._icon_cache.get(os.path.basename(app["exe"]).lower(), app["name"].lower())
+            
+            item.setIcon(QIcon.fromTheme(icon_name, QIcon.fromTheme("application-x-executable")))
             self.running_list.addItem(item)
 
     def _filter_running_apps(self, text):
@@ -249,15 +247,8 @@ class AddAppDialog(QDialog):
         self.selection_label.setText(f"{_('Selected:')} {self.selected_app}")
         self.btn_add.setEnabled(True)
 
-    def _on_browse_file(self):
-        path, _ = QFileDialog.getOpenFileName(self, _("Select executable"), "/usr/bin")
-        if path:
-            self.selected_app = os.path.basename(path)
-            self.btn_add.setEnabled(True)
-            self.accept()
-
     def _on_add_clicked(self):
-        if self.tabs.currentIndex() == 2: # Manual
+        if self.tabs.currentIndex() == 1: # Manual
             self.selected_app = self.manual_input.text().strip()
             if not self.selected_app:
                 return
@@ -299,9 +290,15 @@ class ModeManagerPage(QWidget):
         self.app_list.itemClicked.connect(self._on_app_selected)
         self.sidebar_layout.addWidget(self.app_list)
 
-        self.btn_add_app = QPushButton(_("+ Add Application"))
+        self.btn_add_app = QPushButton(QIcon.fromTheme("list-add"), _("Add Application"))
+        self.btn_remove_app = QPushButton(QIcon.fromTheme("list-remove"), _("Remove"))
+        self.btn_remove_app.setEnabled(False)
+        
         self.btn_add_app.clicked.connect(self._on_add_app)
+        self.btn_remove_app.clicked.connect(self._on_remove_app)
+        
         self.sidebar_layout.addWidget(self.btn_add_app)
+        self.sidebar_layout.addWidget(self.btn_remove_app)
 
         self.layout.addWidget(self.sidebar_widget)
 
@@ -370,6 +367,25 @@ class ModeManagerPage(QWidget):
         self.main_layout.addWidget(self.app_settings_card)
         self.main_layout.addStretch()
 
+        # Bottom Toolbar (Import/Export) in a card to match other editors
+        self.toolbar_card = CardWidget("")
+        # Reduce margins for toolbar card to be more compact
+        self.toolbar_card.main_layout.setContentsMargins(16, 4, 16, 4)
+        
+        toolbar_layout = QHBoxLayout()
+        toolbar_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
+        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
+        self.btn_import.clicked.connect(self._on_import)
+        self.btn_export.clicked.connect(self._on_export)
+        
+        toolbar_layout.addStretch()
+        toolbar_layout.addWidget(self.btn_import)
+        toolbar_layout.addWidget(self.btn_export)
+        self.toolbar_card.content_layout.addLayout(toolbar_layout)
+        self.main_layout.addWidget(self.toolbar_card)
+
         # Initial visibility
         self.app_settings_card.setVisible(False)
 
@@ -422,24 +438,85 @@ class ModeManagerPage(QWidget):
                 self.app_list.setCurrentItem(item)
 
     def _scan_desktop_files(self):
-        paths = ["/usr/share/applications", os.path.expanduser("~/.local/share/applications")]
-        for p in paths:
-            if not os.path.isdir(p): continue
+        """Builds a robust map of app identifiers to icon names."""
+        search_paths = [
+            "/usr/share/applications",
+            os.path.expanduser("~/.local/share/applications"),
+            "/var/lib/flatpak/exports/share/applications",
+            os.path.expanduser("~/.local/share/flatpak/exports/share/applications"),
+            "/var/lib/snapd/desktop/applications",
+        ]
+        
+        # Priority 1: Direct binary names from Exec line
+        # Priority 2: Desktop filenames (e.g. com.discordapp.Discord -> Discord)
+        # Priority 3: Application Names
+        
+        for p in search_paths:
+            if not os.path.isdir(p):
+                continue
             for f in os.listdir(p):
-                if not f.endswith(".desktop"): continue
+                if not f.endswith(".desktop"):
+                    continue
                 try:
-                    with open(os.path.join(p, f), "r") as df:
+                    desktop_id = f[:-8] # remove .desktop
+                    with open(os.path.join(p, f), "r", encoding="utf-8") as df:
                         content = df.read()
-                        exec_match = re.search(r"^Exec=([^ \n]+)", content, re.MULTILINE)
+                        
                         icon_match = re.search(r"^Icon=([^\n]+)", content, re.MULTILINE)
+                        if not icon_match: continue
+                        icon = icon_match.group(1).strip()
+                        
+                        # Map by desktop ID (e.g. discord)
+                        self._icon_cache[desktop_id.lower()] = icon
+                        if "." in desktop_id: # handle com.discordapp.Discord
+                            self._icon_cache[desktop_id.split(".")[-1].lower()] = icon
+                        
+                        name_match = re.search(r"^Name=([^\n]+)", content, re.MULTILINE)
+                        if name_match:
+                            self._icon_cache[name_match.group(1).strip().lower()] = icon
+
+                        exec_match = re.search(r"^Exec=([^\n]+)", content, re.MULTILINE)
                         if exec_match:
-                            binary_name = os.path.basename(exec_match.group(1))
-                            if icon_match:
-                                self._icon_cache[binary_name] = icon_match.group(1).strip()
-                except Exception: continue
+                            exec_line = exec_match.group(1).strip()
+                            # Handle quoted paths or args
+                            if exec_line.startswith('"'):
+                                binary_path = exec_line[1:].split('"')[0]
+                            else:
+                                binary_path = exec_line.split(" ")[0]
+                            
+                            binary_name = os.path.basename(binary_path).lower()
+                            self._icon_cache[binary_name] = icon
+                            
+                            # Handle Flatpak 'flatpak run ...'
+                            if binary_name == "flatpak" and " --command=" in exec_line:
+                                cmd_match = re.search(r"--command=([^ ]+)", exec_line)
+                                if cmd_match:
+                                    self._icon_cache[cmd_match.group(1).lower()] = icon
+                except Exception:
+                    continue
+        
+        # Manual Overrides for stubborn apps
+        manual_icons = {
+            "discord": "discord",
+            "upnote": "upnote",
+            "antigravity": "preferences-desktop-accessibility",
+        }
+        for k, v in manual_icons.items():
+            if k not in self._icon_cache:
+                self._icon_cache[k] = v
 
     def _resolve_icon(self, app_name):
-        icon_name = self._icon_cache.get(app_name, app_name.lower())
+        """Resolves icon name for a given app handle."""
+        app_lower = app_name.lower()
+        icon_name = self._icon_cache.get(app_lower)
+        
+        if not icon_name:
+            # Try removing extension or path if it's a full path
+            basename = os.path.basename(app_name).lower()
+            if "." in basename:
+                basename = basename.split(".")[0]
+            icon_name = self._icon_cache.get(basename, basename)
+            
         return QIcon.fromTheme(icon_name, QIcon.fromTheme("application-x-executable"))
 
     def _filter_apps(self, text):
@@ -455,6 +532,7 @@ class ModeManagerPage(QWidget):
         self.app_name_label.setText(app_name)
         self.app_icon_label.setPixmap(self._resolve_icon(app_name).pixmap(48, 48))
         self.app_settings_card.setVisible(True)
+        self.btn_remove_app.setEnabled(True) # Enable Remove
         self._update_mode_cards()
 
     def _on_global_mode_changed(self, index):
@@ -483,7 +561,7 @@ class ModeManagerPage(QWidget):
             card.update_style()
 
     def _on_add_app(self):
-        dialog = AddAppDialog(self)
+        dialog = AddAppDialog(self._icon_cache, self)
         if dialog.exec():
             new_app = dialog.selected_app
             if new_app not in self.app_rules:
@@ -492,6 +570,28 @@ class ModeManagerPage(QWidget):
             self.save_data(quiet=True)
             self._populate_app_list()
             self._notify_changed()
+
+    def _on_remove_app(self):
+        if not self.selected_app:
+            return
+            
+        reply = QMessageBox.question(
+            self, _("Confirm Remove"),
+            _("Are you sure you want to remove rules for this application?"),
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if reply == QMessageBox.No:
+            return
+            
+        if self.selected_app in self.app_rules:
+            del self.app_rules[self.selected_app]
+        
+        self.selected_app = None
+        self.app_settings_card.setVisible(False)
+        self.btn_remove_app.setEnabled(False)
+        self.save_data(quiet=True)
+        self._populate_app_list()
+        self._notify_changed()
 
     def _notify_changed(self):
         main_win = self.window()
@@ -523,3 +623,76 @@ class ModeManagerPage(QWidget):
 
     def restore_defaults(self):
         self.load_data()
+
+    def _on_import(self):
+        path, _filter = QFileDialog.getOpenFileName(
+            self, _("Import App Rules"), "", _("Tab-separated (*.tsv *.txt);;All files (*)")
+        )
+        if not path:
+            return
+        
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        except Exception as e:
+            QMessageBox.warning(self, _("Error"), f"Cannot open file for reading: {e}")
+            return
+
+        imported = 0
+        confirmed = False
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            
+            parts = line.split("\t") if "\t" in line else line.split(",")
+            if len(parts) < 2:
+                continue
+            
+            app_name = parts[0].strip()
+            try:
+                mode_id = int(parts[1].strip())
+            except ValueError:
+                continue
+            
+            if not confirmed and self.app_rules:
+                reply = QMessageBox.question(
+                    self, _("Confirm Import"),
+                    _("Merge imported rules with existing ones?"),
+                    QMessageBox.Yes | QMessageBox.No
+                )
+                if reply == QMessageBox.No:
+                    return
+                confirmed = True
+            else:
+                confirmed = True
+            
+            self.app_rules[app_name] = mode_id
+            imported += 1
+        
+        if imported > 0:
+            self.save_data(quiet=True)
+            self._populate_app_list()
+            self._notify_changed()
+            QMessageBox.information(self, _("Import Complete"), _(f"Imported {imported} app rules."))
+
+    def _on_export(self):
+        if not self.app_rules:
+            QMessageBox.information(self, _("Export"), _("No rules to export."))
+            return
+            
+        path, _filter = QFileDialog.getSaveFileName(
+            self, _("Export App Rules"), "lotus-app-rules.tsv",
+            _("Tab-separated (*.tsv *.txt);;All files (*)")
+        )
+        if not path:
+            return
+            
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write("# Lotus App Rules Export\n# Format: app_name<TAB>mode_id\n")
+                for app, mode in sorted(self.app_rules.items()):
+                    f.write(f"{app}\t{mode}\n")
+            QMessageBox.information(self, _("Export Complete"), _(f"Exported {len(self.app_rules)} rules to:\n{path}"))
+        except Exception as e:
+            QMessageBox.warning(self, _("Error"), f"Cannot open file for writing: {e}")
