@@ -899,8 +899,8 @@ namespace fcitx {
             if (!isAutomatedBackspace) {
                 if (shouldCapitalize_) {
                     if (currentSym >= FcitxKey_a && currentSym <= FcitxKey_z) {
-                        KeySym upperSym = static_cast<KeySym>(currentSym - (FcitxKey_a - FcitxKey_A));
-                        currentSym      = upperSym;
+                        auto upperSym = static_cast<KeySym>(currentSym - (FcitxKey_a - FcitxKey_A));
+                        currentSym    = upperSym;
                         keyEvent.setKey(Key(upperSym, keyEvent.rawKey().states()));
                         shouldCapitalize_ = false;
                     } else if (currentSym != FcitxKey_space) {
@@ -943,7 +943,7 @@ namespace fcitx {
                 std::string keyUtf8Check = Key::keySymToUTF8(currentSym);
                 if (!keyUtf8Check.empty() && buffered_keys_.size() < MAX_BUFFERED_KEYS) {
                     LOTUS_WARN("Typing so fast, add key to queue");
-                    buffered_keys_.push_back({currentSym, keyEvent.rawKey().states()});
+                    buffered_keys_.push_back({.sym = currentSym, .state = keyEvent.rawKey().states()});
                 }
                 keyEvent.filterAndAccept();
             }
@@ -965,7 +965,8 @@ namespace fcitx {
         }
 
         switch (realMode) {
-            case LotusMode::Uinput: {
+            case LotusMode::Uinput:
+            case LotusMode::Smooth: {
                 handleUinputMode(keyEvent, currentSym, true);
                 break;
             }
@@ -983,10 +984,6 @@ namespace fcitx {
             }
             case LotusMode::Emoji: {
                 handleEmojiMode(keyEvent);
-                break;
-            }
-            case LotusMode::Smooth: {
-                handleUinputMode(keyEvent, currentSym, true);
                 break;
             }
             default: {
