@@ -442,7 +442,7 @@ namespace fcitx {
                     break;
                 }
                 case FcitxKey_r: {
-                    selectedMode  = modeStringToEnum(config_.mode.value());
+                    selectedMode = modeStringToEnum(config_.mode.value());
                     break;
                 }
                 case FcitxKey_Escape: {
