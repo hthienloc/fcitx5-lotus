@@ -216,7 +216,6 @@ namespace fcitx {
         std::vector<SimpleAction*>                 toggleActions_;
         std::vector<ScopedConnection>              connections_;
         CGoObject                                  dictionary_;
-        std::unordered_map<std::string, LotusMode> appRules_;
         bool                                       isSelectingAppMode_ = false;
         std::string                                currentConfigureApp_;
         FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
@@ -281,7 +280,28 @@ namespace fcitx {
         /**
          * @brief Saves application-specific mode rules.
          */
-        void saveAppRules();
+        void saveAppRules() const;
+
+        /**
+         * @brief Get application-specific mode rules
+         * @return Current application-specific mode rules
+        */
+
+        LotusMode getAppRule(const std::string& appName) const;
+
+        /**
+         * @brief Set application-specific mode rules
+         * @param appName The application name
+         * @param mode The mode to set
+         */
+        void setAppRule(const std::string& appName, LotusMode mode);
+
+        /**
+         * @brief Remove application-specific mode rules
+         * @param appName The application name
+         * @return true if removed
+         */
+        bool removeAppRule(const std::string& appName);
 
         /**
          * @brief Shows the application mode selection menu.

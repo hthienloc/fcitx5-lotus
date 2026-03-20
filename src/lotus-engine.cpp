@@ -13,6 +13,7 @@
 #include "lotus-monitor.h"
 #include "lotus-utils.h"
 #include "ack-apps.h"
+#include <utility>
 #ifndef DISABLE_VERSION_ACTION
 #include "lotus-version.h"
 #endif
@@ -33,7 +34,6 @@ namespace fcitx {
     constexpr const char* CharsetActionPrefix = "lotus-charset-";
     const std::string     CustomKeymapFile    = "conf/lotus-custom-keymap.conf";
     const std::string     MacroTableFile      = "conf/lotus-macro-table.conf";
-    const std::string     AppRulesFile        = "conf/lotus-app-rules.conf";
 
     // Returns the KeySym that triggers the "Type hotkey char" action in the mode
     // menu.  If the hotkey itself conflicts with a reserved menu key, falls back
@@ -225,11 +225,7 @@ namespace fcitx {
         readAsIni(customKeymap_, CustomKeymapFile);
         readAsIni(macroTables_, MacroTableFile);
         macroTableObject_.reset(newMacroTable(macroTables_));
-        readAsIni(appRulesTables_, AppRulesFile);
-        appRules_.clear();
-        for (const auto& rule : *appRulesTables_.rules) {
-            appRules_[*rule.app] = static_cast<LotusMode>(*rule.mode);
-        }
+        loadAppRules();
         populateConfig();
     }
 
@@ -273,11 +269,7 @@ namespace fcitx {
             refreshEngine();
         } else if (path == "app_rules") {
             appRulesTables_.load(config, true);
-            safeSaveAsIni(appRulesTables_, AppRulesFile);
-            appRules_.clear();
-            for (const auto& rule : *appRulesTables_.rules) {
-                appRules_[*rule.app] = static_cast<LotusMode>(*rule.mode);
-            }
+            saveAppRules();
             refreshEngine();
         }
     }
@@ -300,8 +292,7 @@ namespace fcitx {
         std::string appName = getProgramName(ic);
         LOTUS_INFO("App name: " + appName);
 
-        auto            it         = appRules_.find(appName);
-        const LotusMode targetMode = (it != appRules_.end()) ? it->second : modeStringToEnum(config_.mode.value());
+        const LotusMode targetMode = getAppRule(appName);
         LOTUS_INFO("Target mode: " + modeEnumToString(targetMode));
         reloadConfig();
         updateCharsetAction(event.inputContext());
@@ -451,7 +442,7 @@ namespace fcitx {
                     break;
                 }
                 case FcitxKey_r: {
-                    if (appRules_.erase(currentConfigureApp_) > 0 && !isStartsWith(currentConfigureApp_, "ctx_")) {
+                    if (removeAppRule(currentConfigureApp_) && !isStartsWith(currentConfigureApp_, "ctx_")) {
                         saveAppRules();
                     }
                     selectedMode  = modeStringToEnum(config_.mode.value());
@@ -485,7 +476,7 @@ namespace fcitx {
             if (selectedMode != LotusMode::NoMode) {
                 LOTUS_INFO("Selected mode: " + modeEnumToString(selectedMode));
                 if (selectedMode != LotusMode::Emoji) {
-                    appRules_[currentConfigureApp_] = selectedMode;
+                    setAppRule(currentConfigureApp_, selectedMode);
                     if (!isStartsWith(currentConfigureApp_, "ctx_")) {
                         saveAppRules();
                     }
@@ -589,20 +580,99 @@ namespace fcitx {
         }
     }
 
-    void LotusEngine::loadAppRules() {}
-
-    void LotusEngine::saveAppRules() {
+    void LotusEngine::loadAppRules() {
+#if LOTUS_USE_MODERN_FCITX_API
+        std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
+#else
+        std::string configDir = StandardPath::global().userDirectory(StandardPath::Type::Config) + "/fcitx5/conf";
+#endif
+        std::ifstream file(configDir + "/lotus-app-rules.conf");
+        if (!file.is_open()) {
+            return;
+        }
         std::vector<lotusAppRule> rules;
-        for (const auto& pair : appRules_) {
-            if (!isStartsWith(pair.first, "ctx_")) {
+        std::string               line;
+        while (std::getline(file, line)) {
+            if (line.empty() || line[0] == '#')
+                continue;
+            auto delimiterPos = line.find('=');
+            if (delimiterPos != std::string::npos) {
+                std::string  app  = line.substr(0, delimiterPos);
+                std::string  mode = line.substr(delimiterPos + 1);
                 lotusAppRule rule;
-                rule.app.setValue(pair.first);
-                rule.mode.setValue(static_cast<int>(pair.second));
+                rule.app.setValue(app);
+                rule.mode.setValue(std::stoi(mode));
                 rules.push_back(std::move(rule));
             }
         }
+        file.close();
         appRulesTables_.rules.setValue(std::move(rules));
-        safeSaveAsIni(appRulesTables_, AppRulesFile);
+    }
+
+    void LotusEngine::saveAppRules() const {
+#if LOTUS_USE_MODERN_FCITX_API
+        std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
+#else
+        std::string configDir = StandardPath::global().userDirectory(StandardPath::Type::Config) + "/fcitx5/conf";
+#endif
+        std::ofstream file(configDir + "/lotus-app-rules.conf");
+        if (!file.is_open())
+            return;
+
+        file << "# Lotus Per-App Configuration\n";
+        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
+        auto appRules = appRulesTables_.rules.value();
+        for (const auto& pair : appRules) {
+            if (!isStartsWith(pair.app.value(), "ctx_")) {
+                file << pair.app.value() << "=" << static_cast<int>(pair.mode.value()) << "\n";
+            }
+        }
+        file.close();
+    }
+
+    LotusMode LotusEngine::getAppRule(const std::string& appName) const {
+        for (const auto& rule : *appRulesTables_.rules) {
+            if (*rule.app == appName) {
+                return static_cast<LotusMode>(*rule.mode);
+            }
+        }
+        return modeStringToEnum(config_.mode.value());
+    }
+
+    void LotusEngine::setAppRule(const std::string& appName, LotusMode mode) {
+        auto rules = *appRulesTables_.rules;
+
+        bool found = false;
+        for (auto& rule : rules) {
+            if (*rule.app == appName) {
+                rule.mode.setValue(static_cast<int>(mode));
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            lotusAppRule newRule;
+            newRule.app.setValue(appName);
+            newRule.mode.setValue(static_cast<int>(mode));
+            rules.push_back(std::move(newRule));
+        }
+
+        appRulesTables_.rules.setValue(std::move(rules));
+    }
+
+    bool LotusEngine::removeAppRule(const std::string& appName) {
+        auto rules = *appRulesTables_.rules;
+        bool found = false;
+        for (auto it = rules.begin(); it != rules.end(); ++it) {
+            if (it->app.value() == appName) {
+                rules.erase(it);
+                found = true;
+                appRulesTables_.rules.setValue(std::move(rules));
+                break;
+            }
+        }
+        return found;
     }
 
     void LotusEngine::closeAppModeMenu() {
@@ -636,7 +706,7 @@ namespace fcitx {
         auto applyMode = [this, cleanup](LotusMode mode) {
             return [this, mode, cleanup](InputContext* ic) {
                 if (mode != LotusMode::Emoji) {
-                    appRules_[currentConfigureApp_] = mode;
+                    setAppRule(currentConfigureApp_, mode);
                     if (!isStartsWith(currentConfigureApp_, "ctx_")) {
                         saveAppRules();
                     }
@@ -661,7 +731,7 @@ namespace fcitx {
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[e] OFF")), applyMode(LotusMode::Off)));
 
         candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[r] Default Typing")), [this, cleanup](InputContext* ic) {
-            if (appRules_.erase(currentConfigureApp_) > 0 && !isStartsWith(currentConfigureApp_, "ctx_")) {
+            if (removeAppRule(currentConfigureApp_) && !isStartsWith(currentConfigureApp_, "ctx_")) {
                 saveAppRules();
             }
             setMode(modeStringToEnum(config_.mode.value()), ic);
