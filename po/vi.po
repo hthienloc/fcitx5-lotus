@@ -446,7 +446,7 @@ msgstr "Giao diện"
 
 #: settings-gui/ui/main_window.py:189
 msgid "About"
-msgstr "Thông tin"
+msgstr "Giới thiệu"
 
 #: settings-gui/ui/main_window.py:197
 msgid "Confirm Reset"
