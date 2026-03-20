@@ -297,13 +297,6 @@ namespace fcitx {
         void setAppRule(const std::string& appName, LotusMode mode);
 
         /**
-         * @brief Remove application-specific mode rules
-         * @param appName The application name
-         * @return true if removed
-         */
-        bool removeAppRule(const std::string& appName);
-
-        /**
          * @brief Shows the application mode selection menu.
          * @param ic Current input context.
          */

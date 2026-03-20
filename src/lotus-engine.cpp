@@ -442,11 +442,7 @@ namespace fcitx {
                     break;
                 }
                 case FcitxKey_r: {
-                    if (removeAppRule(currentConfigureApp_) && !isStartsWith(currentConfigureApp_, "ctx_")) {
-                        saveAppRules();
-                    }
                     selectedMode  = modeStringToEnum(config_.mode.value());
-                    selectionMade = true;
                     break;
                 }
                 case FcitxKey_Escape: {
@@ -661,20 +657,6 @@ namespace fcitx {
         appRulesTables_.rules.setValue(std::move(rules));
     }
 
-    bool LotusEngine::removeAppRule(const std::string& appName) {
-        auto rules = *appRulesTables_.rules;
-        bool found = false;
-        for (auto it = rules.begin(); it != rules.end(); ++it) {
-            if (it->app.value() == appName) {
-                rules.erase(it);
-                found = true;
-                appRulesTables_.rules.setValue(std::move(rules));
-                break;
-            }
-        }
-        return found;
-    }
-
     void LotusEngine::closeAppModeMenu() {
         isSelectingAppMode_ = false;
         g_mouse_clicked.store(false, std::memory_order_relaxed);
@@ -731,9 +713,6 @@ namespace fcitx {
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[e] OFF")), applyMode(LotusMode::Off)));
 
         candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[r] Default Typing")), [this, cleanup](InputContext* ic) {
-            if (removeAppRule(currentConfigureApp_) && !isStartsWith(currentConfigureApp_, "ctx_")) {
-                saveAppRules();
-            }
             setMode(modeStringToEnum(config_.mode.value()), ic);
             cleanup(ic);
         }));
