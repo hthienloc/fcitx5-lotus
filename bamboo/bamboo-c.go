@@ -24,10 +24,10 @@ import (
 	*/
 	"C"
 	"bamboo-core"
-	"runtime/cgo"
-	"unsafe"
 	"os/signal"
+	"runtime/cgo"
 	"syscall"
+	"unsafe"
 )
 import (
 	"bufio"
@@ -257,6 +257,21 @@ func GetInputMethodNames() **C.char {
 		i++
 	}
 	return toCStringArray(names)
+}
+
+//export DictionaryAddWords
+func DictionaryAddWords(dictHandle uintptr, words **C.char) {
+	dict, ok := cgo.Handle(dictHandle).Value().(*map[string]bool)
+	if !ok {
+		return
+	}
+	w := (*[1 << 20 - 1]*C.char)(unsafe.Pointer(words))
+	i := 0
+	for w[i] != nil {
+		word := strings.ToLower(C.GoString(w[i]))
+		(*dict)[word] = true
+		i++
+	}
 }
 
 //export NewDictionary
