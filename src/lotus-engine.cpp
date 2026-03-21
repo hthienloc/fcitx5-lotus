@@ -599,9 +599,7 @@ namespace fcitx {
                 rule.app.setValue(app);
                 try {
                     rule.mode.setValue(std::stoi(mode));
-                } catch (const std::exception& e) {
-                    rule.mode.setValue(0);
-                }
+                } catch (const std::exception& e) { rule.mode.setValue(0); }
                 rules.push_back(std::move(rule));
             }
         }
