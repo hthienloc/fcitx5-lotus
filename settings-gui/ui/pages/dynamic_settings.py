@@ -292,6 +292,10 @@ class DynamicSettingsPage(QWidget):
         )
         layout.addWidget(cb)
 
+    def load_data(self):
+        """Standardized reload method (alias for load_config)."""
+        self.load_config()
+
     def restore_defaults(self):
         """Resets current values to engine defaults."""
         self.blockSignals(True)

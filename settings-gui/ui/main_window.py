@@ -257,8 +257,10 @@ class LotusSettingsWindow(QMainWindow):
         """Discards all unsaved changes by reloading data on all pages."""
         for i in range(self.content_stack.count()):
             page = self.content_stack.widget(i)
-            if hasattr(page, "restore_defaults"):
-                page.restore_defaults()
+            if hasattr(page, "load_data"):
+                page.load_data()
+            elif hasattr(page, "load_config"):
+                page.load_config()
 
         self.btn_apply.setEnabled(False)
         self.btn_cancel.setEnabled(False)
