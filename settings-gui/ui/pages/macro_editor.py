@@ -48,20 +48,9 @@ class MacroEditorPage(BaseEditorPage):
         main_layout.setContentsMargins(30, 20, 30, 20)
         main_layout.setSpacing(15)
 
-        # Header Row: Title + Search
-        header_layout = QHBoxLayout()
         title = QLabel(_("Macros"))
         title.setObjectName("CategoryTitle")
-        header_layout.addWidget(title)
-        header_layout.addStretch()
-
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(_("Search macros..."))
-        self.search_input.setClearButtonEnabled(True)
-        self.search_input.setFixedWidth(250)
-        self.search_input.textChanged.connect(self.on_search_changed)
-        header_layout.addWidget(self.search_input)
-        main_layout.addLayout(header_layout)
+        main_layout.addWidget(title)
 
         # Macro behavior toggles
         toggles_card = CardWidget("")
@@ -73,6 +62,15 @@ class MacroEditorPage(BaseEditorPage):
         toggles_layout.addWidget(self.cb_enable)
         toggles_layout.addWidget(self.cb_capitalize)
         toggles_layout.addStretch()
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(_("Search macros..."))
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setFixedWidth(200)
+        self.search_input.textChanged.connect(self.on_search_changed)
+        toggles_layout.addWidget(QLabel(_("Search:")))
+        toggles_layout.addWidget(self.search_input)
+
         toggles_card.content_layout.addLayout(toggles_layout)
         main_layout.addWidget(toggles_card)
 

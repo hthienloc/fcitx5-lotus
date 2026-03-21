@@ -237,20 +237,9 @@ class KeymapEditorPage(BaseEditorPage):
         main_layout.setContentsMargins(30, 20, 30, 20)
         main_layout.setSpacing(15)
 
-        # Header Row: Title + Search
-        header_layout = QHBoxLayout()
         title = QLabel(_("Keymap"))
         title.setObjectName("CategoryTitle")
-        header_layout.addWidget(title)
-        header_layout.addStretch()
-
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(_("Search keys..."))
-        self.search_input.setClearButtonEnabled(True)
-        self.search_input.setFixedWidth(250)
-        self.search_input.textChanged.connect(self.on_search_changed)
-        header_layout.addWidget(self.search_input)
-        main_layout.addLayout(header_layout)
+        main_layout.addWidget(title)
 
         # Preset card
         preset_card = CardWidget("")
@@ -267,6 +256,15 @@ class KeymapEditorPage(BaseEditorPage):
         btn_load_preset.clicked.connect(self.on_load_preset)
         preset_layout.addWidget(btn_load_preset)
         preset_layout.addStretch()
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(_("Search keys..."))
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setFixedWidth(200)
+        self.search_input.textChanged.connect(self.on_search_changed)
+        preset_layout.addWidget(QLabel(_("Search:")))
+        preset_layout.addWidget(self.search_input)
+
         preset_card.content_layout.addLayout(preset_layout)
         main_layout.addWidget(preset_card)
 
