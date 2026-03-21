@@ -48,9 +48,20 @@ class MacroEditorPage(BaseEditorPage):
         main_layout.setContentsMargins(30, 20, 30, 20)
         main_layout.setSpacing(15)
 
+        # Header Row: Title + Search
+        header_layout = QHBoxLayout()
         title = QLabel(_("Macros"))
         title.setObjectName("CategoryTitle")
-        main_layout.addWidget(title)
+        header_layout.addWidget(title)
+        header_layout.addStretch()
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(_("Search macros..."))
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setFixedWidth(250)
+        self.search_input.textChanged.connect(self.on_search_changed)
+        header_layout.addWidget(self.search_input)
+        main_layout.addLayout(header_layout)
 
         # Macro behavior toggles
         toggles_card = CardWidget("")
@@ -93,16 +104,6 @@ class MacroEditorPage(BaseEditorPage):
         input_layout.addWidget(self.input_val, 2)
         input_layout.addWidget(self.btn_add)
         content_layout.addLayout(input_layout)
-
-        # 1b. Search Bar
-        search_layout = QHBoxLayout()
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(_("Search macros..."))
-        self.search_input.setClearButtonEnabled(True)
-        self.search_input.textChanged.connect(self.on_search_changed)
-        search_layout.addWidget(QLabel(_("Search:")))
-        search_layout.addWidget(self.search_input)
-        content_layout.addLayout(search_layout)
 
         # 2. Table Area
         self.table = QTableWidget(0, 2)
@@ -163,7 +164,7 @@ class MacroEditorPage(BaseEditorPage):
             data = self.dbus.get_sub_config_list("lotus-macro", "Macro")
             for item in data:
                 self.upsert_row(item.get("Key", ""), item.get("Value", ""), sort=False)
-            self.sort_invalid_to_top()
+            self.on_search_changed()
         finally:
             self.blockSignals(False)
 
@@ -219,7 +220,7 @@ class MacroEditorPage(BaseEditorPage):
                 self.table.item(row, 1).setText(value)
                 self._apply_row_highlight(row, key)
                 if sort:
-                    self.sort_invalid_to_top()
+                    self.on_search_changed()  # Re-apply filter
                 self.on_search_changed()  # Re-apply filter
                 self.update_button_states()
                 return
@@ -231,8 +232,7 @@ class MacroEditorPage(BaseEditorPage):
         self.table.setItem(row, 1, QTableWidgetItem(value))
         self._apply_row_highlight(row, key)
         if sort:
-            self.sort_invalid_to_top()
-        self.on_search_changed()  # Re-apply filter
+            self.on_search_changed()  # Re-apply filter
         self.update_button_states()
         self._on_item_changed()
 

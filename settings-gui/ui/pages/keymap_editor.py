@@ -237,9 +237,20 @@ class KeymapEditorPage(BaseEditorPage):
         main_layout.setContentsMargins(30, 20, 30, 20)
         main_layout.setSpacing(15)
 
+        # Header Row: Title + Search
+        header_layout = QHBoxLayout()
         title = QLabel(_("Keymap"))
         title.setObjectName("CategoryTitle")
-        main_layout.addWidget(title)
+        header_layout.addWidget(title)
+        header_layout.addStretch()
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(_("Search keys..."))
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setFixedWidth(250)
+        self.search_input.textChanged.connect(self.on_search_changed)
+        header_layout.addWidget(self.search_input)
+        main_layout.addLayout(header_layout)
 
         # Preset card
         preset_card = CardWidget("")
@@ -350,6 +361,22 @@ class KeymapEditorPage(BaseEditorPage):
         self.dbus.set_sub_config_list("custom_keymap", "CustomKeymap", data)
         if not quiet:
             QMessageBox.information(self, _("Success"), _("Keymap saved successfully."))
+
+    def on_search_changed(self):
+        """Filters the table rows based on the search input."""
+        search_text = self.search_input.text().lower()
+        for row in range(self.table.rowCount()):
+            key_item = self.table.item(row, 0)
+            action_item = self.table.cellWidget(row, 1) if isinstance(self.table.cellWidget(row, 1), QComboBox) else self.table.item(row, 1)
+            
+            key = key_item.text().lower() if key_item else ""
+            action = ""
+            if isinstance(action_item, QComboBox):
+                action = action_item.currentText().lower()
+            elif action_item:
+                action = action_item.text().lower()
+                
+            self.table.setRowHidden(row, search_text not in key and search_text not in action)
 
     def on_add(self):
         """Adds a new keymap entry."""

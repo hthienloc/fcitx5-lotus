@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QAbstractItemView,
     QFileDialog,
+    QCheckBox,
 )
 from PySide6.QtGui import QIcon, QColor
 from PySide6.QtCore import Qt
@@ -46,9 +47,30 @@ class DictEditorPage(BaseEditorPage):
         main_layout.setContentsMargins(30, 20, 30, 20)
         main_layout.setSpacing(15)
 
+        # Header Row: Title + Search
+        header_layout = QHBoxLayout()
         title = QLabel(_("Dictionary"))
         title.setObjectName("CategoryTitle")
-        main_layout.addWidget(title)
+        header_layout.addWidget(title)
+        header_layout.addStretch()
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText(_("Search words..."))
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setFixedWidth(250)
+        self.search_input.textChanged.connect(self.on_search_changed)
+        header_layout.addWidget(self.search_input)
+        main_layout.addLayout(header_layout)
+
+        # Dictionary behavior toggles
+        toggles_card = CardWidget("")
+        toggles_layout = QHBoxLayout()
+        self.cb_enable = QCheckBox(_("Enable Dictionary"))
+        self.cb_enable.toggled.connect(self._on_item_changed)
+        toggles_layout.addWidget(self.cb_enable)
+        toggles_layout.addStretch()
+        toggles_card.content_layout.addLayout(toggles_layout)
+        main_layout.addWidget(toggles_card)
 
         # Main content area
         editor_card = CardWidget("")
@@ -72,16 +94,6 @@ class DictEditorPage(BaseEditorPage):
         input_layout.addWidget(self.btn_add)
         content_layout.addLayout(input_layout)
 
-        # 1b. Search Bar
-        search_layout = QHBoxLayout()
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(_("Search words..."))
-        self.search_input.setClearButtonEnabled(True)
-        self.search_input.textChanged.connect(self.on_search_changed)
-        search_layout.addWidget(QLabel(_("Search:")))
-        search_layout.addWidget(self.search_input)
-        content_layout.addLayout(search_layout)
-
         # 2. Table Area
         self.table = QTableWidget(0, 1)
         self.table.setHorizontalHeaderLabels([_("Word")])
@@ -100,12 +112,22 @@ class DictEditorPage(BaseEditorPage):
         self.btn_remove = QPushButton(QIcon.fromTheme("list-remove"), _("Remove"))
         self.btn_remove.clicked.connect(self.on_remove)
 
+        self.btn_up = QPushButton(QIcon.fromTheme("go-up"), "")
+        self.btn_up.setToolTip(_("Move Up"))
+        self.btn_down = QPushButton(QIcon.fromTheme("go-down"), "")
+        self.btn_down.setToolTip(_("Move Down"))
+
+        self.btn_up.clicked.connect(self.on_move_up)
+        self.btn_down.clicked.connect(self.on_move_down)
+
         self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
         self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
         self.btn_import.clicked.connect(self.on_import)
         self.btn_export.clicked.connect(self.on_export)
 
         toolbar_layout.addWidget(self.btn_remove)
+        toolbar_layout.addWidget(self.btn_up)
+        toolbar_layout.addWidget(self.btn_down)
         toolbar_layout.addStretch()
 
         content_layout.addLayout(toolbar_layout)
@@ -114,19 +136,27 @@ class DictEditorPage(BaseEditorPage):
     def load_data(self):
         self.blockSignals(True)
         try:
+            # Load global dictionary settings via DBus
+            config_data = self.dbus.get_config()
+            if config_data:
+                values = config_data.get("values", {})
+                self.cb_enable.setChecked(
+                    str(values.get("EnableDictionary", "True")).lower() == "true"
+                )
+
             self.table.setRowCount(0)
             self.word_map.clear()
             data = self.dbus.get_sub_config_list("lotus-dict", "Dictionary")
             for item in data:
                 self.upsert_row(item.get("Word", ""), sort=False)
-            self.sort_invalid_to_top()
         finally:
             self.blockSignals(False)
 
     def restore_defaults(self):
-        """Resets dictionary to empty."""
+        """Resets dictionary to default."""
         self.blockSignals(True)
         try:
+            self.cb_enable.setChecked(True)
             self.table.setRowCount(0)
             self.word_map.clear()
             self._on_item_changed()
@@ -134,10 +164,17 @@ class DictEditorPage(BaseEditorPage):
             self.blockSignals(False)
 
     def is_modified_from_default(self):
-        """Returns True if the dictionary has entries."""
-        return self.table.rowCount() > 0
+        """Returns True if the dictionary has entries or checkboxes are changed from default."""
+        return self.table.rowCount() > 0 or not self.cb_enable.isChecked()
 
     def save_data(self, quiet=False):
+        # Save global dictionary settings via DBus
+        config_data = self.dbus.get_config()
+        if config_data:
+            values = config_data.get("values", {})
+            values["EnableDictionary"] = "True" if self.cb_enable.isChecked() else "False"
+            self.dbus.set_config(values)
+
         data = []
         for row in range(self.table.rowCount()):
             word_item = self.table.item(row, 0)
@@ -156,7 +193,6 @@ class DictEditorPage(BaseEditorPage):
             row = self.table.row(existing_item)
             self._apply_row_highlight(row, word)
             if sort:
-                self.sort_invalid_to_top()
                 self.on_search_changed()
                 self.update_button_states()
             return
@@ -169,7 +205,6 @@ class DictEditorPage(BaseEditorPage):
         self.word_map[word] = item
         self._apply_row_highlight(row, word)
         if sort:
-            self.sort_invalid_to_top()
             self.on_search_changed()
             self.update_button_states()
             self._on_item_changed()
@@ -325,7 +360,7 @@ class DictEditorPage(BaseEditorPage):
             self.upsert_row(word, sort=False)
             imported += 1
 
-        self.sort_invalid_to_top()
+        self.on_search_changed()
 
         QMessageBox.information(
             self,

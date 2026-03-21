@@ -338,12 +338,12 @@ class ModeManagerPage(QWidget):
         self.sidebar_widget.setFixedWidth(240)
         self.sidebar_layout = QVBoxLayout(self.sidebar_widget)
         self.sidebar_layout.setContentsMargins(15, 20, 15, 20)
-        self.sidebar_layout.setSpacing(10)
-
         self.app_search = QLineEdit()
         self.app_search.setPlaceholderText(_("Search applications..."))
         self.app_search.textChanged.connect(self._filter_apps)
         self.sidebar_layout.addWidget(self.app_search)
+
+        self.sidebar_layout.setSpacing(10)
 
         self.app_list = QListWidget()
         self.app_list.setIconSize(QSize(24, 24))

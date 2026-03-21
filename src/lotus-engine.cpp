@@ -225,14 +225,16 @@ namespace fcitx {
 #endif
         if (fd.isValid()) {
             dictionary_.reset(NewDictionary(fd.release()));
-            const auto&              dictWords = *dictTable_.dict;
-            std::vector<const char*> words;
-            words.reserve(dictWords.size() + 1);
-            for (const auto& item : dictWords) {
-                words.push_back(item.word->c_str());
+            if (config_.enableDictionary.value()) {
+                const auto&              dictWords = *dictTable_.dict;
+                std::vector<const char*> words;
+                words.reserve(dictWords.size() + 1);
+                for (const auto& item : dictWords) {
+                    words.push_back(item.word->c_str());
+                }
+                words.push_back(nullptr);
+                DictionaryAddWords(dictionary_.handle(), const_cast<char**>(words.data()));
             }
-            words.push_back(nullptr);
-            DictionaryAddWords(dictionary_.handle(), const_cast<char**>(words.data()));
         }
 
         loadAppRules();
@@ -266,6 +268,7 @@ namespace fcitx {
         updateCharsetAction(nullptr);
         updateAction(nullptr, spellCheckAction_, config_.spellCheck, _("Spell Check"));
         updateAction(nullptr, macroAction_, config_.enableMacro, _("Macro"));
+        updateAction(nullptr, enableDictionaryAction_, config_.enableDictionary, _("Dictionary"));
         updateAction(nullptr, capitalizeMacroAction_, config_.capitalizeMacro, _("Capitalize Macro"));
         updateAction(nullptr, autoNonVnRestoreAction_, config_.autoNonVnRestore, _("Auto Non-VN Restore"));
     }
