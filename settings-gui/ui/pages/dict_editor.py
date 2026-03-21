@@ -296,11 +296,11 @@ class DictEditorPage(BaseEditorPage):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-        except Exception as e:
+        except (IOError, OSError, UnicodeDecodeError) as e:
             QMessageBox.warning(self, "Error", f"Cannot open file for reading: {e}")
             return
 
-        imported = skipped = 0
+        imported = 0
         confirmed = False
         for line in lines:
             word = line.strip()
@@ -330,7 +330,7 @@ class DictEditorPage(BaseEditorPage):
         QMessageBox.information(
             self,
             _("Import Complete"),
-            _(f"Imported {imported} words, skipped {skipped} invalid lines."),
+            _(f"Imported {imported} words."),
         )
 
     def on_export(self):
@@ -359,5 +359,5 @@ class DictEditorPage(BaseEditorPage):
                 _("Export Complete"),
                 _(f"Exported {self.table.rowCount()} words to:\n{path}"),
             )
-        except Exception as e:
+        except (IOError, OSError) as e:
             QMessageBox.warning(self, "Error", f"Cannot open file for writing: {e}")

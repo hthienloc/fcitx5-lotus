@@ -105,16 +105,6 @@ namespace fcitx {
             imNames_ = std::move(imNames);
         }
         config_.inputMethod.annotation().setList(imNames_);
-#if LOTUS_USE_MODERN_FCITX_API
-        auto fd = StandardPaths::global().open(StandardPathsType::PkgData, "lotus/vietnamese.cm.dict");
-#else
-        auto fd = StandardPath::global().open(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict", O_RDONLY);
-#endif
-        if (!fd.isValid()) {
-            LOTUS_ERROR("Failed to load dictionary");
-            throw std::runtime_error("Failed to load dictionary");
-        }
-        dictionary_.reset(NewDictionary(fd.release()));
 
         auto& uiManager = instance_->userInterfaceManager();
 
