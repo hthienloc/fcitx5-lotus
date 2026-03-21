@@ -196,6 +196,7 @@ namespace fcitx {
 
         lotusMacroTable          macroTables_;
         CGoObject                macroTableObject_;
+        lotusDictTable           dictTable_;
         lotusAppRules            appRulesTables_;
 
         FactoryFor<LotusState>   factory_;

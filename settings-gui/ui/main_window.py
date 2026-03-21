@@ -26,6 +26,7 @@ from core.dbus_handler import LotusDBusHandler
 
 from ui.pages.dynamic_settings import DynamicSettingsPage, SettingsCategory
 from ui.pages.macro_editor import MacroEditorPage
+from ui.pages.dict_editor import DictEditorPage
 from ui.pages.keymap_editor import KeymapEditorPage
 from ui.pages.about import AboutPage
 from ui.pages.mode_manager import ModeManagerPage
@@ -181,6 +182,11 @@ class LotusSettingsWindow(QMainWindow):
             _("Macros"),
             "accessories-text-editor",
             MacroEditorPage(self.dbus_handler),
+        )
+        self._add_page(
+            _("Dictionary"),
+            "edit-copy",
+            DictEditorPage(self.dbus_handler),
         )
         self._add_page(
             _("Keymap"),
