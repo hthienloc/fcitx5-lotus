@@ -598,11 +598,7 @@ namespace fcitx {
                 lotusAppRule rule;
                 rule.app.setValue(app);
                 try {
-                    if (!mode.empty()) {
-                        rule.mode.setValue(std::stoi(mode));
-                    } else {
-                        rule.mode.setValue(0);
-                    }
+                    rule.mode.setValue(std::stoi(mode));
                 } catch (const std::exception& e) {
                     rule.mode.setValue(0);
                 }
