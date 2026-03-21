@@ -492,11 +492,11 @@ Add this line to file `~/.config/kanata/kanata.kbd`
 Add this line to `/etc/environment` to fix input issues for X11/XCB applications on Wayland:
 
 ```sh
-DBUS_SESSION_BUS_ADDRESS="autolaunch:"
+DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
 ```
 Or set the env in your DE/WM config (Recommended).
 
-Example for Hyprland: `env = DBUS_SESSION_BUS_ADDRESS,autolaunch:`
+Example for Hyprland: `env = DBUS_SESSION_BUS_ADDRESS,unix:path=$XDG_RUNTIME_DIR/bus`
 
 </details>
 

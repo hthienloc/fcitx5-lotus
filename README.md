@@ -491,11 +491,11 @@ Thêm dòng sau vào file `~/.config/kanata/kanata.kbd`
 Thêm dòng sau vào `/etc/environment` để fix lỗi không gõ được trên app x11/xcb trên wayland
 
 ```sh
-DBUS_SESSION_BUS_ADDRESS="autolaunch:"
+DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
 ```
 Hoặc set env trong config của DE/WM (Khuyên dùng).
 
-Ví dụ Hyprland: `env = DBUS_SESSION_BUS_ADDRESS,autolaunch:`
+Ví dụ Hyprland: `env = DBUS_SESSION_BUS_ADDRESS,unix:path=$XDG_RUNTIME_DIR/bus`
 
 </details>
 
