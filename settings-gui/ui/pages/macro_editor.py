@@ -85,6 +85,7 @@ class MacroEditorPage(BaseEditorPage):
         self.btn_add = QPushButton(QIcon.fromTheme("list-add"), _("Add"))
         self.btn_add.clicked.connect(self.on_add)
         self.input_key.textChanged.connect(self._update_add_button_icon)
+        self.input_val.textChanged.connect(self._update_add_button_icon)
 
         input_layout.addWidget(QLabel(_("Key:")))
         input_layout.addWidget(self.input_key, 1)
@@ -243,21 +244,29 @@ class MacroEditorPage(BaseEditorPage):
         return not key.isalnum() or " " in key
 
     def _apply_row_highlight(self, row: int, key: str):
-        """Applies highlighting to rows with invalid keys."""
+        """Applies red background and warning icon to rows with invalid keys."""
         is_invalid = self._is_invalid_macro(key)
-        color = Qt.transparent
+        bg_color = Qt.transparent
         tooltip = ""
+        icon = QIcon()
         if is_invalid:
-            # Use a soft red for warning
-            color = QColor(Qt.red)
-            color.setAlpha(40)
+            # Use a soft red for warning background
+            bg_color = QColor(Qt.red)
+            bg_color.setAlpha(60)
+            icon = QIcon.fromTheme("dialog-warning")
             tooltip = _("Warning: Macro key should not contain spaces or special characters.")
 
         for col in range(self.table.columnCount()):
             item = self.table.item(row, col)
             if item:
-                item.setBackground(color)
+                item.setBackground(bg_color)
+                item.setData(Qt.ForegroundRole, None)
                 item.setToolTip(tooltip)
+                # Show icon in the first column
+                if col == 0:
+                    item.setIcon(icon)
+                else:
+                    item.setIcon(QIcon())
 
     def sort_invalid_to_top(self):
         """Moves all invalid entries to the top, then sorts by key."""
@@ -306,8 +315,23 @@ class MacroEditorPage(BaseEditorPage):
         self.input_key.setFocus()
 
     def _update_add_button_icon(self):
-        """Changes the Add button icon to Update if key exists."""
+        """Changes the Add button icon to Update if key exists and handles validation."""
         key = self.input_key.text().strip()
+        val = self.input_val.text().strip()
+        is_invalid = self._is_invalid_macro(key)
+        
+        # Validation feedback for input field
+        # Validation feedback for input field
+        if is_invalid:
+            self.input_key.setStyleSheet("color: red;")
+            self.input_key.setToolTip(_("Warning: Macro key should not contain spaces or special characters."))
+        else:
+            self.input_key.setStyleSheet("")
+            self.input_key.setToolTip("")
+
+        # Disable button if key is invalid, empty, or value is empty
+        self.btn_add.setEnabled(not is_invalid and bool(key) and bool(val))
+
         found = any(
             self.table.item(r, 0) and self.table.item(r, 0).text() == key
             for r in range(self.table.rowCount())
