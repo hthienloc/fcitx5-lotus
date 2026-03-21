@@ -37,6 +37,7 @@ class DictEditorPage(BaseEditorPage):
     ):
         super().__init__(parent)
         self.dbus = dbus_handler
+        self.word_map = {}  # word -> QTableWidgetItem
         self._setup_ui()
         self.load_data()
 
@@ -114,6 +115,7 @@ class DictEditorPage(BaseEditorPage):
         self.blockSignals(True)
         try:
             self.table.setRowCount(0)
+            self.word_map.clear()
             data = self.dbus.get_sub_config_list("lotus-dict", "Dictionary")
             for item in data:
                 self.upsert_row(item.get("Word", ""), sort=False)
@@ -126,6 +128,7 @@ class DictEditorPage(BaseEditorPage):
         self.blockSignals(True)
         try:
             self.table.setRowCount(0)
+            self.word_map.clear()
             self._on_item_changed()
         finally:
             self.blockSignals(False)
@@ -147,26 +150,29 @@ class DictEditorPage(BaseEditorPage):
             QMessageBox.information(self, _("Success"), _("Dictionary saved successfully."))
 
     def upsert_row(self, word: str, sort: bool = True):
-        # Check if exists
-        for row in range(self.table.rowCount()):
-            if self.table.item(row, 0) and self.table.item(row, 0).text() == word:
-                self._apply_row_highlight(row, word)
-                if sort:
-                    self.sort_invalid_to_top()
+        # Check if exists (O(1))
+        existing_item = self.word_map.get(word)
+        if existing_item:
+            row = self.table.row(existing_item)
+            self._apply_row_highlight(row, word)
+            if sort:
+                self.sort_invalid_to_top()
                 self.on_search_changed()
                 self.update_button_states()
-                return
+            return
 
         # Insert new
         row = self.table.rowCount()
         self.table.insertRow(row)
-        self.table.setItem(row, 0, QTableWidgetItem(word))
+        item = QTableWidgetItem(word)
+        self.table.setItem(row, 0, item)
+        self.word_map[word] = item
         self._apply_row_highlight(row, word)
         if sort:
             self.sort_invalid_to_top()
-        self.on_search_changed()
-        self.update_button_states()
-        self._on_item_changed()
+            self.on_search_changed()
+            self.update_button_states()
+            self._on_item_changed()
 
     def _is_invalid_word(self, word: str) -> bool:
         """Checks if word contains spaces."""
@@ -194,19 +200,18 @@ class DictEditorPage(BaseEditorPage):
 
     def sort_invalid_to_top(self):
         """Moves all invalid entries to the top, then sorts by word."""
-        rows = []
-        for row in range(self.table.rowCount()):
-            word = self.table.item(row, 0).text() if self.table.item(row, 0) else ""
-            rows.append(word)
-
+        rows = list(self.word_map.keys())
         rows.sort(key=lambda x: (not self._is_invalid_word(x), x.lower()))
 
         self.blockSignals(True)
         self.table.setRowCount(0)
+        self.word_map.clear()
         for word in rows:
             row_idx = self.table.rowCount()
             self.table.insertRow(row_idx)
-            self.table.setItem(row_idx, 0, QTableWidgetItem(word))
+            item = QTableWidgetItem(word)
+            self.table.setItem(row_idx, 0, item)
+            self.word_map[word] = item
             self._apply_row_highlight(row_idx, word)
         self.on_search_changed()
         self.blockSignals(False)
@@ -243,11 +248,7 @@ class DictEditorPage(BaseEditorPage):
 
         self.btn_add.setEnabled(not is_invalid and bool(word))
 
-        found = any(
-            self.table.item(r, 0) and self.table.item(r, 0).text() == word
-            for r in range(self.table.rowCount())
-        )
-        if found:
+        if word in self.word_map:
             self.btn_add.setIcon(QIcon.fromTheme("document-save"))
             self.btn_add.setText(_("Exists"))
             self.btn_add.setEnabled(False)
@@ -260,6 +261,28 @@ class DictEditorPage(BaseEditorPage):
         if word_item:
             self.input_word.setText(word_item.text())
         self.update_button_states()
+
+    def on_remove(self):
+        selected_ranges = self.table.selectedRanges()
+        if not selected_ranges:
+            return
+
+        rows_to_delete = set()
+        for r in selected_ranges:
+            for i in range(r.topRow(), r.bottomRow() + 1):
+                rows_to_delete.add(i)
+
+        for row in sorted(list(rows_to_delete), reverse=True):
+            item = self.table.item(row, 0)
+            if item:
+                word = item.text()
+                if word in self.word_map:
+                    del self.word_map[word]
+            self.table.removeRow(row)
+
+        self.update_button_states()
+        self._on_item_changed()
+        self._update_add_button_icon()
 
     def on_import(self):
         path, _filter = QFileDialog.getOpenFileName(
@@ -299,8 +322,10 @@ class DictEditorPage(BaseEditorPage):
             else:
                 confirmed = True
 
-            self.upsert_row(word)
+            self.upsert_row(word, sort=False)
             imported += 1
+
+        self.sort_invalid_to_top()
 
         QMessageBox.information(
             self,
