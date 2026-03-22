@@ -79,6 +79,7 @@ class DynamicSettingsPage(QWidget):
         self.dbus = dbus_handler
         self.category = category
         self.current_values = {}
+        self.initial_values = {}
         self.modified_values = {}
         self.button_groups = []
 
@@ -163,6 +164,7 @@ class DynamicSettingsPage(QWidget):
             if self.category == SettingsCategory.INTERFACE and not category_groups:
                 self.container_layout.addWidget(QLabel(_("No interface settings available yet.")))
 
+            self.initial_values = self.current_values.copy()
             self.container_layout.addStretch()
         finally:
             self.blockSignals(False)
@@ -181,6 +183,10 @@ class DynamicSettingsPage(QWidget):
                 elif str(val) != str(default_val):
                     return True
         return False
+
+    def is_modified(self):
+        """Returns True if the current values differ from the initial loaded values."""
+        return self.current_values != self.initial_values
 
     def _render_hotkey(self, item, layout):
         key, type_str, label, default, annotations = item
@@ -327,6 +333,7 @@ class DynamicSettingsPage(QWidget):
             latest_values.update(self.modified_values)
             self.dbus.set_config(latest_values)
             self.modified_values.clear()
+            self.initial_values = self.current_values.copy()
 
     def update_config(self, key: str, new_value):
         """Updates internal state and notifies parent window of change."""

@@ -40,6 +40,7 @@ class MacroEditorPage(BaseEditorPage):
     ):
         super().__init__(parent)
         self.dbus = dbus_handler
+        self.initial_state = {}
         self._setup_ui()
         self.load_data()
 
@@ -163,6 +164,7 @@ class MacroEditorPage(BaseEditorPage):
             for item in data:
                 self.upsert_row(item.get("Key", ""), item.get("Value", ""), sort=False)
             self.on_search_changed()
+            self.initial_state = self._get_current_state()
         finally:
             self.blockSignals(False)
 
@@ -186,6 +188,26 @@ class MacroEditorPage(BaseEditorPage):
             or not self.cb_capitalize.isChecked()
         )
 
+    def is_modified(self):
+        """Returns True if the current state differs from the initial loaded state."""
+        return self._get_current_state() != self.initial_state
+
+    def _get_current_state(self):
+        """Captures the current UI state for comparison."""
+        data = []
+        for row in range(self.table.rowCount()):
+            key_item = self.table.item(row, 0)
+            val_item = self.table.item(row, 1)
+            if key_item and key_item.text():
+                data.append(
+                    {"Key": key_item.text(), "Value": val_item.text() if val_item else ""}
+                )
+        return {
+            "data": data,
+            "EnableMacro": self.cb_enable.isChecked(),
+            "CapitalizeMacro": self.cb_capitalize.isChecked(),
+        }
+
     def save_data(self, quiet=False):
         # Save global macro settings via DBus
         config_data = self.dbus.get_config()
@@ -208,6 +230,7 @@ class MacroEditorPage(BaseEditorPage):
             )
 
         self.dbus.set_sub_config_list("lotus-macro", "Macro", data)
+        self.initial_state = self._get_current_state()
         if not quiet:
             QMessageBox.information(self, _("Success"), _("Macros saved successfully."))
 

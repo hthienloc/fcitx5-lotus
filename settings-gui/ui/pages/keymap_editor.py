@@ -230,6 +230,7 @@ class KeymapEditorPage(BaseEditorPage):
     def __init__(self, dbus_handler: LotusDBusHandler, parent=None):
         super().__init__(parent)
         self.dbus = dbus_handler
+        self.initial_state = {}
         self._setup_ui()
         self.load_data()
 
@@ -354,6 +355,7 @@ class KeymapEditorPage(BaseEditorPage):
             data = self.dbus.get_sub_config_list("custom_keymap", "CustomKeymap")
             for item in data:
                 self._add_row(item.get("Key", ""), item.get("Value", ""))
+            self.initial_state = self._get_current_state()
         finally:
             self.blockSignals(False)
             self.on_search_changed()
@@ -366,6 +368,23 @@ class KeymapEditorPage(BaseEditorPage):
     def is_modified_from_default(self):
         """Returns True if the keymap table has any entries."""
         return self.table.rowCount() > 0
+
+    def is_modified(self):
+        """Returns True if the current state differs from the initial loaded state."""
+        return self._get_current_state() != self.initial_state
+
+    def _get_current_state(self):
+        """Captures the current UI state for comparison."""
+        data = []
+        for row in range(self.table.rowCount()):
+            key_item = self.table.item(row, 0)
+            combo_widget = self.table.cellWidget(row, 1)
+            if key_item and combo_widget:
+                data.append({"Key": key_item.text(), "Value": combo_widget.currentData()})
+        return {
+            "data": data,
+            "EnableCustomKeymap": self.cb_enable.isChecked(),
+        }
 
     def save_data(self, quiet=False):
         """Saves current table via DBus to C++ Engine."""
@@ -385,6 +404,7 @@ class KeymapEditorPage(BaseEditorPage):
             data.append({"Key": key_item.text(), "Value": combo_widget.currentData()})
 
         self.dbus.set_sub_config_list("custom_keymap", "CustomKeymap", data)
+        self.initial_state = self._get_current_state()
         if not quiet:
             QMessageBox.information(self, _("Success"), _("Keymap saved successfully."))
 

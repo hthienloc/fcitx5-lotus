@@ -48,12 +48,14 @@ class LotusSettingsWindow(QMainWindow):
         self.update_reset_button_state()
 
     def update_reset_button_state(self):
-        any_modified = any(
-            hasattr(self.content_stack.widget(i), "is_modified_from_default")
-            and self.content_stack.widget(i).is_modified_from_default()
+        any_modified_from_default = any(
+            (hasattr(self.content_stack.widget(i), "is_modified_from_default")
+             and self.content_stack.widget(i).is_modified_from_default())
+            or (hasattr(self.content_stack.widget(i), "is_modified")
+                and self.content_stack.widget(i).is_modified())
             for i in range(self.content_stack.count())
         )
-        self.btn_reset.setEnabled(any_modified)
+        self.btn_reset.setEnabled(any_modified_from_default)
 
     def _apply_global_styles(self):
         self.setStyleSheet("""
@@ -227,9 +229,14 @@ class LotusSettingsWindow(QMainWindow):
             self.on_changed()
 
     def on_changed(self):
-        """Enables the apply and cancel buttons when changes are detected."""
-        self.btn_apply.setEnabled(True)
-        self.btn_cancel.setEnabled(True)
+        """Enables/disables the apply and cancel buttons based on pending changes."""
+        any_modified = any(
+            hasattr(self.content_stack.widget(i), "is_modified")
+            and self.content_stack.widget(i).is_modified()
+            for i in range(self.content_stack.count())
+        )
+        self.btn_apply.setEnabled(any_modified)
+        self.btn_cancel.setEnabled(any_modified)
         self.update_reset_button_state()
 
     def on_save_all(self, quiet=False):

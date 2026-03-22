@@ -41,6 +41,7 @@ class DictEditorPage(BaseEditorPage):
         super().__init__(parent)
         self.dbus = dbus_handler
         self.words = []  # List of all words
+        self.initial_state = {}
         self._setup_ui()
         self.load_data()
 
@@ -167,6 +168,7 @@ class DictEditorPage(BaseEditorPage):
                     print(f"Failed to read dictionary {path_to_read}: {e}")
 
             self._rebuild_table()
+            self.initial_state = self._get_current_state()
         finally:
             self.blockSignals(False)
             self.on_search_changed()
@@ -208,6 +210,17 @@ class DictEditorPage(BaseEditorPage):
         """Returns True if the dictionary has entries or checkboxes are changed from default."""
         return len(self.words) > 0 or not self.cb_enable.isChecked()
 
+    def is_modified(self):
+        """Returns True if the current state differs from the initial loaded state."""
+        return self._get_current_state() != self.initial_state
+
+    def _get_current_state(self):
+        """Captures the current UI state for comparison."""
+        return {
+            "words": sorted(self.words),
+            "EnableDictionary": self.cb_enable.isChecked(),
+        }
+
     def save_data(self, quiet=False):
         # Save global dictionary settings via DBus
         config_data = self.dbus.get_config()
@@ -230,6 +243,7 @@ class DictEditorPage(BaseEditorPage):
                 if current_config:
                     self.dbus.set_config(current_config.get("values", {}))
 
+            self.initial_state = self._get_current_state()
             if not quiet:
                 QMessageBox.information(self, _("Success"), _("Dictionary saved successfully to local storage."))
         except Exception as e:
