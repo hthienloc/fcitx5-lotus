@@ -149,7 +149,7 @@ namespace fcitx {
                          uiManager);
         initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "lotus-autonvnrestore", "edit-undo", _("Auto Restore Keys With Invalid Wwords"),
                          _("Auto Non-VN Restore"), uiManager);
-        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "book", _("Enable Custom Dictionary"), _("Custom Dictionary"), uiManager);
+        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "accessories-dictionary", _("Enable Custom Dictionary"), _("Custom Dictionary"), uiManager);
 
         settingsAction_ = std::make_unique<SimpleAction>();
         settingsAction_->setShortText(_("Settings"));
@@ -287,9 +287,9 @@ namespace fcitx {
         updateCharsetAction(nullptr);
         updateAction(nullptr, spellCheckAction_, config_.spellCheck, _("Spell Check"));
         updateAction(nullptr, macroAction_, config_.enableMacro, _("Macro"));
-        updateAction(nullptr, macroAction_, config_.enableMacro, _("Macro"));
         updateAction(nullptr, capitalizeMacroAction_, config_.capitalizeMacro, _("Capitalize Macro"));
         updateAction(nullptr, autoNonVnRestoreAction_, config_.autoNonVnRestore, _("Auto Non-VN Restore"));
+        updateAction(nullptr, enableDictionaryAction_, config_.enableDictionary, _("Custom Dictionary"));
     }
 
     void LotusEngine::setSubConfig(const std::string& path, const RawConfig& config) {

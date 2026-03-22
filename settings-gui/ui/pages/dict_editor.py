@@ -67,6 +67,11 @@ class DictEditorPage(BaseEditorPage):
         title = QLabel(_("Custom Dictionary"))
         title.setObjectName("CategoryTitle")
         main_layout.addWidget(title)
+        
+        explanation = QLabel(_("Words in the custom dictionary will be protected from 'Auto Restore'. Use this for names, technical terms, or words not yet in the standard dictionary."))
+        explanation.setWordWrap(True)
+        explanation.setStyleSheet("color: gray; font-size: 13px;")
+        main_layout.addWidget(explanation)
 
         # Dictionary behavior toggles
         toggles_card = CardWidget("")
