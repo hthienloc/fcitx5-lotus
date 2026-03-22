@@ -213,6 +213,7 @@ namespace fcitx {
         std::unique_ptr<SimpleAction>              macroAction_;
         std::unique_ptr<SimpleAction>              capitalizeMacroAction_;
         std::unique_ptr<SimpleAction>              autoNonVnRestoreAction_;
+        std::unique_ptr<SimpleAction>              enableDictionaryAction_;
         std::unique_ptr<SimpleAction>              settingsAction_;
         std::vector<SimpleAction*>                 toggleActions_;
         std::vector<ScopedConnection>              connections_;

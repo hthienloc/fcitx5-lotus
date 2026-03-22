@@ -214,6 +214,7 @@ namespace fcitx {
         Option<bool>    ddFreeStyle{this, "DdFreeStyle", _("Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On"), true};
         Option<bool>    fixUinputWithAck{this, "FixUinputWithAck", _("Fix Uinput Mode With Ack"), false};
         Option<bool>    useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
+        Option<bool>    enableDictionary{this, "EnableDictionary", _("Enable Dictionary"), true};
         SubConfigOption macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
         SubConfigOption dictEditor{this, "DictEditor", _("Dictionary"), "fcitx://config/addon/lotus/lotus-dict"};
         SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};

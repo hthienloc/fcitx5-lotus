@@ -150,6 +150,7 @@ namespace fcitx {
                          uiManager);
         initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "lotus-autonvnrestore", "edit-undo", _("Auto Restore Keys With Invalid Wwords"),
                          _("Auto Non-VN Restore"), uiManager);
+        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "book", _("Enable Dictionary"), _("Dictionary"), uiManager);
 
         settingsAction_ = std::make_unique<SimpleAction>();
         settingsAction_->setShortText(_("Settings"));
@@ -177,7 +178,7 @@ namespace fcitx {
 #ifndef DISABLE_VERSION_ACTION
             versionAction_.get(),
 #endif
-            charsetAction_.get(), spellCheckAction_.get(), macroAction_.get(), capitalizeMacroAction_.get(), autoNonVnRestoreAction_.get(), settingsAction_.get()};
+            charsetAction_.get(), spellCheckAction_.get(), macroAction_.get(), capitalizeMacroAction_.get(), autoNonVnRestoreAction_.get(), enableDictionaryAction_.get(), settingsAction_.get()};
     }
 
     void LotusEngine::initToggleAction(std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& actionId, const std::string& iconName,

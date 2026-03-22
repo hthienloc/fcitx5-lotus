@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "/usr/local/share/fcitx5-lotus/settings-gui/main.py" "$@"

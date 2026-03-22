@@ -96,6 +96,14 @@ msgstr "Sử dụng biểu tượng trạng thái Lotus"
 msgid "Mode Menu Hotkey"
 msgstr "Phím tắt menu chế độ gõ"
 
+#: src/lotus-engine.cpp:148 src/lotus-engine.cpp:271 src/lotus-config.h:218
+msgid "Dictionary"
+msgstr "Từ điển"
+
+#: src/lotus-config.h:217 src/lotus-engine.cpp:153
+msgid "Enable Dictionary"
+msgstr "Bật từ điển"
+
 #: src/lotus-engine.cpp:128
 msgid "Charset"
 msgstr "Bảng mã"
