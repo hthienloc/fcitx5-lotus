@@ -129,15 +129,8 @@ class DictEditorPage(BaseEditorPage):
         self.btn_remove = QPushButton(QIcon.fromTheme("list-remove"), _("Remove"))
         self.btn_remove.clicked.connect(self.on_remove)
 
-        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
-        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
-        self.btn_import.clicked.connect(self.on_import)
-        self.btn_export.clicked.connect(self.on_export)
-
         toolbar_layout.addWidget(self.btn_remove)
         toolbar_layout.addStretch()
-        toolbar_layout.addWidget(self.btn_import)
-        toolbar_layout.addWidget(self.btn_export)
 
         content_layout.addLayout(toolbar_layout)
         self.update_button_states()
@@ -336,7 +329,7 @@ class DictEditorPage(BaseEditorPage):
             self,
             _("Import Dictionary"),
             "",
-            _("Text files (*.txt *.tsv);;All files (*)"),
+            _("Dictionary files (*.tsv *.txt);;All files (*)"),
         )
         if not path:
             return
@@ -391,8 +384,8 @@ class DictEditorPage(BaseEditorPage):
         path, _filter = QFileDialog.getSaveFileName(
             self,
             _("Export Dictionary"),
-            "lotus-dict.txt",
-            _("Text files (*.txt);;All files (*)"),
+            "lotus-dict.tsv",
+            _("Tab-separated (*.tsv);;Text files (*.txt);;All files (*)"),
         )
         if not path:
             return

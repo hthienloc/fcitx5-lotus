@@ -659,7 +659,7 @@ class ModeManagerPage(QWidget):
             self,
             _("Import Application Rules"),
             "",
-            _("Tab-separated (*.tsv *.txt);;All files (*)"),
+            _("Tab-separated (*.tsv);;Text files (*.txt);;All files (*)"),
         )
         if not path:
             return
@@ -734,7 +734,7 @@ class ModeManagerPage(QWidget):
             self,
             _("Export Application Rules"),
             "lotus-app-rules.tsv",
-            _("Tab-separated (*.tsv *.txt);;All files (*)"),
+            _("Tab-separated (*.tsv);;Text files (*.txt);;All files (*)"),
         )
         if not path:
             return

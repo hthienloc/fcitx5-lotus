@@ -210,6 +210,7 @@ namespace fcitx {
         Option<bool>    fixUinputWithAck{this, "FixUinputWithAck", _("Fix Uinput Mode With Ack"), false};
         Option<bool>    useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
         Option<bool>    enableDictionary{this, "EnableDictionary", _("Enable Custom Dictionary"), false};
+        Option<bool>    enableCustomKeymap{this, "EnableCustomKeymap", _("Enable Custom Keymap"), false};
         SubConfigOption macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
         SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
         SubConfigOption appRules{this, "AppRules", _("App Rules"), "fcitx://config/addon/lotus/app_rules"}; KeyListOption modeMenuKey{

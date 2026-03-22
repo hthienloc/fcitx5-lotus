@@ -149,7 +149,7 @@ namespace fcitx {
                          uiManager);
         initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "lotus-autonvnrestore", "edit-undo", _("Auto Restore Keys With Invalid Wwords"),
                          _("Auto Non-VN Restore"), uiManager);
-        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "book", _("Enable Dictionary"), _("Dictionary"), uiManager);
+        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "book", _("Enable Custom Dictionary"), _("Dictionary"), uiManager);
 
         settingsAction_ = std::make_unique<SimpleAction>();
         settingsAction_->setShortText(_("Settings"));
@@ -214,7 +214,11 @@ namespace fcitx {
 
     void LotusEngine::reloadConfig() {
         readAsIni(config_, "conf/lotus.conf");
-        readAsIni(customKeymap_, CustomKeymapFile);
+        if (config_.enableCustomKeymap.value()) {
+            readAsIni(customKeymap_, CustomKeymapFile);
+        } else {
+            customKeymap_.customKeymap.setValue(std::vector<lotusKeymap>{});
+        }
         readAsIni(macroTables_, MacroTableFile);
         macroTableObject_.reset(newMacroTable(macroTables_));
 #if LOTUS_USE_MODERN_FCITX_API

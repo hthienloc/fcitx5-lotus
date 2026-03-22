@@ -415,7 +415,7 @@ class MacroEditorPage(BaseEditorPage):
             self,
             _("Export Macros"),
             "lotus-macro.tsv",
-            _("Tab-separated (*.tsv *.txt);;All files (*)"),
+            _("Tab-separated (*.tsv);;Text files (*.txt);;All files (*)"),
         )
         if not path:
             return
