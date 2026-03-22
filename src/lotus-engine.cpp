@@ -149,7 +149,7 @@ namespace fcitx {
                          uiManager);
         initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "lotus-autonvnrestore", "edit-undo", _("Auto Restore Keys With Invalid Wwords"),
                          _("Auto Non-VN Restore"), uiManager);
-        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "book", _("Enable Custom Dictionary"), _("Dictionary"), uiManager);
+        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "book", _("Enable Custom Dictionary"), _("Custom Dictionary"), uiManager);
 
         settingsAction_ = std::make_unique<SimpleAction>();
         settingsAction_->setShortText(_("Settings"));

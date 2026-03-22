@@ -64,7 +64,7 @@ class DictEditorPage(BaseEditorPage):
         main_layout.setContentsMargins(30, 20, 30, 20)
         main_layout.setSpacing(15)
 
-        title = QLabel(_("Dictionary"))
+        title = QLabel(_("Custom Dictionary"))
         title.setObjectName("CategoryTitle")
         main_layout.addWidget(title)
 
@@ -327,7 +327,7 @@ class DictEditorPage(BaseEditorPage):
     def on_import(self):
         path, _filter = QFileDialog.getOpenFileName(
             self,
-            _("Import Dictionary"),
+            _("Import Custom Dictionary"),
             "",
             _("Dictionary files (*.tsv *.txt);;All files (*)"),
         )
@@ -378,12 +378,12 @@ class DictEditorPage(BaseEditorPage):
     def on_export(self):
         if not self.words:
             QMessageBox.information(
-                self, _("Export"), _("The dictionary is empty, nothing to export.")
+                self, _("Export"), _("The custom dictionary is empty, nothing to export.")
             )
             return
         path, _filter = QFileDialog.getSaveFileName(
             self,
-            _("Export Dictionary"),
+            _("Export Custom Dictionary"),
             "lotus-dict.tsv",
             _("Tab-separated (*.tsv);;Text files (*.txt);;All files (*)"),
         )
