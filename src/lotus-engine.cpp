@@ -177,7 +177,8 @@ namespace fcitx {
 #ifndef DISABLE_VERSION_ACTION
             versionAction_.get(),
 #endif
-            charsetAction_.get(), spellCheckAction_.get(), macroAction_.get(), capitalizeMacroAction_.get(), autoNonVnRestoreAction_.get(), enableDictionaryAction_.get(), settingsAction_.get()};
+            charsetAction_.get(),          spellCheckAction_.get(),       macroAction_.get(),   capitalizeMacroAction_.get(),
+            autoNonVnRestoreAction_.get(), enableDictionaryAction_.get(), settingsAction_.get()};
     }
 
     void LotusEngine::initToggleAction(std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& actionId, const std::string& iconName,

@@ -2,7 +2,6 @@
 
 /* package command-line-arguments */
 
-
 #line 1 "cgo-builtin-export-prolog"
 
 #include <stddef.h>
@@ -11,37 +10,37 @@
 #define GO_CGO_EXPORT_PROLOGUE_H
 
 #ifndef GO_CGO_GOSTRING_TYPEDEF
-typedef struct { const char *p; ptrdiff_t n; } _GoString_;
-extern size_t _GoStringLen(_GoString_ s);
-extern const char *_GoStringPtr(_GoString_ s);
+typedef struct {
+    const char* p;
+    ptrdiff_t   n;
+} _GoString_;
+extern size_t      _GoStringLen(_GoString_ s);
+extern const char* _GoStringPtr(_GoString_ s);
 #endif
 
 #endif
 
 /* Start of preamble from import "C" comments.  */
 
-
 #line 10 "bamboo-c.go"
 
-		#include <stdint.h>
-		#include <stdbool.h>
-		typedef const char cchar;
-		typedef struct {
-			bool autoNonVnRestore;
-			bool ddFreeStyle;
-			bool macroEnabled;
-			bool autoCapitalizeMacro;
-			bool spellCheckWithDicts;
-			const char *outputCharset;
-			bool modernStyle;
-			bool freeMarking;
-		} FcitxBambooEngineOption;
-	
+#include <stdint.h>
+#include <stdbool.h>
+typedef const char cchar;
+typedef struct {
+    bool        autoNonVnRestore;
+    bool        ddFreeStyle;
+    bool        macroEnabled;
+    bool        autoCapitalizeMacro;
+    bool        spellCheckWithDicts;
+    const char* outputCharset;
+    bool        modernStyle;
+    bool        freeMarking;
+} FcitxBambooEngineOption;
+
 #line 1 "cgo-generated-wrapper"
 
-
 /* End of preamble from import "C" comments.  */
-
 
 /* Start of boilerplate cgo prologue.  */
 #line 1 "cgo-gcc-export-header-prolog"
@@ -49,19 +48,19 @@ extern const char *_GoStringPtr(_GoString_ s);
 #ifndef GO_CGO_PROLOGUE_H
 #define GO_CGO_PROLOGUE_H
 
-typedef signed char GoInt8;
-typedef unsigned char GoUint8;
-typedef short GoInt16;
-typedef unsigned short GoUint16;
-typedef int GoInt32;
-typedef unsigned int GoUint32;
-typedef long long GoInt64;
+typedef signed char        GoInt8;
+typedef unsigned char      GoUint8;
+typedef short              GoInt16;
+typedef unsigned short     GoUint16;
+typedef int                GoInt32;
+typedef unsigned int       GoUint32;
+typedef long long          GoInt64;
 typedef unsigned long long GoUint64;
-typedef GoInt64 GoInt;
-typedef GoUint64 GoUint;
-typedef size_t GoUintptr;
-typedef float GoFloat32;
-typedef double GoFloat64;
+typedef GoInt64            GoInt;
+typedef GoUint64           GoUint;
+typedef size_t             GoUintptr;
+typedef float              GoFloat32;
+typedef double             GoFloat64;
 #ifdef _MSC_VER
 #if !defined(__cplusplus) || _MSVC_LANG <= 201402L
 #include <complex.h>
@@ -69,7 +68,7 @@ typedef _Fcomplex GoComplex64;
 typedef _Dcomplex GoComplex128;
 #else
 #include <complex>
-typedef std::complex<float> GoComplex64;
+typedef std::complex<float>  GoComplex64;
 typedef std::complex<double> GoComplex128;
 #endif
 #else
@@ -81,15 +80,22 @@ typedef double _Complex GoComplex128;
   static assertion to make sure the file is being used on architecture
   at least with matching size of GoInt.
 */
-typedef char _check_for_64_bit_pointer_matching_GoInt[sizeof(void*)==64/8 ? 1:-1];
+typedef char _check_for_64_bit_pointer_matching_GoInt[sizeof(void*) == 64 / 8 ? 1 : -1];
 
 #ifndef GO_CGO_GOSTRING_TYPEDEF
 typedef _GoString_ GoString;
 #endif
-typedef void *GoMap;
-typedef void *GoChan;
-typedef struct { void *t; void *v; } GoInterface;
-typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
+typedef void* GoMap;
+typedef void* GoChan;
+typedef struct {
+    void* t;
+    void* v;
+} GoInterface;
+typedef struct {
+    void* data;
+    GoInt len;
+    GoInt cap;
+} GoSlice;
 
 #endif
 
@@ -99,22 +105,22 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
-extern void Init(void);
-extern GoUint8 EngineProcessKeyEvent(GoUintptr engine, GoUint32 keyVal, GoUint32 state);
-extern void EngineSetRestoreKeyStroke(GoUintptr engine);
-extern char* EnginePullPreedit(GoUintptr engine);
-extern void EngineCommitPreedit(GoUintptr engine);
-extern char* EnginePullCommit(GoUintptr engine);
-extern void EngineSetOption(GoUintptr engine, FcitxBambooEngineOption* option);
+extern void      Init(void);
+extern GoUint8   EngineProcessKeyEvent(GoUintptr engine, GoUint32 keyVal, GoUint32 state);
+extern void      EngineSetRestoreKeyStroke(GoUintptr engine);
+extern char*     EnginePullPreedit(GoUintptr engine);
+extern void      EngineCommitPreedit(GoUintptr engine);
+extern char*     EnginePullCommit(GoUintptr engine);
+extern void      EngineSetOption(GoUintptr engine, FcitxBambooEngineOption* option);
 extern GoUintptr NewEngine(cchar* name, GoUintptr dictHandle, GoUintptr tableHandle);
 extern GoUintptr NewCustomEngine(char** definition, GoUintptr dictHandle, GoUintptr tableHandle);
 extern GoUintptr NewMacroTable(char** definition);
-extern void DeleteObject(GoUintptr handle);
-extern void ResetEngine(GoUintptr engine);
-extern void EngineRebuildFromText(GoUintptr engine, cchar* text);
-extern char** GetCharsetNames(void);
-extern char** GetInputMethodNames(void);
-extern void DictionaryAddWords(GoUintptr dictHandle, char** words);
+extern void      DeleteObject(GoUintptr handle);
+extern void      ResetEngine(GoUintptr engine);
+extern void      EngineRebuildFromText(GoUintptr engine, cchar* text);
+extern char**    GetCharsetNames(void);
+extern char**    GetInputMethodNames(void);
+extern void      DictionaryAddWords(GoUintptr dictHandle, char** words);
 extern GoUintptr NewDictionary(GoUintptr fd);
 
 #ifdef __cplusplus
