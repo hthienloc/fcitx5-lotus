@@ -34,7 +34,6 @@ namespace fcitx {
     constexpr const char* CharsetActionPrefix = "lotus-charset-";
     const std::string     CustomKeymapFile    = "conf/lotus-custom-keymap.conf";
     const std::string     MacroTableFile      = "conf/lotus-macro-table.conf";
-    const std::string     DictTableFile       = "conf/lotus-dict-table.conf";
 
     // Returns the KeySym that triggers the "Type hotkey char" action in the mode
     // menu.  If the hotkey itself conflicts with a reserved menu key, falls back
@@ -217,26 +216,43 @@ namespace fcitx {
         readAsIni(customKeymap_, CustomKeymapFile);
         readAsIni(macroTables_, MacroTableFile);
         macroTableObject_.reset(newMacroTable(macroTables_));
-        readAsIni(dictTable_, DictTableFile);
-
 #if LOTUS_USE_MODERN_FCITX_API
-        auto fd = StandardPaths::global().open(StandardPathsType::PkgData, "lotus/vietnamese.cm.dict");
-#else
-        auto fd = StandardPath::global().open(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict", O_RDONLY);
-#endif
-        if (fd.isValid()) {
-            dictionary_.reset(NewDictionary(fd.release()));
-            if (config_.enableDictionary.value()) {
-                const auto&              dictWords = *dictTable_.dict;
-                std::vector<const char*> words;
-                words.reserve(dictWords.size() + 1);
-                for (const auto& item : dictWords) {
-                    words.push_back(item.word->c_str());
+        if (config_.enableDictionary.value()) {
+            auto fd = StandardPaths::global().open(StandardPathsType::PkgData, "lotus/vietnamese.cm.dict");
+            if (fd.isValid()) {
+                dictionary_.reset(NewDictionary(fd.release()));
+            }
+        } else {
+            auto paths = StandardPaths::global().locateAll(StandardPathsType::PkgData, "lotus/vietnamese.cm.dict");
+            for (const auto& p : paths) {
+                if (p.find("/home/") != 0) {
+                    auto fd = fcitx::UnixFD::open(p, O_RDONLY);
+                    if (fd.isValid()) {
+                        dictionary_.reset(NewDictionary(fd.release()));
+                        break;
+                    }
                 }
-                words.push_back(nullptr);
-                DictionaryAddWords(dictionary_.handle(), const_cast<char**>(words.data()));
             }
         }
+#else
+        if (config_.enableDictionary.value()) {
+            auto fd = StandardPath::global().open(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict", O_RDONLY);
+            if (fd.isValid()) {
+                dictionary_.reset(NewDictionary(fd.release()));
+            }
+        } else {
+            auto paths = StandardPath::global().locateAll(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict");
+            for (const auto& p : paths) {
+                if (p.find("/home/") != 0) {
+                    int fd = open(p.c_str(), O_RDONLY);
+                    if (fd != -1) {
+                        dictionary_.reset(NewDictionary(fd));
+                        break;
+                    }
+                }
+            }
+        }
+#endif
 
         loadAppRules();
         populateConfig();
@@ -247,9 +263,6 @@ namespace fcitx {
             return &customKeymap_;
         if (path == "lotus-macro") {
             return &macroTables_;
-        }
-        if (path == "lotus-dict") {
-            return &dictTable_;
         }
         if (path == "app_rules") {
             return &appRulesTables_;
@@ -269,7 +282,7 @@ namespace fcitx {
         updateCharsetAction(nullptr);
         updateAction(nullptr, spellCheckAction_, config_.spellCheck, _("Spell Check"));
         updateAction(nullptr, macroAction_, config_.enableMacro, _("Macro"));
-        updateAction(nullptr, enableDictionaryAction_, config_.enableDictionary, _("Dictionary"));
+        updateAction(nullptr, macroAction_, config_.enableMacro, _("Macro"));
         updateAction(nullptr, capitalizeMacroAction_, config_.capitalizeMacro, _("Capitalize Macro"));
         updateAction(nullptr, autoNonVnRestoreAction_, config_.autoNonVnRestore, _("Auto Non-VN Restore"));
     }
@@ -283,11 +296,6 @@ namespace fcitx {
             macroTables_.load(config, true);
             safeSaveAsIni(macroTables_, MacroTableFile);
             macroTableObject_.reset(newMacroTable(macroTables_));
-            refreshEngine();
-        } else if (path == "lotus-dict") {
-            dictTable_.load(config, true);
-            safeSaveAsIni(dictTable_, DictTableFile);
-            reloadConfig();
             refreshEngine();
         } else if (path == "app_rules") {
             appRulesTables_.load(config, true);

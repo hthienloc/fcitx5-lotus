@@ -184,11 +184,6 @@ namespace fcitx {
                         OptionWithAnnotation<std::vector<lotusKeymap>, ListDisplayOptionAnnotation> customKeymap{
                             this, "CustomKeymap", _("Custom Keymap"), {}, {}, {}, ListDisplayOptionAnnotation("Key")};);
 
-    FCITX_CONFIGURATION(lotusDictItem, Option<std::string> word{this, "Word", _("Word"), ""};);
-    FCITX_CONFIGURATION(lotusDictTable,
-                        OptionWithAnnotation<std::vector<lotusDictItem>, ListDisplayOptionAnnotation> dict{
-                            this, "Dictionary", _("Dictionary"), {}, {}, {}, ListDisplayOptionAnnotation("Word")};);
-
     FCITX_CONFIGURATION(lotusAppRule, Option<std::string> app{this, "App", _("App"), ""}; Option<int> mode{this, "Mode", _("Mode"), 0};);
     FCITX_CONFIGURATION(lotusAppRules,
                         OptionWithAnnotation<std::vector<lotusAppRule>, ListDisplayOptionAnnotation> rules{
@@ -214,9 +209,8 @@ namespace fcitx {
         Option<bool>    ddFreeStyle{this, "DdFreeStyle", _("Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On"), true};
         Option<bool>    fixUinputWithAck{this, "FixUinputWithAck", _("Fix Uinput Mode With Ack"), false};
         Option<bool>    useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
-        Option<bool>    enableDictionary{this, "EnableDictionary", _("Enable Dictionary"), true};
+        Option<bool>    enableDictionary{this, "EnableDictionary", _("Enable Custom Dictionary"), false};
         SubConfigOption macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
-        SubConfigOption dictEditor{this, "DictEditor", _("Dictionary"), "fcitx://config/addon/lotus/lotus-dict"};
         SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
         SubConfigOption appRules{this, "AppRules", _("App Rules"), "fcitx://config/addon/lotus/app_rules"}; KeyListOption modeMenuKey{
             this, "ModeMenuKey", _("Mode Menu Hotkey"), {Key("grave")}, KeyListConstrain({KeyConstrainFlag::AllowModifierLess, KeyConstrainFlag::AllowModifierOnly})};);
