@@ -233,7 +233,6 @@ class DictEditorPage(BaseEditorPage):
         try:
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
             with open(local_path, "w", encoding="utf-8") as f:
-                f.write("# Lotus Dictionary\n")
                 for word in self.words:
                     f.write(f"{word}\n")
             

@@ -58,7 +58,6 @@ func EngineSetRestoreKeyStroke(engine uintptr) {
 	bambooEngine.shouldRestoreKeyStrokes = true
 }
 
-
 //export EnginePullPreedit
 func EnginePullPreedit(engine uintptr) *C.char {
 	bambooEngine, ok := cgo.Handle(engine).Value().(*FcitxBambooEngine)
@@ -86,7 +85,7 @@ func EnginePullCommit(engine uintptr) *C.char {
 	var commitText = bambooEngine.commitText
 	bambooEngine.commitText = ""
 	encodedText := bamboo.Encode(bambooEngine.outputCharset, commitText)
-	return C.CString(encodedText) 
+	return C.CString(encodedText)
 }
 
 //export EngineSetOption
@@ -257,21 +256,6 @@ func GetInputMethodNames() **C.char {
 		i++
 	}
 	return toCStringArray(names)
-}
-
-//export DictionaryAddWords
-func DictionaryAddWords(dictHandle uintptr, words **C.char) {
-	dict, ok := cgo.Handle(dictHandle).Value().(*map[string]bool)
-	if !ok {
-		return
-	}
-	w := (*[1 << 20 - 1]*C.char)(unsafe.Pointer(words))
-	i := 0
-	for w[i] != nil {
-		word := strings.ToLower(C.GoString(w[i]))
-		(*dict)[word] = true
-		i++
-	}
 }
 
 //export NewDictionary

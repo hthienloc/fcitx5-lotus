@@ -180,6 +180,7 @@ namespace fcitx {
 #endif
             charsetAction_.get(),          spellCheckAction_.get(),       macroAction_.get(),   capitalizeMacroAction_.get(),
             autoNonVnRestoreAction_.get(), enableDictionaryAction_.get(), settingsAction_.get()};
+        emptyCustomKeymap_.customKeymap.setValue(std::vector<lotusKeymap>{});
     }
 
     void LotusEngine::initToggleAction(std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& actionId, const std::string& iconName,
@@ -213,25 +214,35 @@ namespace fcitx {
         }
     }
 
+    const lotusCustomKeymap& LotusEngine::customKeymap() const {
+        if (config_.enableCustomKeymap.value()) {
+            return customKeymap_;
+        }
+        return emptyCustomKeymap_;
+    }
+
     void LotusEngine::reloadConfig() {
         readAsIni(config_, "conf/lotus.conf");
-        if (config_.enableCustomKeymap.value()) {
-            readAsIni(customKeymap_, CustomKeymapFile);
-        } else {
-            customKeymap_.customKeymap.setValue(std::vector<lotusKeymap>{});
-        }
+        readAsIni(customKeymap_, CustomKeymapFile);
         readAsIni(macroTables_, MacroTableFile);
         macroTableObject_.reset(newMacroTable(macroTables_));
-#if LOTUS_USE_MODERN_FCITX_API
         if (config_.enableDictionary.value()) {
+#if LOTUS_USE_MODERN_FCITX_API
             auto fd = StandardPaths::global().open(StandardPathsType::PkgData, "lotus/vietnamese.cm.dict");
+#else
+            auto fd = StandardPath::global().open(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict", O_RDONLY);
+#endif
             if (fd.isValid()) {
                 dictionary_.reset(NewDictionary(fd.release()));
             }
         } else {
+#if LOTUS_USE_MODERN_FCITX_API
             auto paths = StandardPaths::global().locateAll(StandardPathsType::PkgData, "lotus/vietnamese.cm.dict");
+#else
+            auto paths = StandardPath::global().locateAll(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict");
+#endif
             for (const auto& p : paths) {
-                if (p.string().find("/home/") != 0) {
+                if (!isStartsWith(p.string(), "/home/")) {
                     auto fd = fcitx::UnixFD(::open(p.c_str(), O_RDONLY));
                     if (fd.isValid()) {
                         dictionary_.reset(NewDictionary(fd.release()));
@@ -240,26 +251,6 @@ namespace fcitx {
                 }
             }
         }
-#else
-        if (config_.enableDictionary.value()) {
-            auto fd = StandardPath::global().open(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict", O_RDONLY);
-            if (fd.isValid()) {
-                dictionary_.reset(NewDictionary(fd.release()));
-            }
-        } else {
-            auto paths = StandardPath::global().locateAll(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict");
-            for (const auto& p : paths) {
-                if (p.find("/home/") != 0) {
-                    int fd = ::open(p.c_str(), O_RDONLY);
-                    if (fd != -1) {
-                        dictionary_.reset(NewDictionary(fd));
-                        break;
-                    }
-                }
-            }
-        }
-#endif
-
         loadAppRules();
         populateConfig();
     }

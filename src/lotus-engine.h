@@ -160,9 +160,7 @@ namespace fcitx {
          * @brief Gets the custom keymap configuration.
          * @return Reference to custom keymap.
          */
-        const auto& customKeymap() const {
-            return customKeymap_;
-        }
+        const lotusCustomKeymap& customKeymap() const;
 
         /**
          * @brief Gets the dictionary handle.
@@ -193,6 +191,7 @@ namespace fcitx {
         Instance*                instance_;
         lotusConfig              config_;
         lotusCustomKeymap        customKeymap_;
+        lotusCustomKeymap        emptyCustomKeymap_;
 
         lotusMacroTable          macroTables_;
         CGoObject                macroTableObject_;
