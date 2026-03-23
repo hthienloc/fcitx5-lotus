@@ -246,12 +246,13 @@ namespace fcitx {
                 if (!isStartsWith(p.string(), "/home/")) {
                     auto fd = fcitx::UnixFD(::open(p.c_str(), O_RDONLY));
                     if (fd.isValid()) {
+                        dictionary_.reset(NewDictionary(fd.release()));
 #else
                 if (!isStartsWith(p, "home/")) {
                     int fd = ::open(p.c_str(), O_RDONLY);
                     if (fd != -1) {
+                        dictionary_.reset(NewDictionary(fd));
 #endif
-                        dictionary_.reset(NewDictionary(fd.release()));
                         break;
                     }
                 }
