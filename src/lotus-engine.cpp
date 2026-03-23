@@ -242,9 +242,15 @@ namespace fcitx {
             auto paths = StandardPath::global().locateAll(StandardPath::Type::PkgData, "lotus/vietnamese.cm.dict");
 #endif
             for (const auto& p : paths) {
+#if LOTUS_USE_MODERN_FCITX_API
                 if (!isStartsWith(p.string(), "/home/")) {
                     auto fd = fcitx::UnixFD(::open(p.c_str(), O_RDONLY));
                     if (fd.isValid()) {
+#else
+                if (!isStartsWith(p, "home/")) {
+                    int fd = ::open(p.c_str(), O_RDONLY);
+                    if (fd != -1) {
+#endif
                         dictionary_.reset(NewDictionary(fd.release()));
                         break;
                     }
