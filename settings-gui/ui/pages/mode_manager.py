@@ -39,6 +39,7 @@ MODE_HARDCORE = 3
 MODE_SURROUNDING = 4
 MODE_PREEDIT = 5
 MODE_EMOJI = 6
+MODE_CUSTOM = 7
 MODE_DEFAULT = -1  # UI special value for "Use Global Default"
 
 MODE_INFO = {
@@ -50,6 +51,7 @@ MODE_INFO = {
     MODE_SURROUNDING: {"title": _("Surrounding Text"), "icon": "text-field"},
     MODE_PREEDIT: {"title": _("Preedit"), "icon": "text-field"},
     MODE_EMOJI: {"title": _("Emoji Picker"), "icon": "face-smile"},
+    MODE_CUSTOM: {"title": _("Uinput (Custom)"), "icon": "input-keyboard"},
 }
 
 
@@ -403,7 +405,7 @@ class ModeManagerPage(QWidget):
         self.combo_global_mode = QComboBox()
         global_modes = [
             MODE_OFF, MODE_SMOOTH, MODE_SLOW, MODE_HARDCORE,
-            MODE_SURROUNDING, MODE_PREEDIT, MODE_EMOJI
+            MODE_CUSTOM, MODE_SURROUNDING, MODE_PREEDIT, MODE_EMOJI
         ]
         for m in global_modes:
             self.combo_global_mode.addItem(MODE_INFO[m]["title"], MODE_INFO[m]["title"])
@@ -437,8 +439,9 @@ class ModeManagerPage(QWidget):
         grid_modes = [
             MODE_DEFAULT, MODE_OFF,
             MODE_SMOOTH, MODE_SLOW,
-            MODE_HARDCORE, MODE_SURROUNDING,
-            MODE_PREEDIT, MODE_EMOJI
+            MODE_HARDCORE, MODE_CUSTOM,
+            MODE_SURROUNDING, MODE_PREEDIT,
+            MODE_EMOJI
         ]
         for i, m in enumerate(grid_modes):
             card = ModeCard(m)
@@ -775,7 +778,7 @@ class ModeManagerPage(QWidget):
             with open(path, "w", encoding="utf-8") as f:
                 f.write("# Lotus Application Rules Table\n")
                 f.write("# Format: application_name<TAB>mode_id\n")
-                f.write("# Modes: 0=Off, 1=Uinput(Smooth), 2=Uinput(Slow), 3=Uinput(Hardcore), 4=Surrounding, 5=Preedit, 6=Emoji\n")
+                f.write("# Modes: 0=Off, 1=Uinput(Smooth), 2=Uinput(Slow), 3=Uinput(Hardcore), 4=Surrounding, 5=Preedit, 6=Emoji, 7=Uinput(Custom)\n")
                 for app, mode in sorted(self.app_rules.items()):
                     f.write(f"{app}\t{mode}\n")
             QMessageBox.information(

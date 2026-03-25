@@ -660,7 +660,7 @@ namespace fcitx {
             return;
 
         file << "# Lotus Per-App Configuration\n";
-        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Uinput (Custom), 5 = Surrounding Text, 6 = Preedit, 7 = Emoji Picker\n";
+        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker, 7 = Uinput (Custom)\n";
         auto appRules = appRulesTables_.rules.value();
         for (const auto& pair : appRules) {
             if (!isStartsWith(pair.app.value(), "ctx_")) {

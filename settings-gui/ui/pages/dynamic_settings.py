@@ -287,9 +287,11 @@ class DynamicSettingsPage(QWidget):
         slider.setTickPosition(QSlider.TicksBothSides)
         slider.setTickInterval(20)
         
-        slider.valueChanged.connect(
-            lambda v, k=key, l=val_label: (self.update_config(k, str(v)), l.setText(f"{v} ms"))
-        )
+        def on_value_changed(v):
+            self.update_config(key, str(v))
+            val_label.setText(f"{v} ms")
+
+        slider.valueChanged.connect(on_value_changed)
         
         row_layout.addWidget(slider)
         layout.addLayout(row_layout)
