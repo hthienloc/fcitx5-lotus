@@ -120,8 +120,9 @@ namespace fcitx {
         /**
          * @brief Sends backspace key events via uinput.
          * @param count Number of backspaces to send.
+         * @param interDelay Delay between backspaces (ms).
          */
-        void send_backspace_uinput(int count) const;
+        void send_backspace_uinput(int count, int interDelay) const;
 
         /**
          * @brief Replays buffer content to the engine.

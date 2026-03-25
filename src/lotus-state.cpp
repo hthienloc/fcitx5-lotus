@@ -107,13 +107,14 @@ namespace fcitx {
         return connect_uinput_server() ? uinput_client_fd_ : -1;
     }
 
-    void LotusState::send_backspace_uinput(int count) const {
+    void LotusState::send_backspace_uinput(int count, int interDelay) const {
         if (uinput_client_fd_ < 0 && !connect_uinput_server()) {
             LOTUS_ERROR("Cannot send backspace since cannot connect to uinput server");
             return;
         }
 
-        ssize_t n = send(uinput_client_fd_, &count, sizeof(count), MSG_NOSIGNAL);
+        UinputMessage msg = {static_cast<int32_t>(count), static_cast<int32_t>(interDelay)};
+        ssize_t n = send(uinput_client_fd_, &msg, sizeof(msg), MSG_NOSIGNAL);
 
         if (n < 0) {
             LOTUS_WARN("Failed to send backspace: " + std::string(strerror(errno)));
@@ -121,13 +122,13 @@ namespace fcitx {
             uinput_client_fd_ = -1;
             if (connect_uinput_server()) {
                 LOTUS_INFO("Reconnected to uinput server successfully");
-                send(uinput_client_fd_, &count, sizeof(count), MSG_NOSIGNAL);
+                send(uinput_client_fd_, &msg, sizeof(msg), MSG_NOSIGNAL);
             }
         }
 
         if (waitAck_) {
             LOTUS_INFO("Waiting for ack");
-            std::this_thread::sleep_for(std::chrono::milliseconds(count * 5));
+            std::this_thread::sleep_for(std::chrono::milliseconds(count * (interDelay + 2)));
         }
     }
 
@@ -486,8 +487,20 @@ namespace fcitx {
         replacement_start_ms_.store(now_ms(), std::memory_order_release);
         is_deleting_.store(true, std::memory_order_release);
         monitor_cv.notify_one();
-        send_backspace_uinput(expected_backspaces_);
-        LOTUS_INFO("Send " + std::to_string(expected_backspaces_) + " backspaces");
+        
+        int preDelay = 5;
+        int interDelay = 1;
+        if (realMode == LotusMode::UinputCustom) {
+            preDelay = *engine_->config().uinputCustomPreDelay;
+            interDelay = *engine_->config().uinputCustomInterDelay;
+        }
+        
+        if (preDelay > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(preDelay));
+        }
+        
+        send_backspace_uinput(expected_backspaces_, interDelay);
+        LOTUS_INFO("Send " + std::to_string(expected_backspaces_) + " backspaces (interDelay: " + std::to_string(interDelay) + "ms)");
     }
 
     void LotusState::checkForwardSpecialKey(KeyEvent& keyEvent, KeySym& currentSym) {

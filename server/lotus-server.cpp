@@ -183,6 +183,7 @@ int main(int argc, char* argv[]) {
 
     int              addon_fd           = -1;
     int              pending_backspaces = 0;
+    int              current_inter_delay = 1;
 
     struct sigaction sa{};
     sa.sa_handler = signal_handler;
@@ -192,7 +193,7 @@ int main(int argc, char* argv[]) {
     sigaction(SIGINT, &sa, nullptr);
 
     while (g_running.load(std::memory_order_acquire)) {
-        int poll_timeout = (pending_backspaces > 0) ? 1 : -1;
+        int poll_timeout = (pending_backspaces > 0) ? current_inter_delay : -1;
         int ret          = poll(fds.data(), fds.size(), poll_timeout);
 
         if (ret < 0) {
@@ -244,14 +245,15 @@ int main(int argc, char* argv[]) {
 
         // handle connect from addon
         if (fds[KB_CLIENT_INDEX].fd >= 0 && (fds[KB_CLIENT_INDEX].revents & (POLLIN | POLLHUP | POLLERR)) != 0) {
-            int     count = 0;
-            ssize_t n     = recv(fds[KB_CLIENT_INDEX].fd, &count, sizeof(count), 0);
+            UinputMessage msg   = {0, 0};
+            ssize_t       n     = recv(fds[KB_CLIENT_INDEX].fd, &msg, sizeof(msg), 0);
             if (n <= 0) {
                 LotusLogger::instance().warn("Keyboard client disconnected or connection error");
                 close(fds[KB_CLIENT_INDEX].fd);
                 fds[KB_CLIENT_INDEX].fd = -1;
             } else {
-                pending_backspaces += count - 1;
+                pending_backspaces += msg.count - 1;
+                current_inter_delay = std::max(1, (int)msg.inter_delay_ms);
                 send_single_backspace();
             }
         }

@@ -102,4 +102,12 @@ struct KeyEntry {
     uint32_t state; ///< Key state (modifiers)
 };
 
+/**
+ * @brief Message format for Uinput server.
+ */
+struct UinputMessage {
+    int32_t count;          ///< Number of backspaces to send
+    int32_t inter_delay_ms; ///< Delay between backspaces (ms)
+};
+
 #endif // _FCITX5_LOTUS_UTILS_H_

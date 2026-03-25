@@ -214,7 +214,9 @@ namespace fcitx {
         Option<bool>    useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
         Option<bool>    enableDictionary{this, "EnableDictionary", _("Enable Custom Dictionary"), false};
         Option<bool>    enableCustomKeymap{this, "EnableCustomKeymap", _("Enable Custom Keymap"), false};
-        Option<int>     uinputCustomDelay{this, "UinputCustomDelay", _("Uinput Custom Delay (ms)"), 20};
+        Option<int>     uinputCustomPreDelay{this, "UinputCustomPreDelay", _("Uinput Custom Pre Delay (ms)"), 5};
+        Option<int>     uinputCustomInterDelay{this, "UinputCustomInterDelay", _("Uinput Custom Inter Delay (ms)"), 1};
+        Option<int>     uinputCustomDelay{this, "UinputCustomDelay", _("Uinput Custom Post Delay (ms)"), 20};
         SubConfigOption macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
         SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
         SubConfigOption appRules{this, "AppRules", _("App Rules"), "fcitx://config/addon/lotus/app_rules"}; KeyListOption modeMenuKey{

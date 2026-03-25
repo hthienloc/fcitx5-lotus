@@ -41,13 +41,17 @@ SETTINGS_MAP = {
     SettingsCategory.GENERAL: {
         "HOTKEYS": ["ModeMenuKey"],
         "INPUT METHOD": ["InputMethod", "Mode", "OutputCharset"],
+        "UINPUT CUSTOM": ["UinputCustomPreDelay", "UinputCustomInterDelay", "UinputCustomDelay"],
     },
     SettingsCategory.APPEARANCE: {
         "THEME & ICONS": ["UseLotusIcons"],
     },
     SettingsCategory.TYPING: {
         "SPELLING & CORRECTIONS": ["SpellCheck", "AutoNonVnRestore", "DdFreeStyle"],
-        "TYPING OPTIONS": ["ModernStyle", "FreeMarking", "W2U", "FixUinputWithAck", "DoubleSpaceToPeriod", "AutoCapitalizeAfterPunctuation", "UinputCustomDelay"],
+        "TYPING OPTIONS": [
+            "ModernStyle", "FreeMarking", "W2U", "FixUinputWithAck", 
+            "DoubleSpaceToPeriod", "AutoCapitalizeAfterPunctuation"
+        ],
     },
     SettingsCategory.SHORTCUTS: {
         "SHORTCUTS": ["ModeMenuKey"],
@@ -161,7 +165,7 @@ class DynamicSettingsPage(QWidget):
                     elif type_str == "Boolean":
                         self._render_checkbox(item, card.content_layout)
                     elif type_str == "Integer":
-                        if k == "UinputCustomDelay":
+                        if k in ["UinputCustomDelay", "UinputCustomPreDelay", "UinputCustomInterDelay"]:
                             self._render_slider(item, card.content_layout)
                         else:
                             self._render_spinbox(item, card.content_layout)
@@ -282,7 +286,7 @@ class DynamicSettingsPage(QWidget):
         row_layout.addLayout(header_layout)
 
         slider = QSlider(Qt.Horizontal)
-        slider.setRange(0, 200)
+        slider.setRange(0, 100)
         slider.setValue(val)
         slider.setTickPosition(QSlider.TicksBothSides)
         slider.setTickInterval(20)

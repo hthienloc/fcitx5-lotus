@@ -95,10 +95,15 @@ void close_restricted(int fd, void* user_data);
 extern const struct libinput_interface interface;
 
 /**
+ * @brief Message format for Uinput server.
+ */
+struct UinputMessage {
+    int32_t count;          ///< Number of backspaces to send
+    int32_t inter_delay_ms; ///< Delay between backspaces (ms)
+};
+
+/**
  * @brief Main entry point for the uinput server.
- * @param argc Argument count.
- * @param argv Argument vector.
- * @return Exit code (0 on success).
  */
 int main(int argc, char* argv[]);
 
