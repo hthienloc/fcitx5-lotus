@@ -483,10 +483,6 @@ namespace fcitx {
                     selectedMode = LotusMode::Off;
                     break;
                 }
-                case FcitxKey_d: {
-                    selectedMode = modeStringToEnum(config_.mode.value());
-                    break;
-                }
                 case FcitxKey_Escape: {
                     selectionMade = true;
                     break;
@@ -756,10 +752,6 @@ namespace fcitx {
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Preedit, _("[w] Preedit")), applyMode(LotusMode::Preedit)));
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Emoji, _("[e] Emoji Picker")), applyMode(LotusMode::Emoji)));
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[r] OFF")), applyMode(LotusMode::Off)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[d] Default Typing")), [this, cleanup](InputContext* ic) {
-            setMode(modeStringToEnum(config_.mode.value()), ic);
-            cleanup(ic);
-        }));
 
         {
             const auto& kl = *config_.modeMenuKey;
@@ -787,7 +779,7 @@ namespace fcitx {
             case LotusMode::Preedit: selectedIndex = 6; break;
             case LotusMode::Emoji: selectedIndex = 7; break;
             case LotusMode::Off: selectedIndex = 8; break;
-            default: selectedIndex = 9; break;
+            default: selectedIndex = 1; break;
         }
         candidateList->setGlobalCursorIndex(selectedIndex);
 
