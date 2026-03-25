@@ -18,7 +18,10 @@ from PySide6.QtWidgets import (
     QButtonGroup,
     QGridLayout,
     QSizePolicy,
+    QSpinBox,
+    QSlider,
 )
+from PySide6.QtCore import Qt
 from ui.components import HotkeyCaptureWidget
 from core.dbus_handler import LotusDBusHandler
 from enum import Enum
@@ -44,7 +47,7 @@ SETTINGS_MAP = {
     },
     SettingsCategory.TYPING: {
         "SPELLING & CORRECTIONS": ["SpellCheck", "AutoNonVnRestore", "DdFreeStyle"],
-        "TYPING OPTIONS": ["ModernStyle", "FreeMarking", "W2U", "FixUinputWithAck", "DoubleSpaceToPeriod", "AutoCapitalizeAfterPunctuation"],
+        "TYPING OPTIONS": ["ModernStyle", "FreeMarking", "W2U", "FixUinputWithAck", "DoubleSpaceToPeriod", "AutoCapitalizeAfterPunctuation", "UinputCustomDelay"],
     },
     SettingsCategory.SHORTCUTS: {
         "SHORTCUTS": ["ModeMenuKey"],
@@ -157,6 +160,11 @@ class DynamicSettingsPage(QWidget):
                         self._render_combobox(item, card.content_layout)
                     elif type_str == "Boolean":
                         self._render_checkbox(item, card.content_layout)
+                    elif type_str == "Integer":
+                        if k == "UinputCustomDelay":
+                            self._render_slider(item, card.content_layout)
+                        else:
+                            self._render_spinbox(item, card.content_layout)
                 
                 if found_any:
                     self.container_layout.addWidget(card)
@@ -237,6 +245,53 @@ class DynamicSettingsPage(QWidget):
             lambda text, k=key: self.update_config(k, combo.currentData())
         )
         row_layout.addWidget(combo)
+        layout.addLayout(row_layout)
+
+    def _render_spinbox(self, item, layout):
+        key, type_str, label, default, annotations = item
+        val = int(self.current_values.get(key, default))
+
+        row_layout = QHBoxLayout()
+        row_layout.addWidget(QLabel(_(label)))
+        row_layout.addStretch()
+
+        spin = QSpinBox()
+        spin.setFixedWidth(200)
+        spin.setRange(0, 1000)
+        spin.setValue(val)
+        spin.setSuffix(" ms")
+
+        spin.valueChanged.connect(
+            lambda val, k=key: self.update_config(k, str(val))
+        )
+        row_layout.addWidget(spin)
+        layout.addLayout(row_layout)
+
+    def _render_slider(self, item, layout):
+        key, type_str, label, default, annotations = item
+        val = int(self.current_values.get(key, default))
+
+        row_layout = QVBoxLayout()
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(QLabel(_(label)))
+        header_layout.addStretch()
+        
+        val_label = QLabel(f"{val} ms")
+        val_label.setObjectName("SliderValueLabel")
+        header_layout.addWidget(val_label)
+        row_layout.addLayout(header_layout)
+
+        slider = QSlider(Qt.Horizontal)
+        slider.setRange(0, 200)
+        slider.setValue(val)
+        slider.setTickPosition(QSlider.TicksBothSides)
+        slider.setTickInterval(20)
+        
+        slider.valueChanged.connect(
+            lambda v, k=key, l=val_label: (self.update_config(k, str(v)), l.setText(f"{v} ms"))
+        )
+        
+        row_layout.addWidget(slider)
         layout.addLayout(row_layout)
 
     def _render_radio_group(self, item, layout, columns=1):

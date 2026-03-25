@@ -944,7 +944,14 @@ namespace fcitx {
             if (isBackspace(currentSym)) {
                 if (realtextLen > 0)
                     realtextLen -= 1;
-                if (handleUInputKeyPress(keyEvent, currentSym, (realMode == LotusMode::Smooth) ? 5 : 20)) {
+                int sleepTime = 20;
+                if (realMode == LotusMode::Smooth) {
+                    sleepTime = 5;
+                } else if (realMode == LotusMode::UinputCustom) {
+                    sleepTime = engine_->config().uinputCustomDelay.value();
+                }
+
+                if (handleUInputKeyPress(keyEvent, currentSym, sleepTime)) {
                     return;
                 }
             } else {
@@ -974,6 +981,7 @@ namespace fcitx {
 
         switch (realMode) {
             case LotusMode::Uinput:
+            case LotusMode::UinputCustom:
             case LotusMode::Smooth: {
                 handleUinputMode(keyEvent, currentSym, true);
                 break;
@@ -1037,6 +1045,7 @@ namespace fcitx {
             case LotusMode::SurroundingText:
             case LotusMode::Uinput:
             case LotusMode::UinputHC:
+            case LotusMode::UinputCustom:
             case LotusMode::Smooth: {
                 ic_->inputPanel().reset();
                 break;
@@ -1069,6 +1078,7 @@ namespace fcitx {
             }
             case LotusMode::Uinput:
             case LotusMode::UinputHC:
+            case LotusMode::UinputCustom:
             case LotusMode::Smooth: {
                 if (lotusEngine_) {
                     UniqueCPtr<char> preedit(EnginePullPreedit(lotusEngine_.handle()));

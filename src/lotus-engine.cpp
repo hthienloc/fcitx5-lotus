@@ -464,22 +464,26 @@ namespace fcitx {
                     break;
                 }
                 case FcitxKey_4: {
-                    selectedMode = LotusMode::SurroundingText;
+                    selectedMode = LotusMode::UinputCustom;
                     break;
                 }
                 case FcitxKey_q: {
-                    selectedMode = LotusMode::Preedit;
+                    selectedMode = LotusMode::SurroundingText;
                     break;
                 }
                 case FcitxKey_w: {
-                    selectedMode = LotusMode::Emoji;
+                    selectedMode = LotusMode::Preedit;
                     break;
                 }
                 case FcitxKey_e: {
-                    selectedMode = LotusMode::Off;
+                    selectedMode = LotusMode::Emoji;
                     break;
                 }
                 case FcitxKey_r: {
+                    selectedMode = LotusMode::Off;
+                    break;
+                }
+                case FcitxKey_d: {
                     selectedMode = modeStringToEnum(config_.mode.value());
                     break;
                 }
@@ -656,7 +660,7 @@ namespace fcitx {
             return;
 
         file << "# Lotus Per-App Configuration\n";
-        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
+        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Uinput (Custom), 5 = Surrounding Text, 6 = Preedit, 7 = Emoji Picker\n";
         auto appRules = appRulesTables_.rules.value();
         for (const auto& pair : appRules) {
             if (!isStartsWith(pair.app.value(), "ctx_")) {
@@ -747,12 +751,12 @@ namespace fcitx {
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Smooth, _("[1] Uinput (Smooth)")), applyMode(LotusMode::Smooth)));
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Uinput, _("[2] Uinput (Slow)")), applyMode(LotusMode::Uinput)));
         candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::UinputHC, _("[3] Uinput (Hardcore)")), applyMode(LotusMode::UinputHC)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::SurroundingText, _("[4] Surrounding Text")), applyMode(LotusMode::SurroundingText)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Preedit, _("[q] Preedit")), applyMode(LotusMode::Preedit)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Emoji, _("[w] Emoji Picker")), applyMode(LotusMode::Emoji)));
-        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[e] OFF")), applyMode(LotusMode::Off)));
-
-        candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[r] Default Typing")), [this, cleanup](InputContext* ic) {
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::UinputCustom, _("[4] Uinput (Custom)")), applyMode(LotusMode::UinputCustom)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::SurroundingText, _("[q] Surrounding Text")), applyMode(LotusMode::SurroundingText)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Preedit, _("[w] Preedit")), applyMode(LotusMode::Preedit)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Emoji, _("[e] Emoji Picker")), applyMode(LotusMode::Emoji)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(getLabel(LotusMode::Off, _("[r] OFF")), applyMode(LotusMode::Off)));
+        candidateList->append(std::make_unique<AppModeCandidateWord>(Text(_("[d] Default Typing")), [this, cleanup](InputContext* ic) {
             setMode(modeStringToEnum(config_.mode.value()), ic);
             cleanup(ic);
         }));
@@ -778,11 +782,12 @@ namespace fcitx {
             case LotusMode::Smooth: selectedIndex = 1; break;
             case LotusMode::Uinput: selectedIndex = 2; break;
             case LotusMode::UinputHC: selectedIndex = 3; break;
-            case LotusMode::SurroundingText: selectedIndex = 4; break;
-            case LotusMode::Preedit: selectedIndex = 5; break;
-            case LotusMode::Emoji: selectedIndex = 6; break;
-            case LotusMode::Off: selectedIndex = 7; break;
-            default: selectedIndex = 1; break;
+            case LotusMode::UinputCustom: selectedIndex = 4; break;
+            case LotusMode::SurroundingText: selectedIndex = 5; break;
+            case LotusMode::Preedit: selectedIndex = 6; break;
+            case LotusMode::Emoji: selectedIndex = 7; break;
+            case LotusMode::Off: selectedIndex = 8; break;
+            default: selectedIndex = 9; break;
         }
         candidateList->setGlobalCursorIndex(selectedIndex);
 

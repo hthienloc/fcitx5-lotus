@@ -33,7 +33,8 @@ namespace fcitx {
         SurroundingText = 4,
         Preedit         = 5,
         Emoji           = 6,
-        NoMode          = 7,
+        UinputCustom    = 7,
+        NoMode          = 8,
     };
 
     /**
@@ -50,6 +51,7 @@ namespace fcitx {
             case LotusMode::UinputHC: return "Uinput (Hardcore)";
             case LotusMode::Emoji: return "Emoji Picker";
             case LotusMode::Smooth: return "Uinput (Smooth)";
+            case LotusMode::UinputCustom: return "Uinput (Custom)";
             default: return "";
         }
     }
@@ -68,6 +70,7 @@ namespace fcitx {
             {"Uinput (Hardcore)", LotusMode::UinputHC},
             {"Emoji Picker", LotusMode::Emoji},
             {"Uinput (Smooth)", LotusMode::Smooth},
+            {"Uinput (Custom)", LotusMode::UinputCustom},
         };
         auto it = modeMap.find(mode);
         return it != modeMap.end() ? it->second : LotusMode::NoMode;
@@ -135,7 +138,7 @@ namespace fcitx {
          * @brief Initializes with default mode list.
          */
         ModeListAnnotation() {
-            list_ = {"Uinput (Smooth)", "Uinput (Slow)", "Surrounding Text", "Preedit", "Uinput (Hardcore)", "OFF"};
+            list_ = {"Uinput (Smooth)", "Uinput (Slow)", "Uinput (Custom)", "Surrounding Text", "Preedit", "Uinput (Hardcore)", "OFF"};
         }
     };
 
@@ -211,6 +214,7 @@ namespace fcitx {
         Option<bool>    useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
         Option<bool>    enableDictionary{this, "EnableDictionary", _("Enable Custom Dictionary"), false};
         Option<bool>    enableCustomKeymap{this, "EnableCustomKeymap", _("Enable Custom Keymap"), false};
+        Option<int>     uinputCustomDelay{this, "UinputCustomDelay", _("Uinput Custom Delay (ms)"), 20};
         SubConfigOption macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
         SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
         SubConfigOption appRules{this, "AppRules", _("App Rules"), "fcitx://config/addon/lotus/app_rules"}; KeyListOption modeMenuKey{
