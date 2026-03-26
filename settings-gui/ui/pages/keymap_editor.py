@@ -588,5 +588,5 @@ class KeymapEditorPage(BaseEditorPage):
                 _("Export Complete"),
                 _(f"Exported {self.table.rowCount()} entries to:\n{path}"),
             )
-        except (IOError, OSError) as e:
+        except (IOError, OSError, UnicodeEncodeError) as e:
             QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for writing:')} {e}")
