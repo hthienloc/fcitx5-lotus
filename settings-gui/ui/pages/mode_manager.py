@@ -785,7 +785,7 @@ class ModeManagerPage(QWidget):
                 _("Export Complete"),
                 _(f"Exported {len(self.app_rules)} rules to:\n{path}"),
             )
-        except (IOError, OSError) as e:
+        except (IOError, OSError, UnicodeEncodeError) as e:
             QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for writing:')} {e}")
 
     def save_data(self, quiet=False):
