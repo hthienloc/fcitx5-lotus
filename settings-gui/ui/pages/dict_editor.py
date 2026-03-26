@@ -417,5 +417,5 @@ class DictEditorPage(BaseEditorPage):
                 _("Export Complete"),
                 _(f"Exported {len(self.words)} words to:\n{path}"),
             )
-        except (IOError, OSError, UnicodeDecodeError) as e:
+        except (IOError, OSError, UnicodeEncodeError) as e:
             QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for writing:')} {e}")
