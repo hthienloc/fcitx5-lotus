@@ -384,8 +384,8 @@ class MacroEditorPage(BaseEditorPage):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for reading: {e}")
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for reading:')} {e}")
             return
 
         imported = skipped = 0
@@ -454,5 +454,5 @@ class MacroEditorPage(BaseEditorPage):
                 _("Export Complete"),
                 _(f"Exported {self.table.rowCount()} entries to:\n{path}"),
             )
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for writing: {e}")
+        except (IOError, OSError) as e:
+            QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for writing:')} {e}")

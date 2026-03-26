@@ -246,7 +246,7 @@ class DictEditorPage(BaseEditorPage):
             if not quiet:
                 QMessageBox.information(self, _("Success"), _("Dictionary saved successfully to local storage."))
         except Exception as e:
-            QMessageBox.warning(self, _("Error"), f"Failed to save dictionary: {e}")
+            QMessageBox.warning(self, _("Error"), f"{_('Failed to save dictionary:')} {e}")
 
     def upsert_row(self, word: str, sort: bool = True):
         if word in self.words:
@@ -355,7 +355,7 @@ class DictEditorPage(BaseEditorPage):
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
         except (IOError, OSError, UnicodeDecodeError) as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for reading: {e}")
+            QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for reading:')} {e}")
             return
 
         imported = 0
@@ -417,5 +417,5 @@ class DictEditorPage(BaseEditorPage):
                 _("Export Complete"),
                 _(f"Exported {len(self.words)} words to:\n{path}"),
             )
-        except (IOError, OSError) as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for writing: {e}")
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for writing:')} {e}")

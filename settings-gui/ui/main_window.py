@@ -244,7 +244,7 @@ class LotusSettingsWindow(QMainWindow):
         for i in range(self.content_stack.count()):
             page = self.content_stack.widget(i)
             if hasattr(page, "save_data"):
-                page.save_data(quiet=True)
+                page.save_data(quiet=quiet)
 
         self.btn_apply.setEnabled(False)
         self.btn_cancel.setEnabled(False)

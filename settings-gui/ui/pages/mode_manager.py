@@ -607,7 +607,9 @@ class ModeManagerPage(QWidget):
         self.current_app_mode = mode
         
         self.app_name_label.setText(app_name)
-        self.app_icon_label.setPixmap(self._resolve_icon(app_name).pixmap(48, 48))
+        icon = self._resolve_icon(app_name)
+        if not icon.isNull():
+            self.app_icon_label.setPixmap(icon.pixmap(48, 48))
         self.app_settings_card.setVisible(True)
         self.btn_remove_app.setEnabled(True) # Enable Remove
         self._update_mode_cards()
@@ -700,7 +702,7 @@ class ModeManagerPage(QWidget):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-        except Exception as e:
+        except (IOError, OSError, UnicodeDecodeError) as e:
             QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for reading:')} {e}")
             return
 
@@ -783,7 +785,7 @@ class ModeManagerPage(QWidget):
                 _("Export Complete"),
                 _(f"Exported {len(self.app_rules)} rules to:\n{path}"),
             )
-        except Exception as e:
+        except (IOError, OSError) as e:
             QMessageBox.warning(self, _("Error"), f"{_('Cannot open file for writing:')} {e}")
 
     def save_data(self, quiet=False):
