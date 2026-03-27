@@ -104,8 +104,9 @@ class MacroEditorPage(BaseEditorPage):
         
         # Format Inputs
         fmt_container = QWidget()
-        fmt_vbox = QVBoxLayout(fmt_container)
-        fmt_vbox.setContentsMargins(0, 5, 0, 0)
+        fmt_hbox = QHBoxLayout(fmt_container)
+        fmt_hbox.setContentsMargins(0, 5, 0, 0)
+        fmt_hbox.setSpacing(20)
         
         # Time Format
         time_layout = QHBoxLayout()
@@ -148,8 +149,8 @@ class MacroEditorPage(BaseEditorPage):
         date_layout.addWidget(QLabel(_("Date Format:")))
         date_layout.addWidget(self.input_date_format, 1)
         
-        fmt_vbox.addLayout(time_layout)
-        fmt_vbox.addLayout(date_layout)
+        fmt_hbox.addLayout(time_layout)
+        fmt_hbox.addLayout(date_layout)
         
         dynamic_layout.addWidget(fmt_container)
         
