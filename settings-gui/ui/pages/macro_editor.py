@@ -61,8 +61,18 @@ class MacroEditorPage(BaseEditorPage):
         self.cb_capitalize = QCheckBox(_("Capitalize Macro"))
         self.cb_enable.toggled.connect(self._on_item_changed)
         self.cb_capitalize.toggled.connect(self._on_item_changed)
+        
+        cap_layout = QHBoxLayout()
+        cap_layout.setSpacing(5)
+        cap_layout.addWidget(self.cb_capitalize)
+        
+        help_icon = QLabel()
+        help_icon.setPixmap(QIcon.fromTheme("help-about").pixmap(16, 16))
+        help_icon.setToolTip(_("Automatically match expansion case to trigger key case:<br>- 'kg' → 'khô gà' (all lowercase)<br>- 'KG' → 'KHÔ GÀ' (all uppercase)<br>- 'Kg' → 'khô gà' (original macro case)"))
+        cap_layout.addWidget(help_icon)
+        
         toggles_layout.addWidget(self.cb_enable)
-        toggles_layout.addWidget(self.cb_capitalize)
+        toggles_layout.addLayout(cap_layout)
         toggles_layout.addStretch()
 
         self.search_input = QLineEdit()
