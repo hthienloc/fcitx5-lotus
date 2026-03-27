@@ -577,7 +577,7 @@ namespace fcitx {
             return;
         }
 
-        if (event.type() == EventType::InputContextFocusOut) {
+        if (event.type() == EventType::InputContextFocusOut || event.type() == EventType::InputContextReset) {
             state->reset();
         }
     }
