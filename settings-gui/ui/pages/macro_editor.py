@@ -531,5 +531,5 @@ class MacroEditorPage(BaseEditorPage):
                 _("Export Complete"),
                 _("Exported {} entries to:\n{}").format(self.table.rowCount(), path),
             )
-        except Exception as e:
+        except (IOError, OSError, UnicodeDecodeError) as e:
             QMessageBox.warning(self, _("Error"), _("Cannot open file for writing: {}").format(e))
