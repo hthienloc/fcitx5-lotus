@@ -102,7 +102,7 @@ PRESETS = {
         ("(", "A_Ă"),
         ("d", "D_Đ"),
     ],
-    "Microslop layout": [
+    "Microsoft layout": [
         ("8", "DauSac"),
         ("5", "DauHuyen"),
         ("6", "DauHoi"),
@@ -194,7 +194,7 @@ PRESETS = {
         ("+", "UO_ƯƠ"),
         ("*", "UO_ƯƠ"),
         ("(", "A_Ă"),
-        ("\\\\", "D_Đ"),
+        ("\\", "D_Đ"),
     ],
     "VNI Bàn phím tiếng Pháp": [
         ("&", "XoaDauThanh"),
@@ -497,7 +497,7 @@ class KeymapEditorPage(BaseEditorPage):
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
         except Exception as e:
-            QMessageBox.warning(self, "Error", _("Cannot open file for reading: {}").format(e))
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for reading: {}").format(e))
             return
         imported = skipped = 0
         confirmed = False
@@ -505,7 +505,13 @@ class KeymapEditorPage(BaseEditorPage):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            parts = line.split("\t") if "\t" in line else line.split(",")
+            if "\t" in line:
+                parts = line.split("\t")
+            elif "," in line:
+                parts = line.split(",")
+            else:
+                parts = [line]
+            
             if len(parts) < 2:
                 skipped += 1
                 continue
@@ -585,4 +591,4 @@ class KeymapEditorPage(BaseEditorPage):
                 _("Exported {} entries to:\n{}").format(self.table.rowCount(), path),
             )
         except Exception as e:
-            QMessageBox.warning(self, "Error", _("Cannot open file for writing: {}").format(e))
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for writing: {}").format(e))

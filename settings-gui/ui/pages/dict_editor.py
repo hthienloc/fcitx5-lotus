@@ -353,14 +353,25 @@ class DictEditorPage(BaseEditorPage):
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
         except (IOError, OSError, UnicodeDecodeError) as e:
-            QMessageBox.warning(self, "Error", _("Cannot open file for reading: {}").format(e))
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for reading: {}").format(e))
             return
 
         imported = 0
         confirmed = False
         for line in lines:
-            word = line.strip()
-            if not word or word.startswith("#"):
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            
+            # Handle multi-column files (take first column only)
+            if "\t" in line:
+                word = line.split("\t")[0].strip()
+            elif "," in line:
+                word = line.split(",")[0].strip()
+            else:
+                word = line
+            
+            if not word:
                 continue
 
             if not confirmed and len(self.words) > 0:
@@ -416,4 +427,4 @@ class DictEditorPage(BaseEditorPage):
                 _("Exported {} words to:\n{}").format(len(self.words), path),
             )
         except (IOError, OSError, UnicodeDecodeError) as e:
-            QMessageBox.warning(self, "Error", _("Cannot open file for writing: {}").format(e))
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for writing: {}").format(e))

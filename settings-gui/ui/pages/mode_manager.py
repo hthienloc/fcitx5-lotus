@@ -344,6 +344,7 @@ class ModeManagerPage(QWidget):
         self.original_app_rules = {}
         self.original_global_mode = ""
         self.selected_app = None
+        self.current_app_mode = MODE_DEFAULT
         self._icon_cache = {}
         self._setup_ui()
         self.load_data()

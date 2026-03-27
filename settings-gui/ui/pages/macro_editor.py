@@ -419,7 +419,6 @@ class MacroEditorPage(BaseEditorPage):
         is_invalid = self._is_invalid_macro(key)
         
         # Validation feedback for input field
-        # Validation feedback for input field
         if is_invalid:
             self.input_key.setStyleSheet("color: red;")
             self.input_key.setToolTip(_("Warning: Macro key should not contain spaces or special characters."))
@@ -463,7 +462,7 @@ class MacroEditorPage(BaseEditorPage):
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
         except Exception as e:
-            QMessageBox.warning(self, "Error", _("Cannot open file for reading: {}").format(e))
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for reading: {}").format(e))
             return
 
         imported = skipped = 0
@@ -472,7 +471,13 @@ class MacroEditorPage(BaseEditorPage):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            parts = line.split("\t") if "\t" in line else line.split(",")
+            if "\t" in line:
+                parts = line.split("\t")
+            elif "," in line:
+                parts = line.split(",")
+            else:
+                parts = [line]
+            
             if len(parts) < 2:
                 skipped += 1
                 continue
@@ -533,4 +538,4 @@ class MacroEditorPage(BaseEditorPage):
                 _("Exported {} entries to:\n{}").format(self.table.rowCount(), path),
             )
         except Exception as e:
-            QMessageBox.warning(self, "Error", _("Cannot open file for writing: {}").format(e))
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for writing: {}").format(e))
