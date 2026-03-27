@@ -359,19 +359,8 @@ class DictEditorPage(BaseEditorPage):
         imported = 0
         confirmed = False
         for line in lines:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            
-            # Handle multi-column files (take first column only)
-            if "\t" in line:
-                word = line.split("\t")[0].strip()
-            elif "," in line:
-                word = line.split(",")[0].strip()
-            else:
-                word = line
-            
-            if not word:
+            word = line.strip()
+            if not word or word.startswith("#"):
                 continue
 
             if not confirmed and len(self.words) > 0:

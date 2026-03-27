@@ -471,13 +471,7 @@ class MacroEditorPage(BaseEditorPage):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            if "\t" in line:
-                parts = line.split("\t")
-            elif "," in line:
-                parts = line.split(",")
-            else:
-                parts = [line]
-            
+            parts = line.split("\t") if "\t" in line else line.split(",")
             if len(parts) < 2:
                 skipped += 1
                 continue
