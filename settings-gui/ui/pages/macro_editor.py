@@ -461,7 +461,7 @@ class MacroEditorPage(BaseEditorPage):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-        except Exception as e:
+        except (IOError, OSError, UnicodeDecodeError) as e:
             QMessageBox.warning(self, _("Error"), _("Cannot open file for reading: {}").format(e))
             return
 
