@@ -316,8 +316,7 @@ namespace fcitx {
         return *config_.inputMethod;
     }
 
-    void LotusEngine::activate(const InputMethodEntry& entry, InputContextEvent& event) {
-        FCITX_UNUSED(entry);
+    void LotusEngine::activate(const InputMethodEntry& /*entry*/, InputContextEvent& event) {
         auto*                    ic        = event.inputContext();
         const bool               surrvalid = ic->surroundingText().isValid();
         const bool               is_dbus   = (ic->frontend() != nullptr) && strcmp(ic->frontend(), "dbus") == 0;
@@ -379,8 +378,7 @@ namespace fcitx {
         }
     }
 
-    void LotusEngine::keyEvent(const InputMethodEntry& entry, KeyEvent& keyEvent) {
-        FCITX_UNUSED(entry);
+    void LotusEngine::keyEvent(const InputMethodEntry& /*entry*/, KeyEvent& keyEvent) {
         auto* ic = keyEvent.inputContext();
 
         if (isSelectingAppMode_ && g_mouse_clicked.load(std::memory_order_relaxed)) {
@@ -559,9 +557,8 @@ namespace fcitx {
             realtextLen = static_cast<unsigned int>(textLen);
     }
 
-    void LotusEngine::reset(const InputMethodEntry& entry, InputContextEvent& event) {
+    void LotusEngine::reset(const InputMethodEntry& /*entry*/, InputContextEvent& event) {
         LOTUS_INFO("Reset engine");
-        FCITX_UNUSED(entry);
         auto* state = event.inputContext()->propertyFor(&factory_);
         if (!state->isEmptyHistory() && event.type() != EventType::InputContextFocusOut) {
             return;
@@ -572,8 +569,7 @@ namespace fcitx {
         }
     }
 
-    void LotusEngine::deactivate(const InputMethodEntry& entry, InputContextEvent& event) {
-        FCITX_UNUSED(entry);
+    void LotusEngine::deactivate(const InputMethodEntry& /*entry*/, InputContextEvent& event) {
         auto*      ic              = event.inputContext();
         auto*      state           = ic->propertyFor(&factory_);
         const bool surrvalid       = ic->surroundingText().isValid();
@@ -814,9 +810,7 @@ namespace fcitx {
         }
     }
 
-    std::string LotusEngine::subModeIconImpl(const InputMethodEntry& entry, InputContext& inputContext) {
-        FCITX_UNUSED(entry);
-        FCITX_UNUSED(inputContext);
+    std::string LotusEngine::subModeIconImpl(const InputMethodEntry& /*entry*/, InputContext& /*inputContext*/) {
         if (!*config_.useLotusIcons) {
             switch (realMode) {
                 case LotusMode::Off: return "fcitx-lotus-off-default";
@@ -831,9 +825,7 @@ namespace fcitx {
         }
     }
 
-    std::string LotusEngine::subModeLabelImpl(const InputMethodEntry& entry, InputContext& inputContext) {
-        FCITX_UNUSED(entry);
-        FCITX_UNUSED(inputContext);
+    std::string LotusEngine::subModeLabelImpl(const InputMethodEntry& /*entry*/, InputContext& /*inputContext*/) {
         switch (realMode) {
             case LotusMode::Off: return _("Lotus - Off");
             case LotusMode::Emoji: return "😄";
