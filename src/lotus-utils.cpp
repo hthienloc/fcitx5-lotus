@@ -10,6 +10,8 @@
 
 #include <cstddef>
 #include <fcitx-utils/utf8.h>
+#include <pwd.h>
+#include <unistd.h>
 
 // Global variables
 fcitx::LotusMode        realMode = fcitx::LotusMode::Smooth;
@@ -34,7 +36,8 @@ std::condition_variable monitor_cv;
 FCITX_DEFINE_LOG_CATEGORY(lotus, "lotus", fcitx::LogLevel::NoLog);
 
 std::string buildSocketPath(const char* base_path_suffix) {
-    const char* username_c = std::getenv("USER");
+    struct passwd* pw = getpwuid(getuid());
+    const char* username_c = (pw != nullptr) ? pw->pw_name : nullptr;
     std::string path;
     path.reserve(32);
     path += "lotussocket-";
