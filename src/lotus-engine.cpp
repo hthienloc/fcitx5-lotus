@@ -176,11 +176,9 @@ namespace fcitx {
         if (!std::filesystem::exists(configDir)) {
             std::filesystem::create_directories(configDir);
         }
-        appRulesPath_    = configDir + "/lotus-app-rules.conf";
-        appRulesCtxPath_ = configDir + "/lotus-app-rules-ctx.conf";
-        if (std::filesystem::exists(appRulesCtxPath_)) {
-            std::filesystem::remove(appRulesCtxPath_);
-        }
+        reloadConfig();
+        instance_->inputContextManager().registerProperty("LotusState", &factory_);
+        appRulesPath_ = configDir + "/lotus-app-rules.conf";
         loadAppRules();
         toggleActions_ = {
 #ifndef DISABLE_VERSION_ACTION
@@ -660,28 +658,33 @@ namespace fcitx {
             file.close();
         };
         loadFromFile(appRulesPath_);
-        loadFromFile(appRulesCtxPath_);
+
+        std::vector<lotusAppRule> rules;
+        for (const auto& pair : appRules_) {
+            if (pair.first.find("ctx_") == 0)
+                continue;
+            lotusAppRule rule;
+            rule.app.setValue(pair.first);
+            rule.mode.setValue(static_cast<int>(pair.second));
+            rules.push_back(std::move(rule));
+        }
+        appRulesTables_.rules.setValue(std::move(rules));
     }
 
     void LotusEngine::saveAppRules() const {
-        auto saveToFile = [this](const std::string& path, bool isCtx) {
-            std::ofstream file(path, std::ios::trunc);
-            if (!file.is_open())
-                return;
+        std::ofstream file(appRulesPath_, std::ios::trunc);
+        if (!file.is_open())
+            return;
 
-            file << "# Lotus Per-App Configuration " << (isCtx ? "(Temporary)" : "") << "\n";
-            file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
-            for (const auto& pair : appRules_) {
-                bool currentIsCtx = (pair.first.find("ctx_") == 0);
-                if (currentIsCtx == isCtx) {
-                    file << pair.first << "=" << static_cast<int>(pair.second) << "\n";
-                }
+        file << "# Lotus Per-App Configuration\n";
+        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
+        for (const auto& pair : appRules_) {
+            bool currentIsCtx = (pair.first.find("ctx_") == 0);
+            if (!currentIsCtx) {
+                file << pair.first << "=" << static_cast<int>(pair.second) << "\n";
             }
-            file.close();
-        };
-
-        saveToFile(appRulesPath_, false);
-        saveToFile(appRulesCtxPath_, true);
+        }
+        file.close();
     }
 
     LotusMode LotusEngine::getAppRule(const std::string& appName) const {
@@ -712,6 +715,7 @@ namespace fcitx {
             rules.push_back(std::move(newRule));
         }
 
+        appRules_[appName] = mode;
         appRulesTables_.rules.setValue(std::move(rules));
     }
 
