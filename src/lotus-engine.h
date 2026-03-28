@@ -223,6 +223,7 @@ namespace fcitx {
         std::string                                currentConfigureApp_;
         FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
         std::unique_ptr<EmojiLoader> emojiLoader_;
+        bool                         isGnome_ = false;
 
         /**
          * @brief Refreshes the bamboo engine with current settings.

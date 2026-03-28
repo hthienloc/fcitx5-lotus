@@ -182,7 +182,15 @@ namespace fcitx {
             std::filesystem::remove(appRulesCtxPath_);
         }
         loadAppRules();
-        toggleActions_ = {versionAction_.get(), charsetAction_.get(), spellCheckAction_.get(), macroAction_.get(), capitalizeMacroAction_.get(), autoNonVnRestoreAction_.get()};
+        toggleActions_ = {
+#ifndef DISABLE_VERSION_ACTION
+            versionAction_.get(),
+#endif
+            charsetAction_.get(),
+            spellCheckAction_.get(),
+            macroAction_.get(),
+            capitalizeMacroAction_.get(),
+            autoNonVnRestoreAction_.get()};
     }
 
     void LotusEngine::initToggleAction(std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& actionId, const std::string& iconName,
@@ -659,7 +667,7 @@ namespace fcitx {
         loadFromFile(appRulesCtxPath_);
     }
 
-    void LotusEngine::saveAppRules() {
+    void LotusEngine::saveAppRules() const {
         auto saveToFile = [this](const std::string& path, bool isCtx) {
             std::ofstream file(path, std::ios::trunc);
             if (!file.is_open())
