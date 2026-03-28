@@ -160,7 +160,7 @@ namespace fcitx {
         settingsAction_->setIcon("configure");
         connections_.emplace_back(settingsAction_->connect<SimpleAction::Activated>([](InputContext*) {
             if (fork() == 0) {
-                execlp("fcitx5-lotus-settings", "fcitx5-lotus-settings", nullptr);
+                execl(FCITX5_LOTUS_SETTINGS_PATH, FCITX5_LOTUS_SETTINGS_PATH, nullptr);
                 _exit(1);
             }
         }));
