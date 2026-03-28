@@ -36,9 +36,9 @@ std::condition_variable monitor_cv;
 FCITX_DEFINE_LOG_CATEGORY(lotus, "lotus", fcitx::LogLevel::NoLog);
 
 std::string buildSocketPath(const char* base_path_suffix) {
-    struct passwd* pw = getpwuid(getuid());
-    const char* username_c = (pw != nullptr) ? pw->pw_name : nullptr;
-    std::string path;
+    struct passwd* pw         = getpwuid(getuid());
+    const char*    username_c = (pw != nullptr) ? pw->pw_name : nullptr;
+    std::string    path;
     path.reserve(32);
     path += "lotussocket-";
     path += ((username_c != nullptr) ? username_c : "unknown");
