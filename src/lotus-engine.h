@@ -216,7 +216,9 @@ namespace fcitx {
         std::vector<SimpleAction*>                 toggleActions_;
         std::vector<ScopedConnection>              connections_;
         CGoObject                                  dictionary_;
-        bool                                       isGnome_;
+        std::unordered_map<std::string, LotusMode> appRules_;
+        std::string                                appRulesPath_;
+        std::string                                appRulesCtxPath_;
         bool                                       isSelectingAppMode_ = false;
         std::string                                currentConfigureApp_;
         FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());

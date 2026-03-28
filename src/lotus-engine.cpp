@@ -176,16 +176,13 @@ namespace fcitx {
         if (!std::filesystem::exists(configDir)) {
             std::filesystem::create_directories(configDir);
         }
-        reloadConfig();
-        instance_->inputContextManager().registerProperty("LotusState", &factory_);
-        toggleActions_ = {
-#ifndef DISABLE_VERSION_ACTION
-            versionAction_.get(),
-#endif
-            charsetAction_.get(),          spellCheckAction_.get(),       macroAction_.get(),   capitalizeMacroAction_.get(),
-            autoNonVnRestoreAction_.get(), enableDictionaryAction_.get(), settingsAction_.get()};
-
-        emptyCustomKeymap_.customKeymap.setValue(std::vector<lotusKeymap>{});
+        appRulesPath_    = configDir + "/lotus-app-rules.conf";
+        appRulesCtxPath_ = configDir + "/lotus-app-rules-ctx.conf";
+        if (std::filesystem::exists(appRulesCtxPath_)) {
+            std::filesystem::remove(appRulesCtxPath_);
+        }
+        loadAppRules();
+        toggleActions_ = {versionAction_.get(), charsetAction_.get(), spellCheckAction_.get(), macroAction_.get(), capitalizeMacroAction_.get(), autoNonVnRestoreAction_.get()};
     }
 
     void LotusEngine::initToggleAction(std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& actionId, const std::string& iconName,
@@ -639,55 +636,48 @@ namespace fcitx {
     }
 
     void LotusEngine::loadAppRules() {
-#if LOTUS_USE_MODERN_FCITX_API
-        std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
-#else
-        std::string configDir = StandardPath::global().userDirectory(StandardPath::Type::Config) + "/fcitx5/conf";
-#endif
-        std::ifstream file(configDir + "/lotus-app-rules.conf");
-        if (!file.is_open()) {
-            return;
-        }
-        std::vector<lotusAppRule> rules;
-        std::string               line;
-        while (std::getline(file, line)) {
-            if (line.empty() || line[0] == '#')
-                continue;
-            auto delimiterPos = line.find('=');
-            if (delimiterPos != std::string::npos) {
-                std::string  app  = line.substr(0, delimiterPos);
-                std::string  mode = line.substr(delimiterPos + 1);
-                lotusAppRule rule;
-                rule.app.setValue(app);
-                try {
-                    rule.mode.setValue(std::stoi(mode));
-                } catch (const std::exception& e) { rule.mode.setValue(0); }
-                rules.push_back(std::move(rule));
+        appRules_.clear();
+        auto loadFromFile = [this](const std::string& path) {
+            std::ifstream file(path);
+            if (!file.is_open())
+                return;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (line.empty() || line[0] == '#')
+                    continue;
+                auto delimiterPos = line.find('=');
+                if (delimiterPos != std::string::npos) {
+                    std::string app  = line.substr(0, delimiterPos);
+                    std::string mode = line.substr(delimiterPos + 1);
+                    appRules_[app]   = static_cast<LotusMode>(std::stoi(mode));
+                }
             }
-        }
-        file.close();
-        appRulesTables_.rules.setValue(std::move(rules));
+            file.close();
+        };
+        loadFromFile(appRulesPath_);
+        loadFromFile(appRulesCtxPath_);
     }
 
-    void LotusEngine::saveAppRules() const {
-#if LOTUS_USE_MODERN_FCITX_API
-        std::string configDir = (StandardPaths::global().userDirectory(StandardPathsType::Config) / "fcitx5" / "conf").string();
-#else
-        std::string configDir = StandardPath::global().userDirectory(StandardPath::Type::Config) + "/fcitx5/conf";
-#endif
-        std::ofstream file(configDir + "/lotus-app-rules.conf");
-        if (!file.is_open())
-            return;
+    void LotusEngine::saveAppRules() {
+        auto saveToFile = [this](const std::string& path, bool isCtx) {
+            std::ofstream file(path, std::ios::trunc);
+            if (!file.is_open())
+                return;
 
-        file << "# Lotus Per-App Configuration\n";
-        file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
-        auto appRules = appRulesTables_.rules.value();
-        for (const auto& pair : appRules) {
-            if (!isStartsWith(pair.app.value(), "ctx_")) {
-                file << pair.app.value() << "=" << static_cast<int>(pair.mode.value()) << "\n";
+            file << "# Lotus Per-App Configuration " << (isCtx ? "(Temporary)" : "") << "\n";
+            file << "# 0 = Off, 1 = Uinput (Smooth), 2 = Uinput (Slow), 3 = Uinput (Hardcore), 4 = Surrounding Text, 5 = Preedit, 6 = Emoji Picker\n";
+            for (const auto& pair : appRules_) {
+                bool currentIsCtx = (pair.first.find("ctx_") == 0);
+                if (currentIsCtx == isCtx) {
+                    file << pair.first << "=" << static_cast<int>(pair.second) << "\n";
+                }
             }
-        }
-        file.close();
+            file.close();
+        };
+
+        saveToFile(appRulesPath_, false);
+        saveToFile(appRulesCtxPath_, true);
     }
 
     LotusMode LotusEngine::getAppRule(const std::string& appName) const {
@@ -846,16 +836,14 @@ namespace fcitx {
     }
 
     std::string LotusEngine::getProgramName(InputContext* ic) {
-        if (ic == nullptr) {
+        if (!ic) {
             return "unknown-app";
         }
         std::string programName = ic->program();
         if (programName.empty() || programName == "wayland" || programName == "x11") {
             // Fallback: InputContext address-based resolution
             // This ensures at least per-window separation.
-            std::ostringstream oss;
-            oss << "ctx_" << static_cast<const void*>(ic);
-            programName = oss.str();
+            programName = "ctx_" + std::to_string(reinterpret_cast<uintptr_t>(ic));
         }
         return programName;
     }
