@@ -74,8 +74,26 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "hien-ngo29",
+      "name": "Ngo Phu Hien",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98635550?v=4",
+      "profile": "https://github.com/hien-ngo29",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "minhtrancccp",
+      "name": "Minh Tran",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33189614?v=4",
+      "profile": "https://github.com/minhtrancccp",
+      "contributions": [
+        "platform"
+      ]
     }
   ],
-  "contributorsPerLine": 7,
+  "contributorsPerLine": 4,
   "linkToUsage": true
 }

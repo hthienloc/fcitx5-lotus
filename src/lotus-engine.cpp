@@ -13,6 +13,7 @@
 #include "lotus-monitor.h"
 #include "lotus-utils.h"
 #include "ack-apps.h"
+#include <sys/socket.h>
 #include <utility>
 #ifndef DISABLE_VERSION_ACTION
 #include "lotus-version.h"
@@ -99,7 +100,7 @@ namespace fcitx {
     LotusEngine::LotusEngine(Instance* instance) : instance_(instance), factory_([this](InputContext& ic) { return new LotusState(this, &ic); }) { //NOLINT
         const char* desktop = std::getenv("XDG_CURRENT_DESKTOP");
         isGnome_            = (desktop != nullptr) && std::string(desktop).find("GNOME") != std::string::npos;
-        startMonitoringOnce();
+        startMonitoring();
         Init();
         {
             auto imNames = convertToStringList(GetInputMethodNames());
@@ -150,7 +151,7 @@ namespace fcitx {
         initToggleAction(macroAction_, config_.enableMacro, "lotus-macro", "document-edit", _("Enable Macro"), _("Macro"), uiManager);
         initToggleAction(capitalizeMacroAction_, config_.capitalizeMacro, "lotus-capitalizemacro", "format-text-uppercase", _("Capitalize Macro"), _("Capitalize Macro"),
                          uiManager);
-        initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "lotus-autonvnrestore", "edit-undo", _("Auto Restore Keys With Invalid Wwords"),
+        initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "lotus-autonvnrestore", "edit-undo", _("Auto Restore Keys With Invalid Words"),
                          _("Auto Non-VN Restore"), uiManager);
         initToggleAction(enableDictionaryAction_, config_.enableDictionary, "lotus-dictionary", "accessories-dictionary", _("Enable Custom Dictionary"), _("Custom Dictionary"),
                          uiManager);
@@ -214,8 +215,19 @@ namespace fcitx {
         monitor_cv.notify_all();
         int fd = mouse_socket_fd.load(std::memory_order_acquire);
         if (fd >= 0) {
-            close(fd);
+            shutdown(fd, SHUT_RDWR);
         }
+        if (mouse_thread.joinable()) {
+            mouse_thread.join();
+        }
+        if (monitor_thread.joinable()) {
+            monitor_thread.join();
+        }
+        int old_fd = uinput_client_fd_.exchange(-1);
+        if (old_fd != -1) {
+            close(old_fd);
+        }
+        LOTUS_INFO("Engine destroyed.");
     }
 
     const lotusCustomKeymap& LotusEngine::customKeymap() const {
@@ -319,7 +331,7 @@ namespace fcitx {
     void LotusEngine::activate(const InputMethodEntry& /*entry*/, InputContextEvent& event) {
         auto*                    ic        = event.inputContext();
         const bool               surrvalid = ic->surroundingText().isValid();
-        const bool               is_dbus   = (ic->frontend() != nullptr) && strcmp(ic->frontend(), "dbus") == 0;
+        const bool               is_dbus   = getFrontendName(ic) == "dbus";
         static std::atomic<bool> mouseThreadStarted{false};
         if (!mouseThreadStarted.exchange(true))
             startMouseReset();
@@ -381,7 +393,7 @@ namespace fcitx {
     void LotusEngine::keyEvent(const InputMethodEntry& /*entry*/, KeyEvent& keyEvent) {
         auto* ic = keyEvent.inputContext();
 
-        if (isSelectingAppMode_ && g_mouse_clicked.load(std::memory_order_relaxed)) {
+        if (isSelectingAppMode_ && g_mouse_clicked.load(std::memory_order_acquire)) {
             closeAppModeMenu();
             ic->inputPanel().reset();
             ic->updateUserInterface(UserInterfaceComponent::InputPanel);
@@ -542,7 +554,7 @@ namespace fcitx {
         if (!keyEvent.isRelease() && !config_.modeMenuKey->empty() && keyEvent.key().checkKeyList(*config_.modeMenuKey)) {
             LOTUS_INFO("Mode menu key pressed");
             currentConfigureApp_ = getProgramName(ic);
-            g_mouse_clicked.store(false, std::memory_order_relaxed);
+            g_mouse_clicked.store(false, std::memory_order_release);
             showAppModeMenu(ic);
             keyEvent.filterAndAccept();
             return;
@@ -554,7 +566,7 @@ namespace fcitx {
         size_t       textLen = fcitx_utf8_strlen(text.c_str());
         unsigned int cursor  = s.cursor();
         if (textLen == static_cast<size_t>(cursor))
-            realtextLen = static_cast<unsigned int>(textLen);
+            realtextLen.store(static_cast<unsigned int>(textLen), std::memory_order_release);
     }
 
     void LotusEngine::reset(const InputMethodEntry& /*entry*/, InputContextEvent& event) {
@@ -564,7 +576,7 @@ namespace fcitx {
             return;
         }
 
-        if (event.type() == EventType::InputContextFocusOut) {
+        if (event.type() == EventType::InputContextFocusOut || event.type() == EventType::InputContextReset) {
             state->reset();
         }
     }
@@ -573,7 +585,7 @@ namespace fcitx {
         auto*      ic              = event.inputContext();
         auto*      state           = ic->propertyFor(&factory_);
         const bool surrvalid       = ic->surroundingText().isValid();
-        const bool is_dbus         = (ic->frontend() != nullptr) && strcmp(ic->frontend(), "dbus") == 0;
+        const bool is_dbus         = getFrontendName(ic) == "dbus";
         state->lastDeactivateTime_ = now_ms();
         if (realMode == LotusMode::Preedit && event.type() != EventType::InputContextFocusOut) {
             state->commitBuffer();
@@ -711,7 +723,7 @@ namespace fcitx {
 
     void LotusEngine::closeAppModeMenu() {
         isSelectingAppMode_ = false;
-        g_mouse_clicked.store(false, std::memory_order_relaxed);
+        g_mouse_clicked.store(false, std::memory_order_release);
     }
 
     void LotusEngine::showAppModeMenu(InputContext* ic) {

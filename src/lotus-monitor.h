@@ -14,6 +14,11 @@
 #ifndef _FCITX5_LOTUS_MONITOR_H_
 #define _FCITX5_LOTUS_MONITOR_H_
 
+#include <thread>
+
+extern std::thread monitor_thread;
+extern std::thread mouse_thread;
+
 /**
  * @brief Monitors deletion timing to handle race conditions.
  *
@@ -22,9 +27,9 @@
 void deletingTimeMonitor();
 
 /**
- * @brief Starts the monitoring thread (runs once).
+ * @brief Starts the monitoring thread.
  */
-void startMonitoringOnce();
+void startMonitoring();
 
 /**
  * @brief Thread function for mouse press detection and reset.

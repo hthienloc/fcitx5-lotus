@@ -89,7 +89,21 @@ All members contributing to this project must adhere to the [Contributor Code of
 ## Code Style Rules
 
 - Follow the [`.clang-format`](.clang-format) file in the repository
-- Encouraged to run the `clang-format` command to format code before committing, or use IDE clang-format plugins
+- Encouraged to create a hook for pre-commit to automatically format code before commit by creating a file .git/hooks/pre-commit with the following content:
+
+```bash
+#!/bin/bash
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(cpp|h)$')
+
+if [ -n "$FILES" ]; then
+    for file in $FILES; do
+        clang-format -i "$file"
+        git add "$file"
+    done
+fi
+```
+
+Then run the command: `chmod +x .git/hooks/pre-commit`
 
 ## Pull Request Process
 

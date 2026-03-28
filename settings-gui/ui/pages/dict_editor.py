@@ -221,7 +221,7 @@ class DictEditorPage(BaseEditorPage):
             "EnableDictionary": self.cb_enable.isChecked(),
         }
 
-    def save_data(self, quiet=False):
+    def save_data(self):
         # Save global dictionary settings via DBus
         config_data = self.dbus.get_config()
         if config_data:
@@ -243,10 +243,8 @@ class DictEditorPage(BaseEditorPage):
                     self.dbus.set_config(current_config.get("values", {}))
 
             self.initial_state = self._get_current_state()
-            if not quiet:
-                QMessageBox.information(self, _("Success"), _("Dictionary saved successfully to local storage."))
         except Exception as e:
-            QMessageBox.warning(self, _("Error"), f"Failed to save dictionary: {e}")
+            QMessageBox.warning(self, _("Error"), _("Failed to save dictionary: {}").format(e))
 
     def upsert_row(self, word: str, sort: bool = True):
         if word in self.words:
@@ -342,7 +340,7 @@ class DictEditorPage(BaseEditorPage):
         self._on_item_changed()
         self._update_add_button_icon()
 
-    def on_import(self):
+    def do_import(self):
         path, _filter = QFileDialog.getOpenFileName(
             self,
             _("Import Custom Dictionary"),
@@ -355,7 +353,7 @@ class DictEditorPage(BaseEditorPage):
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
         except (IOError, OSError, UnicodeDecodeError) as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for reading: {e}")
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for reading: {}").format(e))
             return
 
         imported = 0
@@ -390,10 +388,10 @@ class DictEditorPage(BaseEditorPage):
         QMessageBox.information(
             self,
             _("Import Complete"),
-            _(f"Imported {imported} words."),
+            _("Imported {} words.").format(imported),
         )
 
-    def on_export(self):
+    def do_export(self):
         if not self.words:
             QMessageBox.information(
                 self, _("Export"), _("The custom dictionary is empty, nothing to export.")
@@ -415,7 +413,7 @@ class DictEditorPage(BaseEditorPage):
             QMessageBox.information(
                 self,
                 _("Export Complete"),
-                _(f"Exported {len(self.words)} words to:\n{path}"),
+                _("Exported {} words to:\n{}").format(len(self.words), path),
             )
-        except (IOError, OSError) as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for writing: {e}")
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for writing: {}").format(e))

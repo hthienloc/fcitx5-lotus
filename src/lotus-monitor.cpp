@@ -9,7 +9,6 @@
 #include "lotus-utils.h"
 
 #include <cstdio>
-#include <thread>
 #include <cstring>
 #include <string>
 
@@ -20,7 +19,10 @@
 #include <unistd.h>
 #include <limits.h>
 
-void deletingTimeMonitor() {
+std::thread monitor_thread = std::thread();
+std::thread mouse_thread   = std::thread();
+
+void        deletingTimeMonitor() {
     LOTUS_INFO("Deleting monitor thread started.");
     while (!stop_flag_monitor.load()) {
         int64_t deleting_since = 0;
@@ -64,27 +66,29 @@ void deletingTimeMonitor() {
             }
         }
     }
-    monitor_running.store(false, std::memory_order_relaxed);
+    monitor_running.store(false, std::memory_order_release);
     LOTUS_INFO("Deleting monitor thread stopped.");
 }
 
-void startMonitoringOnce() {
+void startMonitoring() {
     if (monitor_running.load())
         return;
-    std::call_once(monitor_init_flag, []() {
+    if (!monitor_running.exchange(true, std::memory_order_acq_rel)) {
         LOTUS_INFO("Initializing monitor threads...");
-        stop_flag_monitor.store(false);
-        std::thread(deletingTimeMonitor).detach();
-        monitor_running.store(true, std::memory_order_relaxed);
-    });
+        if (monitor_thread.joinable()) {
+            monitor_thread.join();
+        }
+        stop_flag_monitor.store(false, std::memory_order_release);
+        monitor_thread = std::thread(deletingTimeMonitor);
+    }
 }
 
 void mousePressResetThread() {
     const std::string mouse_socket_path = buildSocketPath("mouse_socket");
     LOTUS_INFO("Mouse press reset thread started.");
 
-    while (!stop_flag_monitor.load(std::memory_order_relaxed)) {
-        int sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    while (!stop_flag_monitor.load(std::memory_order_acquire)) {
+        int sock = socket(AF_UNIX, SOCK_SEQPACKET | SOCK_NONBLOCK, 0);
         if (sock < 0) {
             LOTUS_ERROR("Failed to create socket: " + std::string(strerror(errno)));
             sleep(1);
@@ -110,7 +114,7 @@ void mousePressResetThread() {
         pfd.fd     = sock;
         pfd.events = POLLIN;
 
-        while (!stop_flag_monitor.load(std::memory_order_relaxed)) {
+        while (!stop_flag_monitor.load(std::memory_order_acquire)) {
             int ret = poll(&pfd, 1, -1);
 
             if (ret > 0 && ((pfd.revents & POLLIN) != 0)) {
@@ -139,8 +143,8 @@ void mousePressResetThread() {
 
                 if (strcmp(exe_path, "/usr/bin/fcitx5-lotus-server") == 0) {
                     LOTUS_DEBUG("Mouse click detected from server. Resetting engine.");
-                    needEngineReset.store(true, std::memory_order_relaxed);
-                    g_mouse_clicked.store(true, std::memory_order_relaxed);
+                    needEngineReset.store(true, std::memory_order_release);
+                    g_mouse_clicked.store(true, std::memory_order_release);
                 } else {
                     LOTUS_WARN("Unauthorized connection attempt from: " + std::string(exe_path));
                 }
@@ -155,5 +159,5 @@ void mousePressResetThread() {
 }
 
 void startMouseReset() {
-    std::thread(mousePressResetThread).detach();
+    mouse_thread = std::thread(mousePressResetThread);
 }

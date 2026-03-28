@@ -89,7 +89,21 @@ Mọi thành viên tham gia đóng góp cho dự án này đều phải tuân th
 ## Quy tắc code style
 
 - Tuân thủ file [`.clang-format`](.clang-format) trong repository
-- Khuyến khích chạy lệnh `clang-format` để định dạng code trước khi commit, hoặc sử dụng các plugin clang-format của các IDE
+- Khuyến khích tạo một hook cho pre-commit để tự động format code trước khi commit bằng cách tạo file .git/hooks/pre-commit với nội dung:
+
+```bash
+#!/bin/bash
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(cpp|h)$')
+
+if [ -n "$FILES" ]; then
+    for file in $FILES; do
+        clang-format -i "$file"
+        git add "$file"
+    done
+fi
+```
+
+Sau đó chạy lệnh: `chmod +x .git/hooks/pre-commit`
 
 ## Quy trình Pull Request
 

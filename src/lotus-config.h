@@ -128,6 +128,24 @@ namespace fcitx {
     };
 
     /**
+     * @brief Annotation for time format list.
+     */
+    struct TimeFormatAnnotation : public StringListAnnotation {
+        TimeFormatAnnotation() {
+            list_ = {"%H:%M", "%H:%M:%S", "%I:%M:%S %p", "%I:%M %p", ""};
+        }
+    };
+
+    /**
+     * @brief Annotation for date format list.
+     */
+    struct DateFormatAnnotation : public StringListAnnotation {
+        DateFormatAnnotation() {
+            list_ = {"%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d", "%d/%m/%y", "%y-%m-%d", ""};
+        }
+    };
+
+    /**
      * @brief Annotation for mode list with predefined options.
      */
     struct ModeListAnnotation : public StringListAnnotation {
@@ -206,13 +224,15 @@ namespace fcitx {
         Option<bool> w2u{this, "W2U", _("Type w to Produce ư"), true}; Option<bool> autoNonVnRestore{this, "AutoNonVnRestore", _("Auto Restore Keys With Invalid Words"), true};
         Option<bool>                                                                modernStyle{this, "ModernStyle", _("Use oà, uý (Instead Of òa, úy)"), true};
         Option<bool>                                                                freeMarking{this, "FreeMarking", _("Allow Type With More Freedom"), true};
-        Option<bool>    ddFreeStyle{this, "DdFreeStyle", _("Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On"), true};
-        Option<bool>    fixUinputWithAck{this, "FixUinputWithAck", _("Fix Uinput Mode With Ack"), false};
-        Option<bool>    useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
-        Option<bool>    enableDictionary{this, "EnableDictionary", _("Enable Custom Dictionary"), false};
-        Option<bool>    enableCustomKeymap{this, "EnableCustomKeymap", _("Enable Custom Keymap"), false};
-        SubConfigOption macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
-        SubConfigOption customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
+        Option<bool>                                            ddFreeStyle{this, "DdFreeStyle", _("Allow dd To Produce đ When Auto Restore Keys With Invalid Words Is On"), true};
+        Option<bool>                                            fixUinputWithAck{this, "FixUinputWithAck", _("Fix Uinput Mode With Ack"), false};
+        Option<bool>                                            useLotusIcons{this, "UseLotusIcons", _("Use Lotus Status Icons"), false};
+        Option<bool>                                            enableDictionary{this, "EnableDictionary", _("Enable Custom Dictionary"), false};
+        Option<bool>                                            enableCustomKeymap{this, "EnableCustomKeymap", _("Enable Custom Keymap"), false};
+        OptionWithAnnotation<std::string, TimeFormatAnnotation> timeFormat{this, "TimeFormat", _("Time Format ($TIME in macro)"), "%H:%M", {}, {}, TimeFormatAnnotation()};
+        OptionWithAnnotation<std::string, DateFormatAnnotation> dateFormat{this, "DateFormat", _("Date Format ($DATE in macro)"), "%d/%m/%Y", {}, {}, DateFormatAnnotation()};
+        SubConfigOption                                         macroEditor{this, "MacroEditor", _("Macro"), "fcitx://config/addon/lotus/lotus-macro"};
+        SubConfigOption                                         customKeymap{this, "CustomKeymap", _("Custom Keymap"), "fcitx://config/addon/lotus/custom_keymap"};
         SubConfigOption appRules{this, "AppRules", _("App Rules"), "fcitx://config/addon/lotus/app_rules"}; KeyListOption modeMenuKey{
             this, "ModeMenuKey", _("Mode Menu Hotkey"), {Key("grave")}, KeyListConstrain({KeyConstrainFlag::AllowModifierLess, KeyConstrainFlag::AllowModifierOnly})};);
 

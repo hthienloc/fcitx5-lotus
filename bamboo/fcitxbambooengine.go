@@ -10,6 +10,7 @@ package main
 import (
 	"bamboo-core"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 )
@@ -29,9 +30,9 @@ type FcitxBambooEngine struct {
 	shouldRestoreKeyStrokes bool
 	outputCharset           string
 	w2u                     bool
+	timeFormat              string
+	dateFormat              string
 }
-
-
 
 const (
 	FcitxShiftMask   = 1 << 0
@@ -51,9 +52,9 @@ const (
 	FcitxMetaMask  = 1 << 28
 )
 const (
-	FcitxBackSpace       = 0xff08
-	FcitxSpace           = 0x020
-	FcitxTab             = 0xff09
+	FcitxBackSpace = 0xff08
+	FcitxSpace     = 0x020
+	FcitxTab       = 0xff09
 )
 
 const (
@@ -76,8 +77,56 @@ func determineMacroCase(str string) uint8 {
 	return VnCaseAllCapital
 }
 
+var strftimeReplacer = strings.NewReplacer(
+	"%H", "15",
+	"%I", "03",
+	"%M", "04",
+	"%S", "05",
+	"%p", "PM",
+	"%P", "pm",
+	"%d", "02",
+	"%m", "01",
+	"%Y", "2006",
+	"%y", "06",
+	"%b", "Jan",
+	"%B", "January",
+	"%a", "Mon",
+	"%A", "Monday",
+	// Some common variants
+	"%D", "01/02/06",
+	"%F", "2006-01-02",
+	"%T", "15:04:05",
+	"%R", "15:04",
+)
+
+func (e *FcitxBambooEngine) formatTime(format string) string {
+	now := time.Now()
+	if format == "" {
+		return ""
+	}
+	layout := strftimeReplacer.Replace(format)
+	if layout == "" {
+		return ""
+	}
+	// If layout was not changed (no placeholders found), default to standard format
+	if layout == format && strings.Contains(format, "%") {
+		// Fallback to something reasonable if it looks like they tried to use placeholders
+		return now.Format("15:04:05 02/01/2006")
+	}
+	return now.Format(layout)
+}
+
 func (e *FcitxBambooEngine) expandMacro(str string) string {
 	var macroText = e.macroTable.GetText(str)
+
+	// Replace dynamic placeholders
+	if e.timeFormat != "" {
+		macroText = strings.ReplaceAll(macroText, "$TIME", e.formatTime(e.timeFormat))
+	}
+	if e.dateFormat != "" {
+		macroText = strings.ReplaceAll(macroText, "$DATE", e.formatTime(e.dateFormat))
+	}
+
 	if e.autoCapitalizeMacro {
 		switch determineMacroCase(str) {
 		case VnCaseAllSmall:
@@ -201,6 +250,14 @@ func (e *FcitxBambooEngine) mustFallbackToEnglish() bool {
 	return !e.preeditor.IsValid(true)
 }
 
+func getLastRune(s string) rune {
+	if len(s) == 0 {
+		return 0
+	}
+	r, _ := utf8.DecodeLastRuneInString(s)
+	return r
+}
+
 func (e *FcitxBambooEngine) getCommitText(keyVal, state uint32) (string, bool) {
 	var keyRune = rune(keyVal)
 	oldText := e.getPreeditString()
@@ -222,10 +279,10 @@ func (e *FcitxBambooEngine) getCommitText(keyVal, state uint32) (string, bool) {
 			} else {
 				newText = e.getProcessedString(bamboo.VietnameseMode)
 			}
-			if fullSeq := e.preeditor.GetProcessedString(bamboo.VietnameseMode); len(fullSeq) > 0 && rune(fullSeq[len(fullSeq)-1]) == keyRune {
+			if fullSeq := e.preeditor.GetProcessedString(bamboo.VietnameseMode); len(fullSeq) > 0 && getLastRune(fullSeq) == keyRune {
 				// [[ => [
 				var ret = e.getPreeditString()
-				var lastRune = rune(ret[len(ret)-1])
+				var lastRune = getLastRune(ret)
 				var isWordBreakRune = bamboo.IsWordBreakSymbol(lastRune)
 				// TODO: THIS IS HACKING
 				if isWordBreakRune {

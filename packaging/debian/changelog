@@ -1,8 +1,7 @@
-fcitx5-lotus (1.7.0-1) unstable; urgency=medium
+fcitx5-lotus (1.8.0-1) unstable; urgency=medium
 
-  * Fix bug cannot use ctrl + backspace to delete word in emoji mode
-  * Add w->ư option
-  * Add invalid macro check
-  * Fix some behavior of uinput mode on browser's search bar
+  * Add backup/restore support
+  * Add dynamic macro ($TIME, $DATE)
+  * Fix some bugs
 
- -- Nguyen Hoang Ky <nhktmdzhg@gmail.com>  Thu, 26 Mar 2026 11:09:00 +0700
+ -- Nguyen Hoang Ky <nhktmdzhg@gmail.com>  Sat, 29 Mar 2026 00:03:00 +0700

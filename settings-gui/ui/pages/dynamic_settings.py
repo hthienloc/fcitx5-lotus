@@ -322,7 +322,7 @@ class DynamicSettingsPage(QWidget):
         finally:
             self.blockSignals(False)
 
-    def save_data(self, quiet=False):
+    def save_data(self):
         """Commits all staged changes to DBus."""
         if not self.modified_values:
             return

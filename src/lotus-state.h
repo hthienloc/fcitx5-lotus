@@ -104,7 +104,6 @@ namespace fcitx {
         bool                    isPrevSpace_        = false;
         bool                    shouldCapitalize_   = false;
         bool                    isPrevPunctuation_  = false;
-        size_t                  prevSurrSuffixLen_  = 0; ///< Previous suffix length
         int64_t                 lastDeactivateTime_ = 0;
 
         /**
@@ -187,8 +186,9 @@ namespace fcitx {
          * @brief Checks and forwards special keys.
          * @param keyEvent The key event.
          * @param currentSym Current key symbol (may be modified).
+         * @return True if key was forwarded.
          */
-        void checkForwardSpecialKey(KeyEvent& keyEvent, KeySym& currentSym);
+        bool checkForwardSpecialKey(KeyEvent& keyEvent, KeySym& currentSym);
 
         /**
          * @brief Handles uinput mode processing.

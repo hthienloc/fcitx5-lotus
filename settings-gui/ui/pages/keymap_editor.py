@@ -102,7 +102,7 @@ PRESETS = {
         ("(", "A_Ă"),
         ("d", "D_Đ"),
     ],
-    "Microslop layout": [
+    "Microsoft layout": [
         ("8", "DauSac"),
         ("5", "DauHuyen"),
         ("6", "DauHoi"),
@@ -329,10 +329,7 @@ class KeymapEditorPage(BaseEditorPage):
         self.btn_remove.setToolTip(_("Remove selected row"))
         self.btn_remove.clicked.connect(self.on_remove)
 
-        btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
-        btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
-        btn_import.clicked.connect(self.on_import)
-        btn_export.clicked.connect(self.on_export)
+
 
         toolbar_layout.addWidget(self.btn_remove)
         toolbar_layout.addStretch()
@@ -386,7 +383,7 @@ class KeymapEditorPage(BaseEditorPage):
             "EnableCustomKeymap": self.cb_enable.isChecked(),
         }
 
-    def save_data(self, quiet=False):
+    def save_data(self):
         """Saves current table via DBus to C++ Engine."""
         # Save toggle
         config_data = self.dbus.get_config()
@@ -405,8 +402,6 @@ class KeymapEditorPage(BaseEditorPage):
 
         self.dbus.set_sub_config_list("custom_keymap", "CustomKeymap", data)
         self.initial_state = self._get_current_state()
-        if not quiet:
-            QMessageBox.information(self, _("Success"), _("Keymap saved successfully."))
 
     def on_search_changed(self):
         """Filters the table rows based on the search input."""
@@ -432,7 +427,8 @@ class KeymapEditorPage(BaseEditorPage):
 
         # Check for update
         for row in range(self.table.rowCount()):
-            if self.table.item(row, 0).text() == key:
+            item = self.table.item(row, 0)
+            if item and item.text() == key:
                 combo = self.table.cellWidget(row, 1)
                 if combo:
                     combo.setCurrentIndex(self.combo_action.currentIndex())
@@ -486,7 +482,7 @@ class KeymapEditorPage(BaseEditorPage):
         if cell_combo:
             self.combo_action.setCurrentIndex(cell_combo.currentIndex())
 
-    def on_import(self):
+    def do_import(self):
         """Imports keymap from a TSV file."""
         path, _filter = QFileDialog.getOpenFileName(
             self,
@@ -500,8 +496,8 @@ class KeymapEditorPage(BaseEditorPage):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for reading: {e}")
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for reading: {}").format(e))
             return
         imported = skipped = 0
         confirmed = False
@@ -535,7 +531,8 @@ class KeymapEditorPage(BaseEditorPage):
             # Upsert
             found = False
             for row in range(self.table.rowCount()):
-                if self.table.item(row, 0).text() == key:
+                item = self.table.item(row, 0)
+                if item and item.text() == key:
                     combo = self.table.cellWidget(row, 1)
                     if combo:
                         idx = combo.findData(action_code)
@@ -552,10 +549,10 @@ class KeymapEditorPage(BaseEditorPage):
         QMessageBox.information(
             self,
             _("Import Complete"),
-            _(f"Imported {imported} entries, skipped {skipped} invalid lines."),
+            _("Imported {} entries, skipped {} invalid lines.").format(imported, skipped),
         )
 
-    def on_export(self):
+    def do_export(self):
         """Exports the current table to a TSV file."""
         if self.table.rowCount() == 0:
             QMessageBox.information(
@@ -585,7 +582,7 @@ class KeymapEditorPage(BaseEditorPage):
             QMessageBox.information(
                 self,
                 _("Export Complete"),
-                _(f"Exported {self.table.rowCount()} entries to:\n{path}"),
+                _("Exported {} entries to:\n{}").format(self.table.rowCount(), path),
             )
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for writing: {e}")
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for writing: {}").format(e))

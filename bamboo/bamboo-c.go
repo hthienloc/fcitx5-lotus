@@ -21,6 +21,8 @@ import (
 			bool modernStyle;
 			bool freeMarking;
 			bool w2u;
+			const char *timeFormat;
+			const char *dateFormat;
 		} FcitxBambooEngineOption;
 	*/
 	"C"
@@ -121,6 +123,8 @@ func EngineSetOption(engine uintptr, option *C.FcitxBambooEngineOption) {
 		flags &= ^bamboo.Ew2uEnabled
 	}
 	bambooEngine.preeditor.SetFlag(flags)
+	bambooEngine.timeFormat = C.GoString(option.timeFormat)
+	bambooEngine.dateFormat = C.GoString(option.dateFormat)
 }
 
 //export NewEngine
@@ -151,6 +155,8 @@ func NewEngine(name *C.cchar, dictHandle uintptr, tableHandle uintptr) uintptr {
 		commitText:              "",
 		shouldRestoreKeyStrokes: false,
 		outputCharset:           "Unicode",
+		timeFormat:              "%H:%M",
+		dateFormat:              "%d/%m/%Y",
 	}
 	return uintptr(cgo.NewHandle(engine))
 }
@@ -170,9 +176,10 @@ func NewCustomEngine(definition **C.char, dictHandle uintptr, tableHandle uintpt
 		"Custom": map[string]string{},
 	}
 	def := (*[1<<20 - 1]*C.char)(unsafe.Pointer(definition))
+	maxEntries := 1<<20 - 1
 
 	i := 0
-	for def[i] != nil {
+	for i < maxEntries && def[i] != nil {
 		definitions["Custom"][C.GoString(def[i])] = C.GoString(def[i+1])
 		i += 2
 	}
@@ -191,6 +198,8 @@ func NewCustomEngine(definition **C.char, dictHandle uintptr, tableHandle uintpt
 		commitText:              "",
 		shouldRestoreKeyStrokes: false,
 		outputCharset:           "Unicode",
+		timeFormat:              "%H:%M",
+		dateFormat:              "%d/%m/%Y",
 	}
 
 	return uintptr(cgo.NewHandle(engine))
@@ -202,8 +211,9 @@ func NewMacroTable(definition **C.char) uintptr {
 		mTable: map[string]string{},
 	}
 	def := (*[1<<20 - 1]*C.char)(unsafe.Pointer(definition))
+	maxEntries := 1<<20 - 1
 	i := 0
-	for def[i] != nil {
+	for i < maxEntries && def[i] != nil {
 		table.mTable[C.GoString(def[i])] = C.GoString(def[i+1])
 		i += 2
 	}
@@ -238,7 +248,6 @@ func EngineRebuildFromText(engine uintptr, text *C.cchar) {
 }
 
 func toCStringArray(strs []string) **C.char {
-
 	array := C.malloc(C.size_t(len(strs)+1) * C.size_t(unsafe.Sizeof(uintptr(0))))
 	// convert the C array to a Go Array so we can index it
 	a := (*[1<<20 - 1]*C.char)(array)
@@ -290,11 +299,14 @@ func GetInputMethodNames() **C.char {
 	return toCStringArray(names)
 }
 
-
 //export NewDictionary
 func NewDictionary(fd uintptr) uintptr {
 	var data = map[string]bool{}
 	f := os.NewFile(fd, "dict")
+	if f == nil {
+		return 0
+	}
+	defer f.Close()
 	rd := bufio.NewReader(f)
 	for {
 		line, _, err := rd.ReadLine()

@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QFileDialog,
     QCheckBox,
+    QComboBox,
 )
 from PySide6.QtGui import QIcon, QColor
 from PySide6.QtCore import Qt
@@ -60,8 +61,18 @@ class MacroEditorPage(BaseEditorPage):
         self.cb_capitalize = QCheckBox(_("Capitalize Macro"))
         self.cb_enable.toggled.connect(self._on_item_changed)
         self.cb_capitalize.toggled.connect(self._on_item_changed)
+        
+        cap_layout = QHBoxLayout()
+        cap_layout.setSpacing(5)
+        cap_layout.addWidget(self.cb_capitalize)
+        
+        help_icon = QLabel()
+        help_icon.setPixmap(QIcon.fromTheme("help-about").pixmap(16, 16))
+        help_icon.setToolTip(_("Automatically match expansion case to trigger key case:<br>- 'kg' → 'khô gà' (all lowercase)<br>- 'KG' → 'KHÔ GÀ' (all uppercase)<br>- 'Kg' → 'khô gà' (original macro case)"))
+        cap_layout.addWidget(help_icon)
+        
         toggles_layout.addWidget(self.cb_enable)
-        toggles_layout.addWidget(self.cb_capitalize)
+        toggles_layout.addLayout(cap_layout)
         toggles_layout.addStretch()
 
         self.search_input = QLineEdit()
@@ -80,6 +91,71 @@ class MacroEditorPage(BaseEditorPage):
         content_layout = QVBoxLayout()
         editor_card.content_layout.addLayout(content_layout)
         main_layout.addWidget(editor_card)
+
+        # Dynamic Macro Settings (Moved below the macro table)
+        dynamic_card = CardWidget("")
+        dynamic_layout = QVBoxLayout()
+        
+        # Hint text
+        hint_label = QLabel(_("Macros can use dynamic placeholders: $TIME (current time) and $DATE (current date)."))
+        hint_label.setWordWrap(True)
+        hint_label.setStyleSheet("color: gray; font-size: 13px;")
+        dynamic_layout.addWidget(hint_label)
+        
+        # Format Inputs
+        fmt_container = QWidget()
+        fmt_hbox = QHBoxLayout(fmt_container)
+        fmt_hbox.setContentsMargins(0, 5, 0, 0)
+        fmt_hbox.setSpacing(20)
+        
+        # Time Format
+        time_layout = QHBoxLayout()
+        self.input_time_format = QComboBox()
+        self.input_time_format.setEditable(False)
+        self.input_time_format.currentIndexChanged.connect(self._on_item_changed)
+        
+        time_presets = [
+            ("%H:%M", "15:04 (24h)"),
+            ("%H:%M:%S", "15:04:05 (24h)"),
+            ("%I:%M %p", "03:04 PM"),
+            ("%I:%M:%S %p", "03:04:05 PM"),
+            ("", _("None (Do not replace $TIME)")),
+        ]
+        for fmt, desc in time_presets:
+            self.input_time_format.addItem(fmt, fmt)
+            self.input_time_format.setItemData(self.input_time_format.count() - 1, desc, Qt.ToolTipRole)
+
+        time_layout.addWidget(QLabel(_("Time Format:")))
+        time_layout.addWidget(self.input_time_format, 1)
+        
+        # Date Format
+        date_layout = QHBoxLayout()
+        self.input_date_format = QComboBox()
+        self.input_date_format.setEditable(False)
+        self.input_date_format.currentIndexChanged.connect(self._on_item_changed)
+
+        date_presets = [
+            ("%d/%m/%Y", "dd/MM/yyyy"),
+            ("%d/%m/%y", "dd/MM/yy"),
+            ("%m/%d/%Y", "MM/dd/yyyy"),
+            ("%Y-%m-%d", "yyyy-MM-dd"),
+            ("%y-%m-%d", "yy-MM-dd"),
+            ("", _("None (Do not replace $DATE)")),
+        ]
+        for fmt, desc in date_presets:
+            self.input_date_format.addItem(fmt, fmt)
+            self.input_date_format.setItemData(self.input_date_format.count() - 1, desc, Qt.ToolTipRole)
+
+        date_layout.addWidget(QLabel(_("Date Format:")))
+        date_layout.addWidget(self.input_date_format, 1)
+        
+        fmt_hbox.addLayout(time_layout)
+        fmt_hbox.addLayout(date_layout)
+        
+        dynamic_layout.addWidget(fmt_container)
+        
+        dynamic_card.content_layout.addLayout(dynamic_layout)
+        main_layout.addWidget(dynamic_card)
 
         # 1. Input Row (Top)
         input_layout = QHBoxLayout()
@@ -128,14 +204,9 @@ class MacroEditorPage(BaseEditorPage):
         self.btn_down = QPushButton(QIcon.fromTheme("go-down"), "")
         self.btn_down.setToolTip(_("Move Down"))
 
-        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("Import"))
-        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("Export"))
-
         self.btn_remove.clicked.connect(self.on_remove)
         self.btn_up.clicked.connect(self.on_move_up)
         self.btn_down.clicked.connect(self.on_move_down)
-        self.btn_import.clicked.connect(self.on_import)
-        self.btn_export.clicked.connect(self.on_export)
 
         toolbar_layout.addWidget(self.btn_remove)
         toolbar_layout.addWidget(self.btn_up)
@@ -158,6 +229,22 @@ class MacroEditorPage(BaseEditorPage):
                 self.cb_capitalize.setChecked(
                     str(values.get("CapitalizeMacro", "True")).lower() == "true"
                 )
+                # Set time format (default %H:%M)
+                time_fmt = values.get("TimeFormat", "%H:%M")
+                index = self.input_time_format.findData(time_fmt)
+                if index >= 0:
+                    self.input_time_format.setCurrentIndex(index)
+                else:
+                    # Fallback to default if not in list (since it's not editable anymore)
+                    self.input_time_format.setCurrentIndex(self.input_time_format.findData("%H:%M"))
+
+                # Set date format
+                date_fmt = values.get("DateFormat", "%d/%m/%Y")
+                index = self.input_date_format.findData(date_fmt)
+                if index >= 0:
+                    self.input_date_format.setCurrentIndex(index)
+                else:
+                    self.input_date_format.setCurrentIndex(self.input_date_format.findData("%d/%m/%Y"))
 
             self.table.setRowCount(0)
             data = self.dbus.get_sub_config_list("lotus-macro", "Macro")
@@ -206,9 +293,11 @@ class MacroEditorPage(BaseEditorPage):
             "data": data,
             "EnableMacro": self.cb_enable.isChecked(),
             "CapitalizeMacro": self.cb_capitalize.isChecked(),
+            "TimeFormat": self.input_time_format.currentText(),
+            "DateFormat": self.input_date_format.currentText(),
         }
 
-    def save_data(self, quiet=False):
+    def save_data(self):
         # Save global macro settings via DBus
         config_data = self.dbus.get_config()
         if config_data:
@@ -217,6 +306,8 @@ class MacroEditorPage(BaseEditorPage):
             values["CapitalizeMacro"] = (
                 "True" if self.cb_capitalize.isChecked() else "False"
             )
+            values["TimeFormat"] = self.input_time_format.currentText()
+            values["DateFormat"] = self.input_date_format.currentText()
             self.dbus.set_config(values)
 
         data = []
@@ -231,8 +322,6 @@ class MacroEditorPage(BaseEditorPage):
 
         self.dbus.set_sub_config_list("lotus-macro", "Macro", data)
         self.initial_state = self._get_current_state()
-        if not quiet:
-            QMessageBox.information(self, _("Success"), _("Macros saved successfully."))
 
     def upsert_row(self, key: str, value: str, sort: bool = True):
         # Update existing
@@ -341,7 +430,6 @@ class MacroEditorPage(BaseEditorPage):
         is_invalid = self._is_invalid_macro(key)
         
         # Validation feedback for input field
-        # Validation feedback for input field
         if is_invalid:
             self.input_key.setStyleSheet("color: red;")
             self.input_key.setToolTip(_("Warning: Macro key should not contain spaces or special characters."))
@@ -372,7 +460,7 @@ class MacroEditorPage(BaseEditorPage):
             self.input_val.setText(val_item.text())
         self.update_button_states()
 
-    def on_import(self):
+    def do_import(self):
         path, _filter = QFileDialog.getOpenFileName(
             self,
             _("Import Macros"),
@@ -384,8 +472,8 @@ class MacroEditorPage(BaseEditorPage):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for reading: {e}")
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for reading: {}").format(e))
             return
 
         imported = skipped = 0
@@ -424,10 +512,10 @@ class MacroEditorPage(BaseEditorPage):
         QMessageBox.information(
             self,
             _("Import Complete"),
-            _(f"Imported {imported} entries, skipped {skipped} invalid lines."),
+            _("Imported {} entries, skipped {} invalid lines.").format(imported, skipped),
         )
 
-    def on_export(self):
+    def do_export(self):
         if self.table.rowCount() == 0:
             QMessageBox.information(
                 self, _("Export"), _("The macro list is empty, nothing to export.")
@@ -452,7 +540,7 @@ class MacroEditorPage(BaseEditorPage):
             QMessageBox.information(
                 self,
                 _("Export Complete"),
-                _(f"Exported {self.table.rowCount()} entries to:\n{path}"),
+                _("Exported {} entries to:\n{}").format(self.table.rowCount(), path),
             )
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file for writing: {e}")
+        except (IOError, OSError, UnicodeDecodeError) as e:
+            QMessageBox.warning(self, _("Error"), _("Cannot open file for writing: {}").format(e))

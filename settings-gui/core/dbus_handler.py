@@ -90,9 +90,11 @@ class LotusDBusHandler:
             formatted = [self._prepare_dbus_data(v) for v in data]
             return dbus.Array(formatted, signature="v")
         elif isinstance(data, bool):
-            return dbus.String("True" if data else "False")
-        elif isinstance(data, (int, float)):
-            return dbus.String(str(data))
+            return dbus.Boolean(data)
+        elif isinstance(data, int):
+            return dbus.Int32(data)
+        elif isinstance(data, float):
+            return dbus.Double(data)
         elif data is None:
             return dbus.String("")
         else:

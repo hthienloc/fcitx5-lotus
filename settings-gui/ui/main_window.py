@@ -30,6 +30,7 @@ from ui.pages.dict_editor import DictEditorPage
 from ui.pages.keymap_editor import KeymapEditorPage
 from ui.pages.about import AboutPage
 from ui.pages.mode_manager import ModeManagerPage
+from ui.pages.backup import BackupPage
 import os
 
 
@@ -134,16 +135,6 @@ class LotusSettingsWindow(QMainWindow):
         self.btn_reset.clicked.connect(self.on_restore_defaults)
         bar_layout.addWidget(self.btn_reset)
 
-        self.btn_import = QPushButton(QIcon.fromTheme("document-import"), _("&Import"))
-        self.btn_import.clicked.connect(self.on_import_clicked)
-        self.btn_import.setVisible(False)
-        bar_layout.addWidget(self.btn_import)
-
-        self.btn_export = QPushButton(QIcon.fromTheme("document-export"), _("&Export"))
-        self.btn_export.clicked.connect(self.on_export_clicked)
-        self.btn_export.setVisible(False)
-        bar_layout.addWidget(self.btn_export)
-
         bar_layout.addStretch()
 
         self.btn_cancel = QPushButton(QIcon.fromTheme("dialog-cancel"), _("&Cancel"))
@@ -202,6 +193,11 @@ class LotusSettingsWindow(QMainWindow):
                 self.dbus_handler, category=SettingsCategory.APPEARANCE
             ),
         )
+        self._add_page(
+            _("Backup"),
+            "document-save-as",
+            BackupPage(self.dbus_handler),
+        )
 
         # Bottom section
         spacer = QListWidgetItem()
@@ -244,7 +240,7 @@ class LotusSettingsWindow(QMainWindow):
         for i in range(self.content_stack.count()):
             page = self.content_stack.widget(i)
             if hasattr(page, "save_data"):
-                page.save_data(quiet=True)
+                page.save_data()
 
         self.btn_apply.setEnabled(False)
         self.btn_cancel.setEnabled(False)
@@ -273,16 +269,6 @@ class LotusSettingsWindow(QMainWindow):
         self.btn_cancel.setEnabled(False)
         self.update_reset_button_state()
 
-    def on_import_clicked(self):
-        page = self.content_stack.currentWidget()
-        if hasattr(page, "on_import"):
-            page.on_import()
-
-    def on_export_clicked(self):
-        page = self.content_stack.currentWidget()
-        if hasattr(page, "on_export"):
-            page.on_export()
-
     def _on_sidebar_changed(self, index):
         item = self.sidebar.item(index)
         if not item:
@@ -293,11 +279,6 @@ class LotusSettingsWindow(QMainWindow):
             widget = item.data(Qt.UserRole + 1)
             if widget:
                 self.content_stack.setCurrentWidget(widget)
-                # Toggle Import/Export buttons based on page capabilities
-                has_import = hasattr(widget, "on_import")
-                has_export = hasattr(widget, "on_export")
-                self.btn_import.setVisible(has_import)
-                self.btn_export.setVisible(has_export)
             self.update_reset_button_state()
         elif role == "header":
             # Don't allow selecting headers, move to next item
