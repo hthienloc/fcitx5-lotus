@@ -75,7 +75,7 @@ void send_single_backspace() {
 }
 
 bool verify_client(int client_fd, uid_t expected_uid, const std::string& socket_type, pid_t& out_pid) {
-    struct ucred cred {};
+    struct ucred cred{};
     socklen_t    len                = sizeof(struct ucred);
     char         exe_path[PATH_MAX] = {0};
 
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
         LotusLogger::instance().info("Uinput device initialized");
         ioctl(uinput_fd_, UI_SET_EVBIT, EV_KEY);
         ioctl(uinput_fd_, UI_SET_KEYBIT, KEY_BACKSPACE);
-        struct uinput_setup usetup {};
+        struct uinput_setup usetup{};
         usetup.id.bustype = BUS_USB;
         usetup.id.vendor  = 0x1234;
         usetup.id.product = 0x5678;
@@ -176,8 +176,8 @@ int main(int argc, char* argv[]) {
     int                server_fd       = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0);
     int                mouse_server_fd = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0);
 
-    struct sockaddr_un addr_kb {};
-    struct sockaddr_un addr_mouse {};
+    struct sockaddr_un addr_kb{};
+    struct sockaddr_un addr_mouse{};
 
     addr_kb.sun_family    = AF_UNIX;
     addr_mouse.sun_family = AF_UNIX;
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]) {
     int              addon_fd           = -1;
     int              pending_backspaces = 0;
 
-    struct sigaction sa {};
+    struct sigaction sa{};
     sa.sa_handler = signal_handler;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
